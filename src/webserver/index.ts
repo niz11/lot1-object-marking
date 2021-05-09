@@ -1,12 +1,10 @@
 import express from 'express';
-
-
+const path = require('path');
 
 const app = express();
 const port = 3000;
 app.get('/', (req, res) => {
-    console.log('received request!');
-    res.send('Express + TypeScript Server');
+    res.sendFile(path.join(__dirname, '/static/index.html'));
 });
 app.set('trust proxy', 'loopback');
 app.listen(port, 'localhost', () => {

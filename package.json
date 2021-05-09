@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Object Detection in AR Preview Walks",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/webserver/index.ts",
-    "build": "tsc --project ./"
+    "start": "npm i && node src/webserver/index.ts",
+    "build": "tsc --project ./",
+    "dev": "nodemon src/webserver/index.ts"
   },
   "repository": {
     "type": "git",
