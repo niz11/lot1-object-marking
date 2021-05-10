@@ -15,6 +15,10 @@ const server = https.createServer(certOptions, app)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/static/index.html'));
 });
+
+app.get('/ex2', (req, res) => {
+    res.sendFile(path.join(__dirname, '/static/ex2.html'));
+});
 app.set('trust proxy', 'loopback');
 
 server.listen(PORT, () => {
