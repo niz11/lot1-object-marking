@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/webserver/server.js",
-    "dev": "nodemon src/webserver/server.js"
+    "dev": "nodemon src/webserver/server.js",
+    "ngstart": "node src/webserver/index.js",
+    "ngdev": "nodemon src/webserver/index.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,6 @@
   },
   "devDependencies": {
     "node": "^15.0.2",
-    "nodemon": "^2.0.7",
-    "tslint": "^6.1.3"
+    "nodemon": "^2.0.7"
   }
 }
