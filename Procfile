@@ -1,0 +1,1 @@
+worker: node src/webserver/server.js
