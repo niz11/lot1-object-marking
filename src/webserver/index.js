@@ -8,7 +8,7 @@ const port = 3000;
 //     console.log('received request!');
 //     res.send('Express + TypeScript Server');
 // });
-app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(path.join(__dirname,'static')));
 app.set('trust proxy', 'loopback');
 app.listen(port, 'localhost', () => {
     console.log(`server is listening on ${port}`);
