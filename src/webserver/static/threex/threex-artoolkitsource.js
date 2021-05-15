@@ -163,8 +163,8 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
     domElement.setAttribute('autoplay', '');
     domElement.setAttribute('muted', '');
     domElement.setAttribute('playsinline', '');
-    domElement.style.width = this.parameters.displayWidth + 'px'
-    domElement.style.height = this.parameters.displayHeight + 'px'
+    domElement.style.width = '0'
+    domElement.style.height = '0'
 
     // check API is available
     if (navigator.mediaDevices === undefined
@@ -215,7 +215,7 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
             window.dispatchEvent(event);
             // to start the video, when it is possible to start it only on userevent. like in android
             document.body.addEventListener('click', function () {
-                domElement.play();
+                // domElement.play();
             });
             // domElement.play();
 
