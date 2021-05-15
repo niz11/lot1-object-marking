@@ -77,7 +77,7 @@ ARjs.Source.prototype.init = function (onReady, onError) {
 
     return this
     function onSourceReady() {
-        document.body.appendChild(_this.domElement);
+        // document.body.appendChild(_this.domElement);
         window.dispatchEvent(new CustomEvent('arjs-video-loaded', {
             detail: {
                 component: document.querySelector('#arjs-video'),
@@ -163,8 +163,8 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
     domElement.setAttribute('autoplay', '');
     domElement.setAttribute('muted', '');
     domElement.setAttribute('playsinline', '');
-    domElement.style.width = '0'
-    domElement.style.height = '0'
+    domElement.style.width = this.parameters.displayWidth + 'px';
+    domElement.style.height = this.parameters.displayHeight + 'px';
 
     // check API is available
     if (navigator.mediaDevices === undefined
