@@ -19,10 +19,17 @@
   Example created by Lee Stemkoski: https://github.com/stemkoski
   Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
 -->
-
+<div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1;'>
+    <p id = 'mct'>Marker Control:</p> <br>
+    <p id = 'mcx'></p> <br>
+    <p id = 'mcy'></p> <br>
+    <p id = 'mcz'></p> <br>
+    <p id = 'mcw'></p> <br>
+</div>
 <script>
 
-
+    var scene, camera, camera2, renderer, clock, deltaTime, totalTime, mesh, markerControls;
+    var arMarker = null;
     var arToolkitSource, arToolkitContext;
 
     initialize();
@@ -30,36 +37,74 @@
 
     function initialize()
     {
+        scene = new THREE.Scene();
 
+        let ambientLight = new THREE.AmbientLight( 0xcccccc, 0.5 );
+        scene.add( ambientLight );
+
+        // camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        camera = new THREE.OrthographicCamera(window.innerWidth / -2,   window.innerWidth / 2, window.innerHeight / -2, window.innerHeight / 2, -100, 100 );
+        scene.add(camera);
+
+        renderer = new THREE.WebGLRenderer({
+            // antialias : true,
+            alpha: true
+        });
+        renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.domElement.style.position = 'absolute'
+        renderer.domElement.style.top = '0px'
+        renderer.domElement.style.left = '0px'
+        document.body.appendChild( renderer.domElement );
+
+        clock = new THREE.Clock();
+        deltaTime = 0;
+        totalTime = 0;
+
+        mesh = new THREE.Mesh(
+            new THREE.CubeGeometry(10,10,10),
+            new THREE.MeshBasicMaterial({color:0xff0000})
+        );
+        // mesh.position.y = 1.25/2;
+
+        // mesh.position.x = 0;
+        // mesh.position.y = 0;
+        // mesh.position.z = 1;
+        scene.add( mesh );
+        camera.position.z = 5;
 
         arToolkitSource = new THREEx.ArToolkitSource({
             sourceType : 'webcam',
             displayWidth: window.innerWidth,
-            displayHeight: window.innerHeight
+            displayHeight: window.innerHeight,
+            showVideo: true
         });
 
         arToolkitSource.init(function onReady(){
             onResize()
-        })
+        });
 
         // handle resize
         window.addEventListener('resize', function(){
             onResize()
-        })
+        });
         function onResize(){
-            arToolkitSource.onResizeElement()
+            arToolkitSource.onResizeElement();
             if( arToolkitContext.arController !== null ){
                 arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)
             }
         }
 
         window.addEventListener("markerFound", function (e) {
-            console.log("Found")
+            console.log("Found");
             console.log(e.detail);
+            arMarker = e.detail;
+
         });
         window.addEventListener("markerLost", function (e) {
-            console.log("Lost")
+            console.log("Lost");
             console.log(e.detail);
+            arMarker = null;
         });
 
         arToolkitContext = new THREEx.ArToolkitContext({
@@ -70,14 +115,16 @@
             // maxDetectionRate: 30
         });
 
+        camera2 = new THREE.Camera();
         arToolkitContext.init( function onCompleted(){
+            camera2.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
         });
 
         let patternArray = ["letterA", "letterB", "letterC", "letterD", "letterF", "kanji", "hiro"];
         for (let i = 6; i < 7; i++)
         {
             let markerRoot = new THREE.Group();
-            let markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+            markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
                 type : 'pattern', patternUrl : "data/" + patternArray[i] + ".patt",
             });
         }
@@ -89,12 +136,35 @@
     {
         if ( arToolkitSource.ready !== false )
             arToolkitContext.update( arToolkitSource.domElement );
+
+
+
+        if (markerControls.object3d.visible) {
+            let pos = markerControls.object3d.position;
+            // let cpos = pos.applyMatrix4(camera2.projectionMatrix);
+            let cpos = pos;
+            document.getElementById('mcx').innerText = 'x: ' + cpos.x;
+            document.getElementById('mcy').innerText = 'y: ' + cpos.y;
+            document.getElementById('mcz').innerText = 'z: ' + cpos.z;
+        }
+
+        document.getElementById('mcw').innerText = 'visible: ' + markerControls.object3d.visible;
     }
 
     function animate()
     {
         requestAnimationFrame(animate);
         update();
+        if (arMarker) {
+            // mesh.position.x = arMarker.object3d.position.x;
+            // mesh.position.y = arMarker.object3d.position.y;
+        }
+        else {
+            // mesh.position.x = 0;
+            // mesh.position.y = 0;
+        }
+        // mesh.position.z = 0;
+        renderer.render( scene, camera );
     }
 
 </script>

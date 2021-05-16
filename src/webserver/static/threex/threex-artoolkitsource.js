@@ -14,6 +14,8 @@ ARjs.Source = THREEx.ArToolkitSource = function (parameters) {
         // url of the source - valid if sourceType = image|video
         sourceUrl: null,
 
+        showVideo: true,
+
         // Device id of the camera to use (optional)
         deviceId: null,
 
@@ -77,7 +79,7 @@ ARjs.Source.prototype.init = function (onReady, onError) {
 
     return this
     function onSourceReady() {
-        // document.body.appendChild(_this.domElement);
+        if (_this.parameters.showVideo === true) document.body.appendChild(_this.domElement);
         window.dispatchEvent(new CustomEvent('arjs-video-loaded', {
             detail: {
                 component: document.querySelector('#arjs-video'),
