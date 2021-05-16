@@ -19,7 +19,9 @@ app.get('/', (req, res) => {
 app.get('/ex2', (req, res) => {
     res.sendFile(path.join(__dirname, '/static/ex2.html'));
 });
-app.set('trust proxy', 'loopback');
+
+// Serve the rest of the static folder. Need to improve with webpack or use a platform like React.
+app.use(express.static(path.join(__dirname,'static')));
 
 server.listen(PORT, () => {
     console.log(`server is listening on ${PORT}`);
