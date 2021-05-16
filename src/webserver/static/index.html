@@ -76,9 +76,8 @@
 
             session.addEventListener("select", (event) => {
                 if (flower) {
-                    const clone = flower.clone();
-                    clone.position.copy(reticle.position);
-                    scene.add(clone);
+                    flower.position.copy(reticle.position);
+                    scene.add(flower);
                 } 
             });
 
