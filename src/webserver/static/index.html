@@ -17,10 +17,13 @@
     <!-- Starting an immersive WebXR session requires user interaction.
     We start this one with a simple button. -->
     <button onclick="activateXR()">Start Hello WebXR</button>
+    <!-- <script type="module">
+        import {WebXRButton} from './webxr-button.js';
+    
+
+    </script> -->
     <script>
         async function activateXR() {
-
-
             console.log("Hi there");
             // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
             const canvas = document.createElement("canvas");
@@ -49,7 +52,7 @@
             camera.matrixAutoUpdate = false;
 
             // Initialize a WebXR session using "immersive-ar".
-            const session = await navigator.xr.requestSession("immersive-ar", {requiredFeatures: ['hit-test']});
+            const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'] });
             session.updateRenderState({
                 baseLayer: new XRWebGLLayer(session, gl)
             });
@@ -63,14 +66,14 @@
             const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
             const loader = new THREE.GLTFLoader();
             let reticle;
-            loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function(gltf) {
+            loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
                 reticle = gltf.scene;
                 reticle.visible = false;
-            scene.add(reticle);
+                scene.add(reticle);
             })
 
             let flower;
-            loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function(gltf) {
+            loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
                 flower = gltf.scene;
             });
 
@@ -78,9 +81,12 @@
                 if (flower) {
                     flower.position.copy(reticle.position);
                     scene.add(flower);
-                } 
+                }
             });
 
+            // Here it's just an example of the marker value being switch after 10 seconds
+            let marker = false;
+            setTimeout(function () { marker = true }, 10000);
             // Create a render loop that allows us to draw on the AR view.
             const onXRFrame = (time, frame) => {
                 // Queue up the next draw request.
@@ -104,13 +110,18 @@
                     camera.projectionMatrix.fromArray(view.projectionMatrix);
                     camera.updateMatrixWorld(true);
 
-                    const hitTestResults = frame.getHitTestResults(hitTestSource);
-                    if (hitTestResults.length > 0 && reticle) {
-                    const hitPose = hitTestResults[0].getPose(referenceSpace);
-                    reticle.visible = true;
-                    reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z)
-                    reticle.updateMatrixWorld(true);
+                    //If marker was deected do hit test here
+                    if (marker) {
+                        console.log("marker detected");
+                        const hitTestResults = frame.getHitTestResults(hitTestSource);
+                        if (hitTestResults.length > 0 && reticle) {
+                            const hitPose = hitTestResults[0].getPose(referenceSpace);
+                            reticle.visible = true;
+                            reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z)
+                            reticle.updateMatrixWorld(true);
+                        }
                     }
+
                     // Render the scene with THREE.WebGLRenderer.
                     renderer.render(scene, camera)
                 }
