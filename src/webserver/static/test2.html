@@ -22,18 +22,18 @@
     <p id = 'mcz'></p> <br>
     <p id = 'mcw'></p> <br>
 </div>
-
-<!--<button onclick="activateXR()" style="z-index: 5; height: 50px;">Fullscreen</button>-->
+<button onclick="activateXR()" style="position: relative; z-index: 5; height: 50px;">Fullscreen</button>
 <script>
-    // async function activateXR() {
-    //     var
-    //         el = document.documentElement
-    //         , rfs =
-    //         el.requestFullScreen
-    //         || el.webkitRequestFullScreen
-    //         || el.mozRequestFullScreen
-    //     ;
-    //     rfs.call(el);
+    async function activateXR() {
+        var
+            el = document.documentElement
+            , rfs =
+            el.requestFullScreen
+            || el.webkitRequestFullScreen
+            || el.mozRequestFullScreen
+        ;
+        rfs.call(el);
+        console.log("Fullscreen")
         var scene, camera, camera2, renderer, clock, deltaTime, totalTime, mesh, markerControls;
         var arToolkitSource, arToolkitContext;
 
@@ -151,6 +151,7 @@
             update();
             renderer.render(scene, camera);
         }
+    }
 </script>
 
 </body>
