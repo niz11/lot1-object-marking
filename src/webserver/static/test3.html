@@ -1,81 +1,156 @@
-<!DOCTYPE html>
-<meta name="viewport"
-      content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
-<title>Hello, AR Cubes!</title>
-<!-- include three.js library -->
-<script src='new/three.js'></script>
-<script src='new/GLTFLoader.js'></script>
-<script src='new/EventDispatcher.js'></script>
-<!-- include jsartookit -->
-<script src="jsartoolkit5/artoolkit.min.js"></script>
-<script src="jsartoolkit5/artoolkit.api.js"></script>
-<!-- include threex.artoolkit -->
+<!doctype html>
+<html>
 
-<!--<script src="js/ar.js"></script>-->
-<script src="threex/threex-artoolkitsource.js"></script>
-<script src="threex/threex-artoolkitcontext.js"></script>
-<script src="threex/threex-arbasecontrols.js"></script>
-<script src="threex/threex-armarkercontrols.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Hello WebXR!</title>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
-<button onclick="activateXR()" style="z-index: 5;">Start Hello WebXR</button>
-<div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1;'>
-    <p id = 'mct'>Marker Control:</p> <br>
-    <p id = 'mcx'></p> <br>
-    <p id = 'mcy'></p> <br>
-    <p id = 'mcz'></p> <br>
-    <p id = 'mcw'></p> <br>
-</div>
+    <!-- three.js -->
+    <script src="new/three.js"></script>
+    <script src="new/GLTFLoader.js"></script>
+
+    <script src="new/EventDispatcher.js"></script>
+
+    <script src="jsartoolkit5/artoolkit.min.js"></script>
+    <script src="jsartoolkit5/artoolkit.api.js"></script>
+    <!-- include threex.artoolkit -->
+    <script src="threex/threex-artoolkitsource.js"></script>
+    <script src="threex/threex-artoolkitcontext.js"></script>
+    <script src="threex/threex-arbasecontrols.js"></script>
+    <script src="threex/threex-armarkercontrols.js"></script>
+</head>
+
+<body>
+
+<!-- Starting an immersive WebXR session requires user interaction.
+We start this one with a simple button. -->
+<button onclick="activateXR()">Start Hello WebXR</button>
+<!-- <script type="module">
+    import {WebXRButton} from './webxr-button.js';
 
 
+</script> -->
 <script>
-    var sceneARJS, cameraARJS, camera2ARJS, renderer, clock, deltaTime, totalTime, mesh, markerControls;
-    var arToolkitSource, arToolkitContext;
-
-    var firstUpdate = false;
-
-    var canvas, gl;
-
-    // initialize();
-    // animate();
     // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
-    canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
-    gl = canvas.getContext("webgl", { xrCompatible: true });
+    const gl = canvas.getContext("webgl", { xrCompatible: true });
 
+    const scene = new THREE.Scene();
 
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(10, 15, 10);
+    scene.add(directionalLight);
 
     // Set up the WebGLRenderer, which handles rendering to the session's base layer.
-    renderer = new THREE.WebGLRenderer({
+    const renderer = new THREE.WebGLRenderer({
         alpha: true,
         preserveDrawingBuffer: true,
         canvas: canvas,
         context: gl
     });
     renderer.autoClear = false;
+
+
+    async function activateXR() {
+        console.log("Hi there");
+
+        const camera = new THREE.PerspectiveCamera();
+        camera.matrixAutoUpdate = false;
+
+        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'] });
+        session.updateRenderState({
+            baseLayer: new XRWebGLLayer(session, gl)
+        });
+
+        const referenceSpace = await session.requestReferenceSpace('local');
+        const viewerSpace = await session.requestReferenceSpace('viewer');
+        const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+        const loader = new THREE.GLTFLoader();
+        let reticle;
+        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+            reticle = gltf.scene;
+            reticle.visible = false;
+            scene.add(reticle);
+        });
+
+        let flower;
+        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
+            flower = gltf.scene;
+        });
+
+        session.addEventListener("select", (event) => {
+            if (flower) {
+                flower.position.copy(reticle.position);
+                scene.add(flower);
+            }
+        });
+
+        // Create a render loop that allows us to draw on the AR view.
+        const onXRFrame = (time, frame) => {
+            // Queue up the next draw request.
+            session.requestAnimationFrame(onXRFrame);
+
+            // Bind the graphics framebuffer to the baseLayer's framebuffer
+            gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer)
+
+            // Retrieve the pose of the device.
+            // XRFrame.getViewerPose can return null while the session attempts to establish tracking.
+            const pose = frame.getViewerPose(referenceSpace);
+            if (pose) {
+                // In mobile AR, we only have one view.
+                const view = pose.views[0];
+
+                const viewport = session.renderState.baseLayer.getViewport(view);
+                renderer.setSize(viewport.width, viewport.height);
+
+                // Use the view's transform matrix and projection matrix to configure the THREE.camera.
+                camera.matrix.fromArray(view.transform.matrix);
+                camera.projectionMatrix.fromArray(view.projectionMatrix);
+                camera.updateMatrixWorld(true);
+
+                //If marker was deected do hit test here
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
+                if (hitTestResults.length > 0 && reticle) {
+                    const hitPose = hitTestResults[0].getPose(referenceSpace);
+                    reticle.visible = true;
+                    reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z);
+                    reticle.updateMatrixWorld(true);
+                }
+
+                // Render the scene with THREE.WebGLRenderer.
+                renderer.render(scene, camera)
+            }
+        };
+        session.requestAnimationFrame(onXRFrame);
+    }
+
+    /** ARJS Initialization **/
+    var arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
+    var arToolkitSource, arToolkitContext;
+
+    var firstUpdate = false;
     function initialize() {
-        sceneARJS = new THREE.Scene();
+        arJSScene = new THREE.Scene();
 
         let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
-        sceneARJS.add(ambientLight);
+        arJSScene.add(ambientLight);
 
-        cameraARJS = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / -2, window.innerHeight / 2, -100, 100);
-        sceneARJS.add(cameraARJS);
+        arJSScamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / -2, window.innerHeight / 2, -100, 100);
+        arJSScene.add(arJSScamera);
 
-
-
-
-
-        mesh = new THREE.Mesh(
+        arJSSmesh = new THREE.Mesh(
             new THREE.BoxGeometry(5, 10, 10),
             new THREE.MeshBasicMaterial({color: 0xff0000})
         );
-        sceneARJS.add(mesh);
-        cameraARJS.position.z = 5;
+        arJSScene.add(arJSSmesh);
+        arJSScamera.position.z = 5;
 
         arToolkitSource = new THREEx.ArToolkitSource({
             sourceType: 'webcam',
-            showVideo: false
+            showVideo: true
         });
 
         arToolkitSource.init(function onReady() {
@@ -89,13 +164,6 @@
 
         window.addEventListener('arjs-video-loaded', function () {
             onResize()
-        });
-
-        window.addEventListener("markerFound", function (e) {
-            console.log("Found")
-        });
-        window.addEventListener("markerLost", function (e) {
-            console.log("Lost")
         });
 
         function onResize() {
@@ -115,19 +183,30 @@
             maxDetectionRate: 30
         });
 
-        camera2ARJS = new THREE.Camera();
+        arJSScamera2 = new THREE.Camera();
         arToolkitContext.init(function onCompleted() {
-            camera2ARJS.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+            arJSScamera2.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
         });
 
         let patternArray = ["letterA", "letterB", "letterC", "letterD", "letterF", "kanji", "hiro"];
         for (let i = 6; i < 7; i++) {
             let markerRoot = new THREE.Group();
-            markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+            arJSSmarkerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
                 type: 'pattern', patternUrl: "data/" + patternArray[i] + ".patt",
             });
         }
     }
+
+
+
+    window.addEventListener("markerFound", function (e) {
+        console.log("Found")
+        console.log(e.detail);
+    });
+    window.addEventListener("markerLost", function (e) {
+        console.log("Lost")
+        console.log(e.detail);
+    });
 
 
     function update() {
@@ -140,122 +219,28 @@
         }
 
 
-        if (markerControls.object3d.visible) {
-            let pos = markerControls.object3d.position;
-            let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(camera2ARJS);
-            document.getElementById('mcx').innerText = 'x: ' + cpos.x;
-            document.getElementById('mcy').innerText = 'y: ' + cpos.y;
-            document.getElementById('mcz').innerText = 'z: ' + cpos.z;
+        if (arJSSmarkerControls.object3d.visible) {
+            let pos = arJSSmarkerControls.object3d.position;
+            let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
+            // document.getElementById('mcx').innerText = 'x: ' + cpos.x;
+            // document.getElementById('mcy').innerText = 'y: ' + cpos.y;
+            // document.getElementById('mcz').innerText = 'z: ' + cpos.z;
 
-            mesh.position.x = cpos.x * window.innerWidth / 2;
-            mesh.position.y = cpos.y * window.innerHeight / -2;
+            arJSSmesh.position.x = cpos.x * window.innerWidth / 2;
+            arJSSmesh.position.y = cpos.y * window.innerHeight / -2;
         }
 
-        document.getElementById('mcw').innerText = 'visible: ' + markerControls.object3d.visible;
+        // document.getElementById('mcw').innerText = 'visible: ' + markerControls.object3d.visible;
     }
 
     function animate() {
-        // requestAnimationFrame(animate);
-        return;
+        requestAnimationFrame(animate);
         update();
-        renderer.render(sceneARJS, cameraARJS);
+        // renderer.render(arJSScene, arJSScamera);
     }
-
-    async function activateXR() {
-        console.log("Hi there");
-
-
-        const scene = new THREE.Scene();
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
-        directionalLight.position.set(10, 15, 10);
-        scene.add(directionalLight);
-
-
-        // The API directly updates the camera matrices.
-        // Disable matrix auto updates so three.js doesn't attempt
-        // to handle the matrices independently.
-        const camera = new THREE.PerspectiveCamera();
-        camera.matrixAutoUpdate = false;
-
-        // Initialize a WebXR session using "immersive-ar".
-        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'] });
-        session.updateRenderState({
-            baseLayer: new XRWebGLLayer(session, gl)
-        });
-
-        // A 'local' reference space has a native origin that is located
-        // near the viewer's position at the time the session was created.
-        const referenceSpace = await session.requestReferenceSpace('local');
-        // Create another XRReferenceSpace that has the viewer as the origin.
-        const viewerSpace = await session.requestReferenceSpace('viewer');
-        // Perform hit testing using the viewer as origin.
-        const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-        const loader = new THREE.GLTFLoader();
-        let reticle;
-        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
-            reticle = gltf.scene;
-            reticle.visible = false;
-            scene.add(reticle);
-        })
-
-        let flower;
-        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
-            flower = gltf.scene;
-        });
-
-        session.addEventListener("select", (event) => {
-            if (flower) {
-                flower.position.copy(reticle.position);
-                scene.add(flower);
-            }
-        });
-
-        // Here it's just an example of the marker value being switch after 10 seconds
-        let marker = false;
-        setTimeout(function () { marker = true }, 10000);
-        // Create a render loop that allows us to draw on the AR view.
-        const onXRFrame = (time, frame) => {
-            // Queue up the next draw request.
-            session.requestAnimationFrame(onXRFrame);
-
-            // Bind the graphics framebuffer to the baseLayer's framebuffer
-            gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer)
-
-            // Retrieve the pose of the device.
-            // XRFrame.getViewerPose can return null while the session attempts to establish tracking.
-            const pose = frame.getViewerPose(referenceSpace);
-            if (pose) {
-                // In mobile AR, we only have one view.
-                const view = pose.views[0];
-
-                const viewport = session.renderState.baseLayer.getViewport(view);
-                renderer.setSize(viewport.width, viewport.height)
-
-                // Use the view's transform matrix and projection matrix to configure the THREE.camera.
-                camera.matrix.fromArray(view.transform.matrix)
-                camera.projectionMatrix.fromArray(view.projectionMatrix);
-                camera.updateMatrixWorld(true);
-                animate();
-                //If marker was deected do hit test here
-                if (marker) {
-                    // console.log("marker detected");
-                    const hitTestResults = frame.getHitTestResults(hitTestSource);
-                    if (hitTestResults.length > 0 && reticle) {
-                        const hitPose = hitTestResults[0].getPose(referenceSpace);
-                        reticle.visible = true;
-                        reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z)
-                        reticle.updateMatrixWorld(true);
-                    }
-                }
-
-                // Render the scene with THREE.WebGLRenderer.
-                renderer.render(scene, camera)
-            }
-        }
-        session.requestAnimationFrame(onXRFrame);
-    }
+    initialize();
+    animate();
 </script>
-
 </body>
+
 </html>
