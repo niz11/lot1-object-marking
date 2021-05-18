@@ -20,7 +20,7 @@
 
 import {RenderView} from './renderer.js';
 import {InputRenderer} from './nodes/input-renderer.js';
-import {StatsViewer} from './nodes/stats-viewer.js';
+// import {StatsViewer} from './nodes/stats-viewer.js';
 import {Node} from './node.js';
 import {vec3, quat} from './math/gl-matrix.js';
 import {Ray} from './math/ray.js';
@@ -186,17 +186,17 @@ export class Scene extends Node {
     this._statsEnabled = enable;
 
     if (enable) {
-      this._stats = new StatsViewer();
-      this._stats.selectable = true;
+      // this._stats = new StatsViewer();
+      // this._stats.selectable = true;
       this.addNode(this._stats);
 
       if (this._statsStanding) {
-        this._stats.translation = [0, 1.4, -0.75];
+        // this._stats.translation = [0, 1.4, -0.75];
       } else {
-        this._stats.translation = [0, -0.3, -0.5];
+        // this._stats.translation = [0, -0.3, -0.5];
       }
-      this._stats.scale = [0.3, 0.3, 0.3];
-      quat.fromEuler(this._stats.rotation, -45.0, 0.0, 0.0);
+      // this._stats.scale = [0.3, 0.3, 0.3];
+      // quat.fromEuler(this._stats.rotation, -45.0, 0.0, 0.0);
     } else if (!enable) {
       if (this._stats) {
         this.removeNode(this._stats);
@@ -209,12 +209,12 @@ export class Scene extends Node {
     this._statsStanding = enable;
     if (this._stats) {
       if (this._statsStanding) {
-        this._stats.translation = [0, 1.4, -0.75];
+        // this._stats.translation = [0, 1.4, -0.75];
       } else {
-        this._stats.translation = [0, -0.3, -0.5];
+        // this._stats.translation = [0, -0.3, -0.5];
       }
-      this._stats.scale = [0.3, 0.3, 0.3];
-      quat.fromEuler(this._stats.rotation, -45.0, 0.0, 0.0);
+      // this._stats.scale = [0.3, 0.3, 0.3];
+      // quat.fromEuler(this._stats.rotation, -45.0, 0.0, 0.0);
     }
   }
 
@@ -281,7 +281,7 @@ export class Scene extends Node {
     let prevTimestamp = this._timestamp;
     this._timestamp = performance.now();
     if (this._stats) {
-      this._stats.begin();
+      // this._stats.begin();
     }
 
     if (prevTimestamp >= 0) {
@@ -301,7 +301,7 @@ export class Scene extends Node {
     }
 
     if (this._stats) {
-      this._stats.end();
+      // this._stats.end();
     }
   }
 
