@@ -157,7 +157,8 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
         window.dispatchEvent(event);
 
         setTimeout(() => {
-            alert('Webcam Error\nName: ' + error.name + '\nMessage: ' + error.message)
+            // alert('Webcam Error\nName: ' + error.name + '\nMessage: ' + error.message)
+            console.log('Webcam Error\nName: ' + error.name + '\nMessage: ' + error.message)
         }, 1000);
     }
 

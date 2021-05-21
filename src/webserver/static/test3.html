@@ -33,6 +33,11 @@ We start this one with a simple button. -->
 
 </script> -->
 <script>
+
+    let offCanvas = new OffscreenCanvas(window.innerWidth, window.innerHeight);
+    let worker = new Worker('offscreenworker.js');
+
+
     // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
     const canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
@@ -60,7 +65,7 @@ We start this one with a simple button. -->
         const camera = new THREE.PerspectiveCamera();
         camera.matrixAutoUpdate = false;
 
-        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'] });
+        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'camera-access'] });
         session.updateRenderState({
             baseLayer: new XRWebGLLayer(session, gl)
         });
@@ -111,6 +116,10 @@ We start this one with a simple button. -->
                 camera.projectionMatrix.fromArray(view.projectionMatrix);
                 camera.updateMatrixWorld(true);
 
+
+                let tex = glBinding.getCameraImage(frame, view);
+                worker.postMessage({canvas: offCanvas, artContext: arToolkitContext, texture: tex}, [offCanvas, arToolkitContext, tex]);
+
                 //If marker was deected do hit test here
                 const hitTestResults = frame.getHitTestResults(hitTestSource);
                 if (hitTestResults.length > 0 && reticle) {
@@ -125,6 +134,8 @@ We start this one with a simple button. -->
             }
         };
         session.requestAnimationFrame(onXRFrame);
+        // initialize();
+        // animate();
     }
 
     /** ARJS Initialization **/
@@ -210,6 +221,7 @@ We start this one with a simple button. -->
 
 
     function update() {
+        // console.log('upd');
         if (arToolkitSource.ready !== false) {
             arToolkitContext.update(arToolkitSource.domElement);
             if (!firstUpdate) {
@@ -217,7 +229,6 @@ We start this one with a simple button. -->
                 firstUpdate = true;
             }
         }
-
 
         if (arJSSmarkerControls.object3d.visible) {
             let pos = arJSSmarkerControls.object3d.position;
@@ -238,8 +249,8 @@ We start this one with a simple button. -->
         update();
         // renderer.render(arJSScene, arJSScamera);
     }
-    initialize();
-    animate();
+    // initialize();
+    // animate();
 </script>
 </body>
 
