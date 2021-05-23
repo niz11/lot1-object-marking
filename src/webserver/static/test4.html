@@ -7,7 +7,6 @@
                 <meta name='apple-mobile-web-app-capable' content='yes'>
 
                     <title>Barebones WebXR Camera Access</title>
-                    <link href='../css/common.css' rel='stylesheet'></link>
                     <style>
                         #session-info {
                         font-weight: bold;
@@ -32,7 +31,7 @@
     <p>Click 'Enter AR' to see content</p>
 </main>
 <script type="module">
-    import * as mat4 from "../js/third-party/gl-matrix/mat4.js"
+    import * as mat4 from "gl/src/mat4.js"
 
     // XR globals.
     let xrButton = document.getElementById('xr-button');
