@@ -10,6 +10,9 @@
     <!-- three.js -->
     <script src="https://unpkg.com/three@0.126.0/build/three.js"></script>
     <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Aframe -->
+    <!-- <script src="js/aframe.min.js"></script>
+    <script src="js/aframe-ar.js"></script> -->
 </head>
 
 <body>
@@ -17,6 +20,8 @@
     <!-- Starting an immersive WebXR session requires user interaction.
     We start this one with a simple button. -->
     <button onclick="activateXR()">Start Hello WebXR</button>
+    <div id="infoBox"> 
+    </div>
     <!-- <script type="module">
         import {WebXRButton} from './webxr-button.js';
     
@@ -52,10 +57,13 @@
             camera.matrixAutoUpdate = false;
 
             // Initialize a WebXR session using "immersive-ar".
-            const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'] });
+            let uiElement = document.getElementById('infoBox');
+            const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: uiElement } });
             session.updateRenderState({
                 baseLayer: new XRWebGLLayer(session, gl)
             });
+            // If null then not optionalFeatures is not supported
+            console.log(session.domOverlayState.type);
 
             // A 'local' reference space has a native origin that is located
             // near the viewer's position at the time the session was created.
@@ -76,13 +84,56 @@
             loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
                 flower = gltf.scene;
             });
+            
+            // Trying to add Three.js geometry to space
+            const loader2 = new THREE.FontLoader();
+
+            let geometry;
+            let mesh;
+            loader2.load('fonts/font.json', function(font) {
+                geometry = new THREE.TextGeometry('Hello three.js!', {
+                font: font,
+                size: 80,
+                height: 5,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 10,
+                bevelSize: 8,
+                bevelOffset: 0,
+                bevelSegments: 5
+            });
+            var material = new THREE.MeshPhongMaterial(
+                        { color: '#dbe4eb', specular: '#dbe4eb' }
+            );
+            mesh = new THREE.Mesh( geometry, material );
+            })
+
 
             session.addEventListener("select", (event) => {
                 if (flower) {
                     flower.position.copy(reticle.position);
                     scene.add(flower);
+                    // mesh.position.copy(reticle.position);
+                    // // geometry.position.set(0,0,0);
+                    // console.log(geometry);
+                    // scene.add(mesh);
+                    // scene.add(geometr
+                    // Update infoBox text on select
+                    let infoBox = document.getElementById('infoBox');
+                    infoBox.innerHTML = "I am the info of the item";
+                    infoBox.style.zIndex = 2;
                 }
             });
+
+            // Option to add beforeSlect event to infoBox
+            // document.getElementById('infoBox').addEventListener(
+            //      'beforexrselect', ev => {
+            //          ev.preventDefault()
+            //         console.log("Before select!!!");
+            //         let infoBox = document.getElementById('infoBox');
+            //         infoBox.innerHTML = "I am the info of the item";
+            //         infoBox.style.zIndex = 2;
+            //         });
 
             // Here it's just an example of the marker value being switch after 10 seconds
             let marker = false;
@@ -112,7 +163,6 @@
 
                     //If marker was deected do hit test here
                     if (marker) {
-                        console.log("marker detected");
                         const hitTestResults = frame.getHitTestResults(hitTestSource);
                         if (hitTestResults.length > 0 && reticle) {
                             const hitPose = hitTestResults[0].getPose(referenceSpace);
