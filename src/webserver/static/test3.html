@@ -93,6 +93,8 @@ We start this one with a simple button. -->
             }
         });
 
+        let glBinding = new XRWebGLBinding(session, gl);
+
         // Create a render loop that allows us to draw on the AR view.
         const onXRFrame = (time, frame) => {
             // Queue up the next draw request.
@@ -134,7 +136,7 @@ We start this one with a simple button. -->
             }
         };
         session.requestAnimationFrame(onXRFrame);
-        // initialize();
+        initialize();
         // animate();
     }
 
@@ -159,14 +161,14 @@ We start this one with a simple button. -->
         arJSScene.add(arJSSmesh);
         arJSScamera.position.z = 5;
 
-        arToolkitSource = new THREEx.ArToolkitSource({
-            sourceType: 'webcam',
-            showVideo: true
-        });
-
-        arToolkitSource.init(function onReady() {
-            onResize()
-        });
+        // arToolkitSource = new THREEx.ArToolkitSource({
+        //     sourceType: 'webcam',
+        //     showVideo: true
+        // });
+        //
+        // arToolkitSource.init(function onReady() {
+        //     onResize()
+        // });
 
         // handle resize
         window.addEventListener('resize', function () {
@@ -178,10 +180,10 @@ We start this one with a simple button. -->
         });
 
         function onResize() {
-            arToolkitSource.onResizeElement();
-            arToolkitSource.copyElementSizeTo(renderer.domElement)
+            // arToolkitSource.onResizeElement();
+            // arToolkitSource.copyElementSizeTo(renderer.domElement)
             if (arToolkitContext.arController !== null) {
-                arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)
+                // arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)
             }
         }
 
@@ -222,13 +224,13 @@ We start this one with a simple button. -->
 
     function update() {
         // console.log('upd');
-        if (arToolkitSource.ready !== false) {
-            arToolkitContext.update(arToolkitSource.domElement);
-            if (!firstUpdate) {
-                window.dispatchEvent(new CustomEvent('resize'));
-                firstUpdate = true;
-            }
-        }
+        // if (arToolkitSource.ready !== false) {
+        //     arToolkitContext.update(arToolkitSource.domElement);
+        //     if (!firstUpdate) {
+        //         window.dispatchEvent(new CustomEvent('resize'));
+        //         firstUpdate = true;
+        //     }
+        // }
 
         if (arJSSmarkerControls.object3d.visible) {
             let pos = arJSSmarkerControls.object3d.position;
