@@ -10,18 +10,56 @@
     <!-- three.js -->
     <script src="https://unpkg.com/three@0.126.0/build/three.js"></script>
     <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
     <!-- Aframe -->
     <!-- <script src="js/aframe.min.js"></script>
     <script src="js/aframe-ar.js"></script> -->
 </head>
-
+<style>
+    button{
+      display: block;
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      border: none;
+      background-color: blue;
+      box-sizing: border-box;
+    }
+  
+    button[slot="hotspot-hand"]{
+      --min-hotspot-opacity: 0;
+      background-color: red;
+    }
+  
+    #annotation{
+      background-color: #888888;
+      position: absolute;
+      transform: translate(10px, 10px);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    /* This keeps child nodes hidden while the element loads */
+    :not(:defined) > * {
+      display: none;
+    }
+  </style>
 <body>
 
     <!-- Starting an immersive WebXR session requires user interaction.
     We start this one with a simple button. -->
-    <button onclick="activateXR()">Start Hello WebXR</button>
+    <a onclick="activateXR()">Start Hello WebXR</a>
+    <!-- <div id="infoBox" style="visibility: hidden;">  -->
     <div id="infoBox"> 
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        ar ar-modes="webxr scene-viewer quick-look" 
+        camera-controls>
+        <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
+            <div id="annotation">This hotspot disappears completely</div>
+          </button>
+        </model-viewer>
     </div>
+    <!-- https://modelviewer.dev/shared-assets/models/Astronaut.glb -->
     <!-- <script type="module">
         import {WebXRButton} from './webxr-button.js';
     
@@ -120,8 +158,13 @@
                     // scene.add(geometr
                     // Update infoBox text on select
                     let infoBox = document.getElementById('infoBox');
-                    infoBox.innerHTML = "I am the info of the item";
-                    infoBox.style.zIndex = 2;
+                    // infoBox.innerHTML = "I am the info of the item";
+                    infoBox.style.visibility = 'visible';
+                    infoBox.zIndex = 2;
+                    const modelViewer = document.querySelector("model-viewer");
+                    window.switchSrc = (element, name) => {
+                        modelViewer.src = "https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+                    }
                 }
             });
 
