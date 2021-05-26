@@ -54,18 +54,17 @@ We start this one with a simple button. -->
     directionalLight.position.set(10, 15, 10);
     scene.add(directionalLight);
 
-    // Set up the WebGLRenderer, which handles rendering to the session's base layer.
-    const renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        preserveDrawingBuffer: true,
-        canvas: canvas,
-        context: gl
-    });
-    renderer.autoClear = false;
-
-
     async function activateXR() {
         console.log("Hi there");
+
+        // Set up the WebGLRenderer, which handles rendering to the session's base layer.
+        const renderer = new THREE.WebGLRenderer({
+            alpha: true,
+            preserveDrawingBuffer: true,
+            canvas: canvas,
+            context: gl
+        });
+        renderer.autoClear = false;
 
         const camera = new THREE.PerspectiveCamera();
         camera.matrixAutoUpdate = false;
@@ -138,6 +137,8 @@ We start this one with a simple button. -->
                     arJSSmesh.position.y = cpos.y * window.innerHeight / -2;
                 }
 
+                gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
+
                 // const viewport = session.renderState.baseLayer.getViewport(view);
                 renderer.setSize(viewport.width, viewport.height);
 
@@ -147,7 +148,6 @@ We start this one with a simple button. -->
                 camera.updateMatrixWorld(true);
 
 
-                //If marker was deected do hit test here
                 const hitTestResults = frame.getHitTestResults(hitTestSource);
                 if (hitTestResults.length > 0 && reticle) {
                     const hitPose = hitTestResults[0].getPose(referenceSpace);
