@@ -48,66 +48,6 @@
 		this.canvas = document.createElement('canvas');
 		this.canvas.width = w;
 		this.canvas.height = h;
-		// this.gl = this.canvas.getContext('webgl');
-		//
-		// const vsSource = `
-		// 	attribute vec2 aVertexPosition;
-		// 	attribute vec2 aTextureCoord;
-		// 	varying highp vec2 vTextureCoord;
-		//
-		// 	void main(void) {
-		// 		gl_Position = vec4(aVertexPosition, 1.0, 1.0);
-		// 		vTextureCoord = aTextureCoord;
-		// 	}
-		// 	`;
-		//
-		//
-		// // Fragment shader program
-		// const fsSource = `
-		// varying highp vec2 vTextureCoord;
-		// uniform sampler2D uSampler;
-		// void main(void) {
-		// 	gl_FragColor = texture2D(uSampler, vTextureCoord);
-		// }
-		// `;
-		//
-		//
-		// this.indiceBuffer = this.gl.createBuffer();
-		// this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indiceBuffer);
-		// const indices = [
-		// 	0, 1, 3, 1, 2, 3
-		// ]
-		//
-		// this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
-		//
-		// this.verts = this.gl?.createBuffer();
-		// this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verts);
-		//
-		// const vertices =
-		// 	[
-		// 		1.0, 1.0, 1.0, 1.0,
-		// 		1.0, -1.0, 1.0, 0.0,
-		// 		-1.0, -1.0, 0.0, 0.0,
-		// 		-1.0, 1.0, 0.0, 1.0
-		// 	]
-		//
-		// this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-		//
-		//
-		// const shaderProgram = initShaderProgram(this.gl, vsSource, fsSource);
-		//
-		// this.programInfo = {
-		// 	program: shaderProgram,
-		// 	attribLocations: {
-		// 		vertexPosition: this.gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-		// 		textureCoord: this.gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
-		// 	},
-		// 	uniformLocations: {
-		// 		uSampler: this.gl.getUniformLocation(shaderProgram, 'uSampler'),
-		// 	},
-		// }
-
-
 
 		this.videoWidth = w;
 		this.videoHeight = h;
@@ -1065,51 +1005,6 @@
 */
 	
 	ARController.prototype._copyImageToHeap = function(data) {
-
-
-		// this.gl.clearColor(0, 0, 0, 0);
-		//
-		// // Clear the framebuffer
-		// this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-		//
-		// this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.verts);
-		// this.gl.vertexAttribPointer(
-		// 	0,
-		// 	2,
-		// 	this.gl.FLOAT,
-		// 	false,
-		// 	4 * 4,
-		// 	0,
-		// )
-		// this.gl.vertexAttribPointer(
-		// 	1,
-		// 	2,
-		// 	this.gl.FLOAT,
-		// 	false,
-		// 	4 * 4,
-		// 	2 * 4,
-		// )
-		//
-		// this.gl.activeTexture(this.gl.TEXTURE0);
-		// this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-		// // this.gl.viewport(0, 0, width, height);
-		//
-		// this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
-		//
-		// {
-		// 	const vertexCount = 6;
-		// 	const type = this.gl.UNSIGNED_SHORT;
-		// 	const offset = 0;
-		// 	this.gl.drawElements(this.gl.TRIANGLES, vertexCount, type, offset);
-		// }
-
-
-		// let data = new Uint8Array(width * height* 4);
-		// this.gl.readPixels(0, 0, width, height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data);
-
-
-
-
 		if (this.dataHeap) {
 			this.dataHeap.set( data );
 			return true;
@@ -1711,26 +1606,4 @@
 			}
 		};
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 })();
