@@ -219,7 +219,7 @@ We start this one with a simple button. -->
             let rb = gl.createRenderbuffer();
             gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
             gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA4, arjsW, arjsH);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, arjsW, arjsH);
             gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, rb);
         });
 
