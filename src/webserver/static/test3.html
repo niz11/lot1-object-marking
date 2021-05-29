@@ -21,12 +21,85 @@
     <script src="threex/threex-arbasecontrols.js"></script>
     <script src="threex/threex-armarkercontrols.js"></script>
 </head>
+<style>
+    /*button{*/
+    /*    display: block;*/
+    /*    width: 20px;*/
+    /*    height: 20px;*/
+    /*    border-radius: 10px;*/
+    /*    border: none;*/
+    /*    background-color: blue;*/
+    /*    box-sizing: border-box;*/
+    /*}*/
 
+    /*button[slot="hotspot-hand"]{*/
+    /*    --min-hotspot-opacity: 0;*/
+    /*    background-color: red;*/
+    /*}*/
+    div.con {
+        /*background-color: rgba(127, 127, 127, 0.90);*/
+        /*position: relative;*/
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin-top: -50px; /* Negative half of height. */
+        margin-left: -50px; /* Negative half of width. */
+
+        /*min-height: 100vh;*/
+        /*visibility: hidden;*/
+    }
+    div.cen {
+        /*background-color: rgba(127, 127, 127, 0.90);*/
+        /*position: relative;*/
+        width: 100px;
+        height: 100px;
+        vertical-align: middle;
+        text-align: center;
+        display: table-cell;
+    }
+    div.foot {
+        background-color: rgba(0, 0, 0, 0.30);
+        color: rgb(255,255,255);
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        padding: 1em;
+        text-align: center;
+        width: 100%;
+        /*visibility: collapse;*/
+    }
+    #annotation{
+        background-color: #888888;
+        position: absolute;
+        transform: translate(10px, 10px);
+        border-radius: 10px;
+        padding: 10px;
+    }
+    /* This keeps child nodes hidden while the element loads */
+    :not(:defined) > * {
+        display: none;
+    }
+</style>
 <body>
+<div id="infoBox">
+<!--    <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">-->
+<!--        <div id="annotation">This hotspot disappears completely</div>-->
+<!--    </button>-->
 
+    <div class="con" id = "con">
+        <div class="cen">
+            +
+        </div>
+    </div>
+
+    <div class="foot">
+        Test info box
+    </div>
+
+</div>
 <!-- Starting an immersive WebXR session requires user interaction.
 We start this one with a simple button. -->
-<button onclick="activateXR()">Start Hello WebXR</button>
+<button onclick="activateXR()" >Start Hello WebXR</button>
 <!-- <script type="module">
     import {WebXRButton} from './webxr-button.js';
 
@@ -68,8 +141,13 @@ We start this one with a simple button. -->
 
         const camera = new THREE.PerspectiveCamera();
         camera.matrixAutoUpdate = false;
-
-        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'camera-access'] });
+        let uiElement = document.getElementById('infoBox');
+        let content = document.getElementById('con');
+        content.style.visibility = 'visible';
+        // content.style.minHeight = '100vh';
+        // content.style.minHeight = '100hw';
+        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'camera-access'],
+            optionalFeatures: ['dom-overlay'], domOverlay: { root: uiElement } });
         session.updateRenderState({
             baseLayer: new XRWebGLLayer(session, gl)
         });
