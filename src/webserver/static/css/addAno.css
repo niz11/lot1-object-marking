@@ -21,9 +21,10 @@
     background-color: red;
   }
 
-  .hotspot:not(.selected) > .annotation{
+  /* Show annotations text on click - Disable for now */
+  /* .hotspot:not(.selected) > .annotation{
     display: none;
-  }
+  } */
 
 
 

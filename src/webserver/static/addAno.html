@@ -47,18 +47,18 @@
     <div id="displayblocks">
 
         <model-viewer ondblclick="addHotspot()" onclick="selected()" id="modelblock"
-            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" class="" ar auto-rotate camera-controls
-            background-color="#254441" shadow-intensity="1" alt="A 3D model of a test cube">
+            src="" class="" ar auto-rotate camera-controls
+            background-color="#254441" shadow-intensity="1" alt="A 3D model of a test cube" ar ar-modes="webxr scene-viewer quick-look">
             <button slot="hotspot-0" class="hotspot"
-                data-position="-0.7397343349036523m 0.7593637108802795m 0.3262876049225051m" data-normal="0m 1m 0m">
+                data-position="-0.5158334257401533m 0.8808310669112648m 00.12073262739521484m" data-normal="-0.6055749170967261m -0.030052908207539756m 0.7952206250416061m">
                 <div class="annotation">
-                    test2</div>
+                    Hand Moon</div>
             </button>
             <button slot="hotspot-1" class="hotspot"
-                data-position="0.13529183354718943m 1.2509730929556313m 0.05367829508087851m"
-                data-normal="0.027936893635175666m -0.11609595558159552m 0.9928450327576873m">
+                data-position="-0.011249673695200163m 1.7695722081445033m 0.34713028254276157m"
+                data-normal="-0.29259561389217825m 0.11383937564155769m 0.9494358342113489m">
                 <div class="annotation">
-                    test</div>
+                    Head Space</div>
             </button>
 
 
@@ -82,7 +82,7 @@
         // Can load datapoints from database and add async
         setTimeout(() => {
             var hotspotCounter = 2;
-            console.log("Time out");
+            console.log("Time out 5sec");
                 const viewer = document.querySelector('#modelblock');
                 // create the hotspot
                 const hotspot = document.createElement('button');
@@ -96,13 +96,13 @@
                 // adds the text to last hotspot
                 var element = document.createElement("div");
                 element.classList.add('annotation');
-                element.appendChild(document.createTextNode("Add in TimeOut"));
+                element.appendChild(document.createTextNode("TimeOut Astroid"));
                 document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
         }, 5000)
         setTimeout(() => {
-            console.log("Time out 2");
+            console.log("Time out 10sec");
                 const viewer = document.querySelector('#modelblock');
-                viewer.src = "https://modelviewer.dev/shared-assets/models/shishkebab.glb"
+                viewer.src = "https://modelviewer.dev/shared-assets/models/Astronaut.glb"
         }, 10000)
     </script>
 
