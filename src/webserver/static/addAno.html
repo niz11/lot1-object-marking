@@ -99,6 +99,11 @@
                 element.appendChild(document.createTextNode("Add in TimeOut"));
                 document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
         }, 5000)
+        setTimeout(() => {
+            console.log("Time out 2");
+                const viewer = document.querySelector('#modelblock');
+                viewer.src = "https://modelviewer.dev/shared-assets/models/shishkebab.glb"
+        }, 10000)
     </script>
 
 
