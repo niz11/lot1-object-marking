@@ -253,12 +253,13 @@ We start this one with a simple button. -->
                     arJSSmesh.position.z = 4.0;
 
                     /*** Handle weird rotation mechanics of AR.js lol ***/
-                    if (Math.abs(arJSSmarkerControls.object3d.rotation.x) <= Math.PI / 2.0){
-                        arJSSmesh.rotation.z = arJSSmarkerControls.object3d.rotation.y;
-                    }
-                    else {
-                        arJSSmesh.rotation.z = Math.PI - arJSSmarkerControls.object3d.rotation.y;
-                    }
+                    // if (Math.abs(arJSSmarkerControls.object3d.rotation.x) <= Math.PI / 2.0){
+                    //     arJSSmesh.rotation.z = arJSSmarkerControls.object3d.rotation.y;
+                    // }
+                    // else {
+                    //     arJSSmesh.rotation.z = Math.PI - arJSSmarkerControls.object3d.rotation.y;
+                    // }
+                    arJSSmesh.rotation.z = Math.PI - arJSSmarkerControls.object3d.rotation.z;
 
 
                     // arJSSmesh.rotation.z += 0.1;
