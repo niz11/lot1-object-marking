@@ -146,7 +146,7 @@ We start this one with a simple button. -->
         content.style.visibility = 'visible';
         // content.style.minHeight = '100vh';
         // content.style.minHeight = '100hw';
-        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'camera-access'],
+        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'anchors', 'camera-access', 'plane-detection'],
             optionalFeatures: ['dom-overlay'], domOverlay: { root: uiElement } });
         session.updateRenderState({
             baseLayer: new XRWebGLLayer(session, gl)
@@ -154,7 +154,10 @@ We start this one with a simple button. -->
 
         const referenceSpace = await session.requestReferenceSpace('local');
         const viewerSpace = await session.requestReferenceSpace('viewer');
-        const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+        const hitTestSource = await session.requestHitTestSource({
+            space: viewerSpace,
+            entityTypes : ["plane", "point"],
+        });
         const loader = new THREE.GLTFLoader();
         let reticle;
         loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
@@ -207,13 +210,7 @@ We start this one with a simple button. -->
 
                 arToolkitContext.update(data);
 
-                if (arJSSmarkerControls.object3d.visible) {
-                    let pos = arJSSmarkerControls.object3d.position;
-                    let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
 
-                    arJSSmesh.position.x = cpos.x * window.innerWidth / 2;
-                    arJSSmesh.position.y = cpos.y * window.innerHeight / -2;
-                }
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
 
@@ -229,13 +226,27 @@ We start this one with a simple button. -->
                 const hitTestResults = frame.getHitTestResults(hitTestSource);
                 if (hitTestResults.length > 0 && reticle) {
                     const hitPose = hitTestResults[0].getPose(referenceSpace);
-                    reticle.visible = true;
+                    reticle.visible = false;
                     reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z);
                     reticle.updateMatrixWorld(true);
                 }
 
                 // Render the scene with THREE.WebGLRenderer.
                 renderer.render(scene, camera)
+                if (arJSSmarkerControls.object3d.visible) {
+                    let pos = arJSSmarkerControls.object3d.position;
+                    let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
+
+                    arJSSmesh.position.x = cpos.x * viewport.width / 2.0;
+                    arJSSmesh.position.y = cpos.y * viewport.height / 2.0;
+                    arJSSmesh.position.z = 4.0;
+
+                    const offset = cpos.x * cpos.x + cpos.y * cpos.y ;
+                    if (offset < 0.004)  arJSSmesh.material.color.setRGB(0.0, 1.0, 0.0);
+                    else arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
+
+                    renderer.render(arJSScene, arJSScamera);
+                }
             }
         };
 
@@ -257,7 +268,7 @@ We start this one with a simple button. -->
         arJSScene.add(arJSScamera);
 
         arJSSmesh = new THREE.Mesh(
-            new THREE.BoxGeometry(5, 10, 10),
+            new THREE.BoxGeometry(5, 5, 20),
             new THREE.MeshBasicMaterial({color: 0xff0000})
         );
         arJSScene.add(arJSSmesh);
