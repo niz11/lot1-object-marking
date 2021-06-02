@@ -128,8 +128,6 @@ We start this one with a simple button. -->
     scene.add(directionalLight);
 
     async function activateXR() {
-        console.log("Hi there");
-
         // Set up the WebGLRenderer, which handles rendering to the session's base layer.
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -237,11 +235,31 @@ We start this one with a simple button. -->
                     let pos = arJSSmarkerControls.object3d.position;
                     let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
 
+
+
                     arJSSmesh.position.x = cpos.x * viewport.width / 2.0;
-                    arJSSmesh.position.y = cpos.y * viewport.height / 2.0;
+                    arJSSmesh.position.y = cpos.y * viewport.height / -2.0;
+                    if (arJSScamera.right !== viewport.width / 2.0){
+                        arJSScamera.left = -viewport.width / 2.0;
+                        arJSScamera.right = viewport.width / 2.0;
+                        arJSScamera.top = viewport.height  / 2.0;
+                        arJSScamera.bottom = -viewport.height  / 2.0;
+                        arJSScamera.updateProjectionMatrix();
+                        console.log("Updating Projection Matrix!")
+                    }
+
                     arJSSmesh.position.z = 4.0;
 
-                    const offset = cpos.x * cpos.x + cpos.y * cpos.y ;
+
+
+                    arJSSmesh.rotation.z += 0.1;
+                    // arJSSmesh.rotation.x += 0.1;
+                    // arJSSmesh.rotation.y = arJSSmarkerControls.object3d.rotation.y;
+                    // arJSSmesh.rotation.z = arJSSmarkerControls.object3d.rotation.z;
+
+                    const ratio = viewport.width / viewport.height;
+
+                    const offset = cpos.x * cpos.x * ratio + cpos.y * cpos.y / ratio ;
                     if (offset < 0.004)  arJSSmesh.material.color.setRGB(0.0, 1.0, 0.0);
                     else arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
 
@@ -264,13 +282,16 @@ We start this one with a simple button. -->
         let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
         arJSScene.add(ambientLight);
 
-        arJSScamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / -2, window.innerHeight / 2, -100, 100);
+        // arJSScamera = new THREE.OrthographicCamera(-1.0, 1.0, -1.0, 1.0, -10.0, 10.0);
+        arJSScamera = new THREE.OrthographicCamera(-window.innerWidth, window.innerWidth, -window.innerHeight, window.innerHeight, -100.0, 100.0);
         arJSScene.add(arJSScamera);
 
         arJSSmesh = new THREE.Mesh(
-            new THREE.BoxGeometry(5, 5, 20),
+            // new THREE.BoxGeometry(0.05, 0.1, 0.05),
+            new THREE.BoxGeometry(50, 100, 5),
             new THREE.MeshBasicMaterial({color: 0xff0000})
         );
+        arJSSmesh.material.wireframe = true;
         arJSScene.add(arJSSmesh);
         arJSScamera.position.z = 5;
 
