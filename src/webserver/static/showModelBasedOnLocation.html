@@ -141,7 +141,7 @@
         }
     </script>
     <script>
-        
+
         // setInterval(() => {
         //     getLocation()
         // }, 2000)
@@ -153,6 +153,43 @@
         // setTimeout(() => {
         //     removeModel()
         // },10000)
+        let id;
+        function success(pos) {
+            const objectLatitude = 52.48979763883894;
+            const objectLongitude = 13.390766864570562;
+            const usersLatitude = pos.coords.latitude;
+            const usersLongitude = pos.coords.longitude;
+            const radius = 5;
+            const d = getDistance(objectLatitude,objectLongitude,usersLatitude,usersLongitude);
+            console.log("Distance from user to object: ", d);
+            const modelStatus = document.getElementById("body").className;
+            if (d < radius) {
+                navigator.geolocation.clearWatch(id);
+                if (modelStatus !== 'model') {
+                    addModel();
+                }
+            } else {
+                if (modelStatus !== 'noModel') {
+                    removeModel()
+                }
+            }
+        }
+
+        function error(err) {
+            console.warn('ERROR(' + err.code + '): ' + err.message);
+        }
+
+        const options = {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 0
+        };
+
+        if (navigator.geolocation) {
+            id = navigator.geolocation.watchPosition(success, error, options);
+        } else {
+            document.getElementById("noModelTextBox").textContent = "Please Enable Location"
+        }
 
         function addModel() {
             console.log("addModel");
@@ -173,44 +210,12 @@
             document.getElementById("noModelTextBox").style.opacity = 1;
         }
 
-
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                const watchID = navigator.geolocation.getCurrentPosition(showPosition);
-                const timeout = setTimeout(function () { navigator.geolocation.clearWatch(watchID); }, 1000);
-            } else {
-                console.log("Geolocation is not supported by this browser.");
-            }
-        }
-        function showPosition(position) {
-            console.log("show posiyion");
-            checkDistance(position.coords.latitude, position.coords.longitude)
-            console.log(position.coords.latitude);
-            console.log(position.coords.longitude);
-        }
-
-        function checkDistance(usersLatitude, usersLongitude) {
-            const objectLatitude = 52.48979763883894;
-            const objectLongitude = 13.390766864570562;
-
+        function getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude) {
             const dLat = (usersLatitude - objectLatitude) * Math.PI / 180;
             const dLon = (usersLongitude - objectLongitude) * Math.PI / 180;
             const a = 0.5 - Math.cos(dLat) / 2 + Math.cos(objectLatitude * Math.PI / 180) * Math.cos(usersLatitude * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
             d = Math.round(6371000 * 2 * Math.asin(Math.sqrt(a)));
-            console.log(d);
-            document.getElementById("distance").textContent = d;
-            const modelStatus = document.getElementById("body").className;
-            console.log(modelStatus);
-            if (d < 5) {
-                if (modelStatus !== 'model') {
-                    addModel();
-                }
-            } else {
-                if (modelStatus !== 'noModel') {
-                    removeModel()
-                }
-            }
+            return d;
         }
     </script>
 
