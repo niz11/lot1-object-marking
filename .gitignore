@@ -8,3 +8,6 @@ rootCA.srl
 server.csr
 server.crt
 server.key
+/web-app/node_modules/
+/.vscode/
+.DS_Store
