@@ -5,8 +5,7 @@ import AR from "../pages/AR/AR"
 
 function App() {
   return (
-    <div className="App">
-            <Router>
+      <Router>
                 <Switch>
                     <Route exact path="/" component={HomePage} />
                     <Route exact path="/home" component={HomePage} />
@@ -14,8 +13,7 @@ function App() {
                     <Route exact path="/about" component={HomePage} />
                     <Route path="*" component={() => "404 NOT FOUND"} />
                 </Switch>
-            </Router>
-    </div>
+      </Router>
   );
 }
 
