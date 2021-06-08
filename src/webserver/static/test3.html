@@ -30,7 +30,8 @@
         border: none;
         background-color: #008CBA;
         box-sizing: border-box;
-        visibility: hidden;
+        visibility: visible;
+        position: fixed;
     }
 
     /*button[slot="hotspot-hand"]{*/
@@ -83,7 +84,7 @@
 </style>
 <body>
 <div id="infoBox">
-    <button class="p" data-position="-0.12 0.12 0.08">
+    <button class="p" data-position="-0.12 0.0 0.0">
     </button>
 
     <div class="con" id = "con">
@@ -195,12 +196,6 @@ We start this one with a simple button. -->
             flower = gltf.scene;
         });
 
-        session.addEventListener("select", (event) => {
-            if (flower) {
-                flower.position.copy(reticle.position);
-                scene.add(flower);
-            }
-        });
 
         let glBinding = new XRWebGLBinding(session, gl);
 
@@ -218,22 +213,24 @@ We start this one with a simple button. -->
                 const view = pose.views[0];
                 const viewport = session.renderState.baseLayer.getViewport(view);
 
-                let tex = glBinding.getCameraImage(frame, view);
+                if (!objAnchor){
 
-                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, arjsBuffer);
-                gl.framebufferTexture2D(
-                    gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
-                    gl.TEXTURE_2D, tex, 0);
+                    let tex = glBinding.getCameraImage(frame, view);
 
-                gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, arjsBuffer2);
-                gl.blitFramebuffer(0, 0, viewport.width, viewport.height, 0, 0, arjsW, arjsH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
-                gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
+                    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, arjsBuffer);
+                    gl.framebufferTexture2D(
+                        gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                        gl.TEXTURE_2D, tex, 0);
 
-                let data = new Uint8ClampedArray(arjsW * arjsH * 4);
-                gl.readPixels(0, 0, arjsW, arjsH, gl.RGBA, gl.UNSIGNED_BYTE, data);
+                    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, arjsBuffer2);
+                    gl.blitFramebuffer(0, 0, viewport.width, viewport.height, 0, 0, arjsW, arjsH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
 
-                arToolkitContext.update(data);
+                    let data = new Uint8ClampedArray(arjsW * arjsH * 4);
+                    gl.readPixels(0, 0, arjsW, arjsH, gl.RGBA, gl.UNSIGNED_BYTE, data);
 
+                    arToolkitContext.update(data);
+                }
 
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
@@ -248,7 +245,7 @@ We start this one with a simple button. -->
 
                 let offset = 100;
 
-                if (arJSSmarkerControls.object3d.visible) {
+                if (!objAnchor && arJSSmarkerControls.object3d.visible) {
                     let pos = arJSSmarkerControls.object3d.position;
                     let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
 
@@ -330,18 +327,32 @@ We start this one with a simple button. -->
                         let dpy = Number(dpe[1]) + box.position.y;
                         let dpz = Number(dpe[2]) + box.position.z;
 
+                        const dpv = new THREE.Vector3(dpx, dpy, dpz);
+                        const sx = dpv.clone();
 
-                        raycaster.set(camera.position, new THREE.Vector3(dpx, dpy, dpz));
+                        const wh = viewport.width / 2.0;
+                        const hh = viewport.height / 2.0;
+
+                        sx.project(camera);
+                        // e.style.left = (wh * sx.x) + wh + 'px';
+                        // e.style.top = -(hh * sx.y) + hh + 'px';
+                        e.style.left = (50 * sx.x) + 50 + '%';
+                        e.style.top = (-50 * sx.y) + 50 + '%';
+                        e.style.visibility = 'visible';
+
+                        raycaster.set(camera.position, dpv);
 
                         const intersections = raycaster.intersectObject(box);
+                        console.log(intersections);
                         const intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
 
                         if (intersection) {
                             console.log(intersection)
-                            e.style.visibility = 'visible';
+                            // e.style.visibility = 'visible';
+
                         }
                         else {
-                            e.style.visibility = 'hidden';
+                            // e.style.visibility = 'hidden';
                         }
                     }
 
