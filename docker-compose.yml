@@ -1,0 +1,52 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  meshroom:
+    image: meshroom
+    runtime: nvidia
+    ports:
+     - "2222:22"
+    volumes:
+     - img_in:/data/img_in
+     - model:/data/model
+     - log:/var/log/meshroom
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - capabilities: [gpu]
+
+  #node:
+    #image: "node:alpine"
+    #user: "node"
+    #working_dir: /home/node/app
+    #environment:
+      #- NODE_ENV=production
+    #volumes:
+      #- model:/home/node/app/model
+      #- log:/home/node/app/log
+    #expose:
+      #- "8888"
+    #command: "npm --version"
+
+volumes:
+  img_in:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./img_in
+  model:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./model
+  log:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./log
+
