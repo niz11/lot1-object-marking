@@ -87,8 +87,6 @@ function process() {
     }
     next = null;
 }
-    };
-
 function onMarkerFound(event) {
     if (event.data.type === artoolkit.PATTERN_MARKER && event.data.marker.cfPatt < _this.parameters.minConfidence) return
     if (event.data.type === artoolkit.BARCODE_MARKER && event.data.marker.cfMatrix < _this.parameters.minConfidence) return
@@ -96,4 +94,4 @@ function onMarkerFound(event) {
     var modelViewMatrix = new THREE.Matrix4().fromArray(event.data.matrix)
     _this.updateWithModelViewMatrix(modelViewMatrix)
 }
-}
+
