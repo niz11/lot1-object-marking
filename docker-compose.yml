@@ -2,15 +2,17 @@
 version: '3'
 
 services:
-  meshroom:
-    image: meshroom
+  photogrammetry:
+    image: photogrammetry
+    container_name: photogrammetry
     runtime: nvidia
     ports:
      - "2222:22"
+    restart: always
     volumes:
      - img_in:/data/img_in
      - model:/data/model
-     - log:/var/log/meshroom
+     - log:/data/log
     deploy:
       resources:
         reservations:
