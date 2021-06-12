@@ -72,3 +72,4 @@ ssh -p 2222 root@[docker-host]
 - scale model to a realistic size
 - optimize meshroom graph parameters
 - publish preview while calculating
+- add image compression tool to pipeline
