@@ -1,0 +1,38 @@
+{
+	"models": [
+		{
+			"modelName": "Astrunaut",
+			"src": "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
+			"alt": "A 3D model of a test cube",
+			"hotspots": [
+				{
+					"position": "-0.5158334257401533m 0.8808310669112648m 00.12073262739521484m",
+					"normal": "-0.6055749170967261m -0.030052908207539756m 0.7952206250416061m",
+					"text": "Hand Moon"
+				},
+				{
+					"position": "-0.011249673695200163m 1.7695722081445033m 0.34713028254276157m",
+					"normal": "-0.29259561389217825m 0.11383937564155769m 0.9494358342113489m",
+					"text": "Head Space"
+				}
+			]
+		},
+		{
+			"modelName": "GeoPlanter",
+			"src": "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.glb",
+			"alt": "GeoPlanter",
+			"hotspots": [
+				{
+					"position": "-0.00960422567398053m 0.09505953028582997m 0.04447080215735666m",
+					"normal": "-5.551115123125784e-17m 0.42171139628954796m 0.9067301132307894m",
+					"text": "Middle Man"
+				},
+				{
+					"position": "-0.01194014640005309m 0.1888m 0.0014m",
+					"normal": "-0.394m 0.605m 0.691555m",
+					"text": "Top Man"
+				}
+			]
+		}
+	]
+}

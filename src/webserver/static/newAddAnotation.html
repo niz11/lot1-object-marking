@@ -1,0 +1,178 @@
+<!-- Need to update the file to use future database instead of local json file! -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>model viewer</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/addAno.css">
+
+    <!-- 3d model viewer links -->
+    <!-- Loads <model-viewer> for modern browsers: -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
+    </script>
+
+    <!-- Loads <model-viewer> for old browsers like IE11: -->
+    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+    </script>
+
+    <!-- The following libraries and polyfills are recommended to maximize browser support -->
+    <!-- NOTE: you must adjust the paths as appropriate for your project -->
+
+    <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+    <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2.1.3/webcomponents-loader.js"></script>
+
+    <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+
+    <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+    <script src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>
+
+    <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
+    <!--<script src="https://unpkg.com/fullscreen-polyfill@1.0.2/dist/fullscreen.polyfill.js"></script>-->
+
+    <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+    <!--<script src="https://unpkg.com/@magicleap/prismatic@0.18.2/prismatic.min.js"></script>-->
+</head>
+
+<body>
+    <div id="displayblocks">
+        <model-viewer ar ondblclick="addHotspotOnClick()" onclick="selected()" id="modelblock" src="" class="" ar
+            auto-rotate camera-controls background-color="#254441" shadow-intensity="1" alt="A 3D model of a test cube"
+            ar ar-modes="webxr scene-viewer quick-look">
+        </model-viewer>
+        <div id="formblock">
+            <select id="modelSelection" onchange="getComboA(this)">
+            </select>
+            <form onSubmit="return false;">
+                <input type="text" id="hotspottext" name="hotspottext" placeholder="Input text for hotspot">
+            </form>
+            <div class="center marginTop"><button class="btn btn--azure" onclick="removeHotspot()">Remove Hotspot</button></div>
+        </div>
+    </div>
+    <script>
+        let jsonData;
+        fetch(`https://localhost:3000/data/modelsData.json`)
+            .then(response => response.json())
+            .then(data => {
+                jsonData = data;
+                addModel(data.models[0])
+                var select = document.getElementById("modelSelection");
+
+                for (const val of data.models) {
+                    let option = document.createElement("option");
+                    option.value = val.modelName;
+                    option.text = val.modelName;
+                    select.appendChild(option);
+                }
+            });
+        function getComboA(selectObject) {
+            var value = selectObject.value;
+            const model = jsonData.models.filter(model => model.modelName === value);
+            if (model) removeAllHotspots();
+            addModel(model[0]);
+        }
+        let selectedHotSpot;
+        function selected() {
+            // Add active class to the current button (highlight it)
+            var header = document.getElementById("modelblock");
+            var hotspots = header.getElementsByClassName("hotspot");
+            for (var i = 0; i < hotspots.length; i++) {
+                hotspots[i].addEventListener("click", function (event) {
+                    selectedHotSpot = this;
+                    currentHotspot = document.getElementsByClassName("selected");
+                    if (currentHotspot.length > 0) {
+                        currentHotspot[0].className = currentHotspot[0].className.replace(" selected", "");
+                    }
+                    this.className += " selected";
+                });
+            }
+
+        }
+    </script>
+    <script>
+        //hotspot counter so we can keep track of how many we added on 3 because we already have hotspot-0 and hotspot-1 (set to 0 if you start with 0 hotspots)
+        function addHotspotOnClick(MouseEvent) {
+            const hotspotCounter = document.getElementsByClassName("hotspot").length
+            var inputtext = document.querySelector('input').value;
+            // if input = nothing then alert error if it isnt then add the hotspot
+            if (inputtext == "") {
+                alert("Put in text first to add hotspots.");
+            } else {
+                const viewer = document.querySelector('#modelblock');
+                const rect = viewer.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const positionAndNormal = viewer.positionAndNormalFromPoint(x, y);
+                // if the model is not clicked return the position in the console
+                if (positionAndNormal == null) {
+                    console.log('no hit result: mouse = ', x, ', ', y);
+                    return;
+                }
+                const { position, normal } = positionAndNormal;
+                // create the hotspot
+                const hotspot = document.createElement('button');
+                hotspot.slot = `hotspot-${hotspotCounter}`;
+                hotspot.classList.add('hotspot');
+                hotspot.id = `hotspot-${hotspotCounter}`;
+                hotspot.dataset.position = position.toString();
+                if (normal != null) {
+                    hotspot.dataset.normal = normal.toString();
+                }
+                viewer.appendChild(hotspot);
+                // adds the text to last hotspot
+                var element = document.createElement("div");
+                element.classList.add('annotation');
+                element.appendChild(document.createTextNode(inputtext));
+                document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
+                document.querySelector('input').value = "";
+            }
+        }
+
+        function addHotspot(position, normal, text) {
+            const viewer = document.querySelector('#modelblock');
+            const hotspotCounter = document.getElementsByClassName("hotspot").length
+            const hotspot = document.createElement('button');
+            hotspot.slot = `hotspot-${hotspotCounter}`;
+            hotspot.classList.add('hotspot');
+            hotspot.id = `hotspot-${hotspotCounter}`;
+            hotspot.dataset.position = position;
+            if (normal != null) {
+                hotspot.dataset.normal = normal;
+            }
+            viewer.appendChild(hotspot);
+            // adds the text to last hotspot
+            var element = document.createElement("div");
+            element.classList.add('annotation');
+            element.appendChild(document.createTextNode(text));
+            document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
+        }
+
+        function addModel(model) {
+            const viewer = document.querySelector('#modelblock');
+            viewer.src = model.src;
+            model.hotspots.map(ano => {
+                addHotspot(ano.position, ano.normal, ano.text)
+            })
+        }
+
+    </script>
+    <script>
+        function removeHotspot() {
+            selectedHotSpot.remove()
+        }
+        function removeAllHotspots() {
+            var el = document.getElementsByClassName("hotspot");
+            if (el.length > 1) {
+                Array.from(el).map(hotspot => hotspot.remove())
+            }
+        }
+    </script>
+
+</body>
+
+</html>
