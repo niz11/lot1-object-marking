@@ -14,6 +14,8 @@ ARjs.Source = THREEx.ArToolkitSource = function (parameters) {
         // url of the source - valid if sourceType = image|video
         sourceUrl: null,
 
+        showVideo: true,
+
         // Device id of the camera to use (optional)
         deviceId: null,
 
@@ -77,7 +79,7 @@ ARjs.Source.prototype.init = function (onReady, onError) {
 
     return this
     function onSourceReady() {
-        document.body.appendChild(_this.domElement);
+        if (_this.parameters.showVideo === true) document.body.appendChild(_this.domElement);
         window.dispatchEvent(new CustomEvent('arjs-video-loaded', {
             detail: {
                 component: document.querySelector('#arjs-video'),
@@ -155,7 +157,8 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
         window.dispatchEvent(event);
 
         setTimeout(() => {
-            alert('Webcam Error\nName: ' + error.name + '\nMessage: ' + error.message)
+            // alert('Webcam Error\nName: ' + error.name + '\nMessage: ' + error.message)
+            console.log('Webcam Error\nName: ' + error.name + '\nMessage: ' + error.message)
         }, 1000);
     }
 
@@ -163,8 +166,8 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
     domElement.setAttribute('autoplay', '');
     domElement.setAttribute('muted', '');
     domElement.setAttribute('playsinline', '');
-    domElement.style.width = this.parameters.displayWidth + 'px'
-    domElement.style.height = this.parameters.displayHeight + 'px'
+    domElement.style.width = this.parameters.displayWidth + 'px';
+    domElement.style.height = this.parameters.displayHeight + 'px';
 
     // check API is available
     if (navigator.mediaDevices === undefined
@@ -215,7 +218,7 @@ ARjs.Source.prototype._initSourceWebcam = function (onReady, onError) {
             window.dispatchEvent(event);
             // to start the video, when it is possible to start it only on userevent. like in android
             document.body.addEventListener('click', function () {
-                domElement.play();
+                // domElement.play();
             });
             // domElement.play();
 

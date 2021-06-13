@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<meta name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<title>Hello, AR Cubes!</title>
+<!-- include three.js library -->
+<script src='old/three.js'></script>
+<!-- include jsartookit -->
+<script src="jsartoolkit5/artoolkit.min.js"></script>
+<script src="jsartoolkit5/artoolkit.api.js"></script>
+<!-- include threex.artoolkit -->
+<script src="threex/threex-artoolkitsource.js"></script>
+<script src="threex/threex-artoolkitcontext.js"></script>
+<script src="threex/threex-arbasecontrols.js"></script>
+<script src="threex/threex-armarkercontrols.js"></script>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+<div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1;'>
+    <p id = 'mct'>Marker Control:</p> <br>
+    <p id = 'mcx'></p> <br>
+    <p id = 'mcy'></p> <br>
+    <p id = 'mcz'></p> <br>
+    <p id = 'mcw'></p> <br>
+</div>
+<button onclick="activateXR()" style="position: relative; z-index: 5; height: 50px;">Fullscreen</button>
+<script>
+    async function activateXR() {
+        var
+            el = document.documentElement
+            , rfs =
+            el.requestFullScreen
+            || el.webkitRequestFullScreen
+            || el.mozRequestFullScreen
+        ;
+        rfs.call(el);
+        console.log("Fullscreen")
+        var scene, camera, camera2, renderer, clock, deltaTime, totalTime, mesh, markerControls;
+        var arToolkitSource, arToolkitContext;
+
+        var firstUpdate = false;
+
+        initialize();
+        animate();
+
+        function initialize() {
+            scene = new THREE.Scene();
+
+            let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+            scene.add(ambientLight);
+
+            camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / -2, window.innerHeight / 2, -100, 100);
+            scene.add(camera);
+
+            renderer = new THREE.WebGLRenderer({
+                alpha: true
+            });
+            renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.domElement.style.position = 'absolute'
+            renderer.domElement.style.top = '0px'
+            renderer.domElement.style.left = '0px'
+            document.body.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+            deltaTime = 0;
+            totalTime = 0;
+
+            mesh = new THREE.Mesh(
+                new THREE.CubeGeometry(5, 10, 10),
+                new THREE.MeshBasicMaterial({color: 0xff0000})
+            );
+            scene.add(mesh);
+            camera.position.z = 5;
+
+            arToolkitSource = new THREEx.ArToolkitSource({
+                sourceType: 'webcam',
+                showVideo: true
+            });
+
+            arToolkitSource.init(function onReady() {
+                onResize()
+            });
+
+            // handle resize
+            window.addEventListener('resize', function () {
+                onResize()
+            });
+
+            window.addEventListener('arjs-video-loaded', function () {
+                onResize()
+            });
+
+            function onResize() {
+                arToolkitSource.onResizeElement();
+                arToolkitSource.copyElementSizeTo(renderer.domElement)
+                if (arToolkitContext.arController !== null) {
+                    arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)
+                }
+            }
+
+
+            arToolkitContext = new THREEx.ArToolkitContext({
+                cameraParametersUrl: 'data/camera_para.dat',
+                detectionMode: 'mono',
+                canvasWidth: 80 * 3,
+                canvasHeight: 60 * 3,
+                maxDetectionRate: 30
+            });
+
+            camera2 = new THREE.Camera();
+            arToolkitContext.init(function onCompleted() {
+                camera2.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+            });
+
+            let patternArray = ["letterA", "letterB", "letterC", "letterD", "letterF", "kanji", "hiro"];
+            for (let i = 6; i < 7; i++) {
+                let markerRoot = new THREE.Group();
+                markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+                    type: 'pattern', patternUrl: "data/" + patternArray[i] + ".patt",
+                });
+            }
+        }
+
+
+        function update() {
+            if (arToolkitSource.ready !== false) {
+                arToolkitContext.update(arToolkitSource.domElement);
+                if (!firstUpdate) {
+                    window.dispatchEvent(new CustomEvent('resize'));
+                    firstUpdate = true;
+                }
+            }
+
+
+            if (markerControls.object3d.visible) {
+                let pos = markerControls.object3d.position;
+                let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(camera2);
+                document.getElementById('mcx').innerText = 'x: ' + cpos.x;
+                document.getElementById('mcy').innerText = 'y: ' + cpos.y;
+                document.getElementById('mcz').innerText = 'z: ' + cpos.z;
+
+                mesh.position.x = cpos.x * window.innerWidth / 2;
+                mesh.position.y = cpos.y * window.innerHeight / -2;
+            }
+
+            document.getElementById('mcw').innerText = 'visible: ' + markerControls.object3d.visible;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            update();
+            renderer.render(scene, camera);
+        }
+    }
+</script>
+
+</body>
+</html>

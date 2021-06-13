@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Hello WebXR!</title>
+
+    <!-- three.js -->
+    <script src="https://unpkg.com/three@0.126.0/build/three.js"></script>
+    <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+    <!-- Aframe -->
+    <!-- <script src="js/aframe.min.js"></script>
+    <script src="js/aframe-ar.js"></script> -->
+</head>
+<style>
+    button{
+      display: block;
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      border: none;
+      background-color: blue;
+      box-sizing: border-box;
+    }
+  
+    button[slot="hotspot-hand"]{
+      --min-hotspot-opacity: 0;
+      background-color: red;
+    }
+  
+    #annotation{
+      background-color: #888888;
+      position: absolute;
+      transform: translate(10px, 10px);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    /* This keeps child nodes hidden while the element loads */
+    :not(:defined) > * {
+      display: none;
+    }
+  </style>
+<body>
+
+    <!-- Starting an immersive WebXR session requires user interaction.
+    We start this one with a simple button. -->
+    <a onclick="activateXR()">Start Hello WebXR</a>
+    <!-- <div id="infoBox" style="visibility: hidden;">  -->
+    <div id="infoBox"> 
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        ar ar-modes="webxr scene-viewer quick-look" 
+        camera-controls>
+        <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
+            <div id="annotation">This hotspot disappears completely</div>
+          </button>
+        </model-viewer>
+    </div>
+    <!-- https://modelviewer.dev/shared-assets/models/Astronaut.glb -->
+    <!-- <script type="module">
+        import {WebXRButton} from './webxr-button.js';
+    
+
+    </script> -->
+    <script>
+        async function activateXR() {
+            console.log("Hi there");
+            // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
+            const canvas = document.createElement("canvas");
+            document.body.appendChild(canvas);
+            const gl = canvas.getContext("webgl", { xrCompatible: true });
+
+            const scene = new THREE.Scene();
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            directionalLight.position.set(10, 15, 10);
+            scene.add(directionalLight);
+
+            // Set up the WebGLRenderer, which handles rendering to the session's base layer.
+            const renderer = new THREE.WebGLRenderer({
+                alpha: true,
+                preserveDrawingBuffer: true,
+                canvas: canvas,
+                context: gl
+            });
+            renderer.autoClear = false;
+
+            // The API directly updates the camera matrices.
+            // Disable matrix auto updates so three.js doesn't attempt
+            // to handle the matrices independently.
+            const camera = new THREE.PerspectiveCamera();
+            camera.matrixAutoUpdate = false;
+
+            // Initialize a WebXR session using "immersive-ar".
+            let uiElement = document.getElementById('infoBox');
+            const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: uiElement } });
+            session.updateRenderState({
+                baseLayer: new XRWebGLLayer(session, gl)
+            });
+            // If null then not optionalFeatures is not supported
+            console.log(session.domOverlayState.type);
+
+            // A 'local' reference space has a native origin that is located
+            // near the viewer's position at the time the session was created.
+            const referenceSpace = await session.requestReferenceSpace('local');
+            // Create another XRReferenceSpace that has the viewer as the origin.
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            // Perform hit testing using the viewer as origin.
+            const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+            const loader = new THREE.GLTFLoader();
+            let reticle;
+            loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+                reticle = gltf.scene;
+                reticle.visible = false;
+                scene.add(reticle);
+            })
+
+            let flower;
+            loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
+                flower = gltf.scene;
+            });
+            
+            // Trying to add Three.js geometry to space
+            const loader2 = new THREE.FontLoader();
+
+            let geometry;
+            let mesh;
+            loader2.load('fonts/font.json', function(font) {
+                geometry = new THREE.TextGeometry('Hello three.js!', {
+                font: font,
+                size: 80,
+                height: 5,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 10,
+                bevelSize: 8,
+                bevelOffset: 0,
+                bevelSegments: 5
+            });
+            var material = new THREE.MeshPhongMaterial(
+                        { color: '#dbe4eb', specular: '#dbe4eb' }
+            );
+            mesh = new THREE.Mesh( geometry, material );
+            })
+
+
+            session.addEventListener("select", (event) => {
+                if (flower) {
+                    flower.position.copy(reticle.position);
+                    scene.add(flower);
+                    // mesh.position.copy(reticle.position);
+                    // // geometry.position.set(0,0,0);
+                    // console.log(geometry);
+                    // scene.add(mesh);
+                    // scene.add(geometr
+                    // Update infoBox text on select
+                    let infoBox = document.getElementById('infoBox');
+                    // infoBox.innerHTML = "I am the info of the item";
+                    infoBox.style.visibility = 'visible';
+                    infoBox.zIndex = 2;
+                    const modelViewer = document.querySelector("model-viewer");
+                    window.switchSrc = (element, name) => {
+                        modelViewer.src = "https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+                    }
+                }
+            });
+
+            // Option to add beforeSlect event to infoBox
+            // document.getElementById('infoBox').addEventListener(
+            //      'beforexrselect', ev => {
+            //          ev.preventDefault()
+            //         console.log("Before select!!!");
+            //         let infoBox = document.getElementById('infoBox');
+            //         infoBox.innerHTML = "I am the info of the item";
+            //         infoBox.style.zIndex = 2;
+            //         });
+
+            // Here it's just an example of the marker value being switch after 10 seconds
+            let marker = false;
+            setTimeout(function () { marker = true }, 10000);
+            // Create a render loop that allows us to draw on the AR view.
+            const onXRFrame = (time, frame) => {
+                // Queue up the next draw request.
+                session.requestAnimationFrame(onXRFrame);
+
+                // Bind the graphics framebuffer to the baseLayer's framebuffer
+                gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer)
+
+                // Retrieve the pose of the device.
+                // XRFrame.getViewerPose can return null while the session attempts to establish tracking.
+                const pose = frame.getViewerPose(referenceSpace);
+                if (pose) {
+                    // In mobile AR, we only have one view.
+                    const view = pose.views[0];
+
+                    const viewport = session.renderState.baseLayer.getViewport(view);
+                    renderer.setSize(viewport.width, viewport.height)
+
+                    // Use the view's transform matrix and projection matrix to configure the THREE.camera.
+                    camera.matrix.fromArray(view.transform.matrix)
+                    camera.projectionMatrix.fromArray(view.projectionMatrix);
+                    camera.updateMatrixWorld(true);
+
+                    //If marker was deected do hit test here
+                    if (marker) {
+                        const hitTestResults = frame.getHitTestResults(hitTestSource);
+                        if (hitTestResults.length > 0 && reticle) {
+                            const hitPose = hitTestResults[0].getPose(referenceSpace);
+                            reticle.visible = true;
+                            reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z)
+                            reticle.updateMatrixWorld(true);
+                        }
+                    }
+
+                    // Render the scene with THREE.WebGLRenderer.
+                    renderer.render(scene, camera)
+                }
+            }
+            session.requestAnimationFrame(onXRFrame);
+        }
+    </script>
+</body>
+
+</html>

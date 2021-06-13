@@ -48,7 +48,6 @@
 		this.canvas = document.createElement('canvas');
 		this.canvas.width = w;
 		this.canvas.height = h;
-		this.ctx = this.canvas.getContext('2d');
 
 		this.videoWidth = w;
 		this.videoHeight = h;
@@ -1005,28 +1004,7 @@
 	};
 */
 	
-	ARController.prototype._copyImageToHeap = function(image) {
-		if (!image) {
-			image = this.image;
-		}
-
-		if( (image.nodeName === 'IMG' && image.width > image.height ) ||
-			(image.nodeName === 'VIDEO' && image.videoWidth > image.videoHeight) ){
-			// if landscape
-			this.ctx.drawImage(image, 0, 0, this.canvas.width, this.canvas.height); // draw video
-		}else{
-			// if portrait
-			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-			var scale = this.canvas.height / this.canvas.width;
-			var scaledHeight = this.canvas.width*scale;
-			var scaledWidth = this.canvas.height*scale;
-			var marginLeft = ( this.canvas.width - scaledWidth)/2;
-			this.ctx.drawImage(image, marginLeft, 0, scaledWidth, scaledHeight); // draw video
-		}
-
-		var imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-		var data = imageData.data;
-
+	ARController.prototype._copyImageToHeap = function(data) {
 		if (this.dataHeap) {
 			this.dataHeap.set( data );
 			return true;
@@ -1628,5 +1606,4 @@
 			}
 		};
 	}
-
 })();
