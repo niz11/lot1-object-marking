@@ -11,3 +11,4 @@ server.key
 /web-app/node_modules/
 /.vscode/
 .DS_Store
+.env
