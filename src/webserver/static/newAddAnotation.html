@@ -74,10 +74,17 @@
             });
         function getComboA(selectObject) {
             var value = selectObject.value;
-            const model = jsonData.filter(model => model.modelName === value);
-            if (model) removeAllHotspots();
-            addModel(model[0]);
-            src = data[0].src;
+            // Need to fetch data again, incease hotspots were added
+            fetch(`https://localhost:3000/models`)
+                .then(response => response.json())
+                .then(data => {
+                    jsonData = data;
+                    const model = jsonData.filter(model => model.modelName === value);
+                    if (model) removeAllHotspots();
+                    addModel(model[0]);
+                    src = model[0].src;
+                });
+
         }
         let selectedHotSpot;
         function selected() {
@@ -104,7 +111,7 @@
             var inputtext = document.querySelector('input').value;
             // if input = nothing then alert error if it isnt then add the hotspot
             if (inputtext == "") {
-                alert("Put in text first to add hotspots.");
+                document.getElementById("ErrorActive").style.display = 'block';
             } else {
                 const viewer = document.querySelector('#modelblock');
                 const rect = viewer.getBoundingClientRect();
@@ -181,19 +188,19 @@
         function removeHotspot() {
             selectedHotSpot.remove()
             fetch('https://localhost:3000/models/remove-hospot', {
-                    method: 'delete',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        src: src,
-                        text: selectedHotSpot.textContent
-                    })
-                }).catch(e => {
-                    console.log(e);
+                method: 'delete',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    src: src,
+                    text: selectedHotSpot.textContent
                 })
+            }).catch(e => {
+                console.log(e);
+            })
         }
         function removeAllHotspots() {
             var el = document.getElementsByClassName("hotspot");
-            if (el.length > 1) {
+            if (el.length > 0) {
                 Array.from(el).map(hotspot => hotspot.remove())
             }
         }
