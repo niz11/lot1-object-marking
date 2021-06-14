@@ -48,4 +48,66 @@ router.post('/add-model', async (req, res) => {
 	}
 });
 
+router.post('/add-hospot', async (req, res) => {
+	if (!req.body.src || !req.body.position || !req.body.normal || !req.body.text) {
+		return res.status(404).json('Missing params: src, position, normal or text');
+	}
+	model = await Model.find({ src: req.body.src });
+	if (model.length !== 0) {
+		const exist = model.hotspots.filter((hotspot) => {
+			hotspot.text !== req.body.text;
+		});
+		if (exist.length !== 0) {
+			res.status(404).json('Hotspot already exsist on Model');
+		} else {
+			let hotspot = {
+				position: req.body.position,
+				normal: req.body.normal,
+				text: req.body.text
+			};
+			model.hotspots.push(hotspot);
+			model.save().then((post) => res.json(hotspot));
+		}
+	} else {
+		res.status(404).json('No Model with input src exists');
+	}
+});
+
+router.delete('/remove-hospot', async (req, res) => {
+	if (!req.body.src || !req.body.text) {
+		return res.status(404).json('Missing params: src, position, normal or text');
+	}
+	model = await Model.find({ src: req.body.src });
+	if (model.length !== 0) {
+		const exist = model.hotspots.filter((hotspot) => {
+			hotspot.text === req.body.text;
+		});
+		if (exist.length === 0) {
+			res.status(404).json('No hotspot with input text exists');
+		} else {
+			const removeHotspot = model.hotspots.filter((hotspot) => {
+				hotspot.text !== req.body.text;
+			});
+			model.hotspots = removeHotspot;
+			model.save().then((hotspots) => res.json(hotspots));
+		}
+	} else {
+		res.status(404).json('No Model with input src exists');
+	}
+});
+
+router.post('/update-location', async (req, res) => {
+	if (!req.body.src || !req.body.latitude || !req.body.longitude) {
+		return res.status(404).json('Missing params: src, latitude or longitude');
+	}
+	model = await Model.find({ src: req.body.src });
+	if (model.length !== 0) {
+		model.location.latitude = req.body.latitude;
+		model.location.latitude = req.body.longitude;
+		model.save().then((model) => res.json(model));
+	} else {
+		res.status(404).json('No Model with input src exists');
+	}
+});
+
 module.exports = router;
