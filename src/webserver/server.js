@@ -10,6 +10,13 @@ const models = require('./database-model/models');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const bodyParser = require('body-parser');
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// parse application/json
+app.use(bodyParser.json());
+
 const certOptions = {
 	key: fs.readFileSync(path.resolve('server.key')),
 	cert: fs.readFileSync(path.resolve('server.crt'))

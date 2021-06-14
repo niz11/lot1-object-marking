@@ -8,30 +8,44 @@ router.get('/test', (req, res) => {
 
 router.get('/', (req, res) => {
 	Model.find()
-		.then((posts) => res.json(posts))
+		.then((models) => res.json(models))
 		.catch((err) => res.status(404).json({ nopostsfound: 'No posts found' }));
 });
 
-router.post('/add-model', (req, res) => {
-	const newModel = new Model({
-		modelName: 'Astrunaut',
-		src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-		alt: 'A 3D model of a test cube',
-		hotspots: [
-			{
-				position: '-0.5158334257401533m 0.8808310669112648m 00.12073262739521484m',
-				normal: '-0.6055749170967261m -0.030052908207539756m 0.7952206250416061m',
-				text: 'Hand Moon'
-			},
-			{
-				position: '-0.011249673695200163m 1.7695722081445033m 0.34713028254276157m',
-				normal: '-0.29259561389217825m 0.11383937564155769m 0.9494358342113489m',
-				text: 'Head Space'
+router.post('/add-model', async (req, res) => {
+	if (!req.body.src || !req.body.modelName || !req.body.latitude || !req.body.longitude) {
+		return res.status(404).json('Missing params: src, model name, latitude or longitude');
+	}
+	modelCheck = await Model.find({ src: req.body.src });
+	if (modelCheck.length === 0) {
+		let hotspots;
+		if (req.body.hotspots && Array.isArray(req.body.hotspots)) {
+			hotspots = req.body.hotspots.map((hotspot) => {
+				if (!hotspot.position || !hotspot.normal || !hotspot.text) {
+					return res.status(404).json('One of the Hotspots is missing a position, a normal or a text');
+				}
+				return {
+					position: hotspot.position,
+					normal: hotspot.normal,
+					text: hotspot.text
+				};
+			});
+		}
+		const newModel = new Model({
+			modelName: req.body.modelName,
+			src: req.body.src,
+			alt: req.body.alt ? req.body.alt : '',
+			hotspots: hotspots ? hotspots : [],
+			location: {
+				latitude: req.body.latitude,
+				longitude: req.body.longitude
 			}
-		]
-	});
+		});
 
-	newModel.save().then((post) => res.json(post));
+		newModel.save().then((post) => res.json(post));
+	} else {
+		res.status(404).json('Model already exsist in DB');
+	}
 });
 
 module.exports = router;

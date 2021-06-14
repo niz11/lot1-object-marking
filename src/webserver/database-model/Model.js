@@ -30,6 +30,16 @@ const ModelSchema = new Schema({
 			}
 		}
 	],
+	location: {
+		latitude: {
+			type: Number,
+			required: true
+		},
+		longitude: {
+			type: Number,
+			required: true
+		}
+	},
 	date: {
 		type: Date,
 		default: Date.now
