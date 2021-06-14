@@ -51,19 +51,21 @@
             <form onSubmit="return false;">
                 <input type="text" id="hotspottext" name="hotspottext" placeholder="Input text for hotspot">
             </form>
-            <div class="center marginTop"><button class="btn btn--azure" onclick="removeHotspot()">Remove Hotspot</button></div>
+            <div class="center marginTop"><button class="btn btn--azure" onclick="removeHotspot()">Remove
+                    Hotspot</button></div>
         </div>
     </div>
     <script>
-        let jsonData;
-        fetch(`https://localhost:3000/data/modelsData.json`)
+        let jsonData, src;
+        fetch(`https://localhost:3000/models`)
             .then(response => response.json())
             .then(data => {
                 jsonData = data;
-                addModel(data.models[0])
+                addModel(data[0])
+                src = data[0].src;
                 var select = document.getElementById("modelSelection");
 
-                for (const val of data.models) {
+                for (const val of data) {
                     let option = document.createElement("option");
                     option.value = val.modelName;
                     option.text = val.modelName;
@@ -72,9 +74,10 @@
             });
         function getComboA(selectObject) {
             var value = selectObject.value;
-            const model = jsonData.models.filter(model => model.modelName === value);
+            const model = jsonData.filter(model => model.modelName === value);
             if (model) removeAllHotspots();
             addModel(model[0]);
+            src = data[0].src;
         }
         let selectedHotSpot;
         function selected() {
@@ -95,8 +98,8 @@
         }
     </script>
     <script>
-        //hotspot counter so we can keep track of how many we added on 3 because we already have hotspot-0 and hotspot-1 (set to 0 if you start with 0 hotspots)
-        function addHotspotOnClick(MouseEvent) {
+        //Also saved the hotspot on the database
+        async function addHotspotOnClick(MouseEvent) {
             const hotspotCounter = document.getElementsByClassName("hotspot").length
             var inputtext = document.querySelector('input').value;
             // if input = nothing then alert error if it isnt then add the hotspot
@@ -130,6 +133,19 @@
                 element.appendChild(document.createTextNode(inputtext));
                 document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
                 document.querySelector('input').value = "";
+                fetch('https://localhost:3000/models/add-hospot', {
+                    method: 'post',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        src: src,
+                        position: position.toString(),
+                        normal: normal ? normal.toString() : '',
+                        text: inputtext
+
+                    })
+                }).catch(e => {
+                    console.log(e);
+                })
             }
         }
 
@@ -164,6 +180,16 @@
     <script>
         function removeHotspot() {
             selectedHotSpot.remove()
+            fetch('https://localhost:3000/models/remove-hospot', {
+                    method: 'delete',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        src: src,
+                        text: selectedHotSpot.textContent
+                    })
+                }).catch(e => {
+                    console.log(e);
+                })
         }
         function removeAllHotspots() {
             var el = document.getElementsByClassName("hotspot");

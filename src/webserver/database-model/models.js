@@ -49,6 +49,7 @@ router.post('/add-model', async (req, res) => {
 });
 
 router.post('/add-hospot', async (req, res) => {
+	console.log(req.body);
 	if (!req.body.src || !req.body.position || !req.body.normal || !req.body.text) {
 		return res.status(404).json('Missing params: src, position, normal or text');
 	}
