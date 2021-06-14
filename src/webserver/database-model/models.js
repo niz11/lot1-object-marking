@@ -53,11 +53,12 @@ router.post('/add-hospot', async (req, res) => {
 		return res.status(404).json('Missing params: src, position, normal or text');
 	}
 	model = await Model.find({ src: req.body.src });
-	if (model.length !== 0) {
-		const exist = model.hotspots.filter((hotspot) => {
-			hotspot.text !== req.body.text;
+	console.log(model);
+	if (model.length === 1) {
+		const exist = model[0].hotspots.filter((hotspot) => {
+			return hotspot.text === req.body.text;
 		});
-		if (exist.length !== 0) {
+		if (exist.length > 0) {
 			res.status(404).json('Hotspot already exsist on Model');
 		} else {
 			let hotspot = {
@@ -65,8 +66,8 @@ router.post('/add-hospot', async (req, res) => {
 				normal: req.body.normal,
 				text: req.body.text
 			};
-			model.hotspots.push(hotspot);
-			model.save().then((post) => res.json(hotspot));
+			model[0].hotspots.push(hotspot);
+			model[0].save().then((model) => res.json(model));
 		}
 	} else {
 		res.status(404).json('No Model with input src exists');
@@ -78,18 +79,19 @@ router.delete('/remove-hospot', async (req, res) => {
 		return res.status(404).json('Missing params: src, position, normal or text');
 	}
 	model = await Model.find({ src: req.body.src });
-	if (model.length !== 0) {
-		const exist = model.hotspots.filter((hotspot) => {
-			hotspot.text === req.body.text;
+	if (model.length === 1) {
+		const exist = model[0].hotspots.filter((hotspot) => {
+			return hotspot.text === req.body.text;
 		});
+		console.log(exist);
 		if (exist.length === 0) {
 			res.status(404).json('No hotspot with input text exists');
 		} else {
-			const removeHotspot = model.hotspots.filter((hotspot) => {
-				hotspot.text !== req.body.text;
+			const removeHotspot = model[0].hotspots.filter((hotspot) => {
+				return hotspot.text !== req.body.text;
 			});
-			model.hotspots = removeHotspot;
-			model.save().then((hotspots) => res.json(hotspots));
+			model[0].hotspots = removeHotspot;
+			model[0].save().then((model) => res.json(model));
 		}
 	} else {
 		res.status(404).json('No Model with input src exists');
@@ -101,10 +103,10 @@ router.post('/update-location', async (req, res) => {
 		return res.status(404).json('Missing params: src, latitude or longitude');
 	}
 	model = await Model.find({ src: req.body.src });
-	if (model.length !== 0) {
-		model.location.latitude = req.body.latitude;
-		model.location.latitude = req.body.longitude;
-		model.save().then((model) => res.json(model));
+	if (model.length === 1) {
+		model[0].location.latitude = req.body.latitude;
+		model[0].location.longitude = req.body.longitude;
+		model[0].save().then((model) => res.json(model));
 	} else {
 		res.status(404).json('No Model with input src exists');
 	}
