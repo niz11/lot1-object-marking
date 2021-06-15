@@ -4,11 +4,11 @@
     height: 20px;
     border-radius: 10px;
     border: none;
-    background-color: blue;
+    background-image: linear-gradient(to right, #886fd5, #3b28b4);
   }
 
   .annotation{
-      width: auto;
+    width: auto;
     background-color: #888888;
     position: absolute;
     transform: translate(10px, 10px);
@@ -18,7 +18,7 @@
   }
 
   .hotspot.selected{
-    background-color: red;
+    background-image: linear-gradient(to right, #dcd1ff, #2d15bf);
   }
 
   /* Show annotations text on click - Disable for now */
@@ -42,19 +42,21 @@
 }
 
 #formblock{
+  display: flex;
+  flex-direction: column;
   width: 40vw;
-  margin: 10vh 0px 0px 0px;
- 
-  height: 80vh;
+  height: 15rem;
   background-color: white;
+  background-color: #f7f7f7;
 }
+
 .center{
   display: flex;
   justify-content: center;
 
 }
 
-.btn{
+/* .btn{
   background-color: #008CBA; 
   border: none;
   color: white;
@@ -63,17 +65,79 @@
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  margin: 50px 2px 4px 2px;
   cursor: pointer;
+  width: 100%;
+  margin: 30px 10% 0px 10%;
+} */
+
+#hotspottext:focus{
+    outline: none;
+    box-shadow: 0 1rem 2rem rgba(black, .1);
+    border-bottom: 3px solid grey;
 }
 
 
-input[type=text], select {
+input[type=text], select, .info-text {
   width: 80%;
   padding: 12px 20px;
-  margin: 50px 10% 0px 10%;
+  margin: 15px 10% 15px 10%;
   display: inline-block;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
 }
+
+.marginTop{
+  margin-top: 15px;
+}
+
+
+.btn {
+  /* copy elemet and put is behind. after is treated as child of btn*/ }
+  .btn, .btn:link, .btn:visited {
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 1rem 1rem;
+    display: inline-block;
+    border-radius: 10rem;
+    /* All are able to be animetated as shorthand */
+    transition: all .2s;
+    position: relative;
+    border: none;
+    cursor: pointer; }
+  .btn:hover {
+    transform: translateY(-0.3rem);
+    /* Adding shadow x y blur */
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+    /* Adding styles to the after state on hover */ }
+    .btn:hover::after {
+      transform: scaleX(1.4) scaleY(1.6);
+      opacity: 0; }
+  .btn:active, .btn:focus {
+    outline: none;
+    transform: translateY(-0.1rem);
+    /* Active shadow: clicked by the user */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); }
+  .btn--azure {
+    background-color: rgb(197 216 232);
+    color: rgb(97 93 93); }
+    .btn--azure::after {
+      background-color: #a0cbed; }
+  .btn::after {
+    /* Have to have content and display */
+    content: "";
+    display: inline-block;
+    /* Covering the whole parent element and behind it */
+    height: 100%;
+    width: 100%;
+    border-radius: 10rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    transition: all .4s; }
+  .btn--animated {
+    /* Animation duration funciton delay */
+    animation: moveInBottom .5s ease-out 0.75s;
+    /* Automaticlly apply the styles of the 0% in the keyframe before animation starts - hides the bottom when it waits with the delay property  */
+    animation-fill-mode: backwards; }
