@@ -110,10 +110,10 @@ ARjs.MarkerControls.prototype.updateWithModelViewMatrix = function(modelViewMatr
 
 	if( this.context.parameters.trackingBackend === 'artoolkit' ){
 		// apply context._axisTransformMatrix - change artoolkit axis to match usual webgl one
-		var tmpMatrix = new THREE.Matrix4().copy(this.context._artoolkitProjectionAxisTransformMatrix)
-		tmpMatrix.multiply(modelViewMatrix)
-
-		modelViewMatrix.copy(tmpMatrix)
+		// var tmpMatrix = new THREE.Matrix4().copy(this.context._artoolkitProjectionAxisTransformMatrix)
+		// tmpMatrix.multiply(modelViewMatrix)
+		//
+		// modelViewMatrix.copy(tmpMatrix)
 	}else console.assert(false)
 
 	// change axis orientation on marker - artoolkit say Z is normal to the marker - ar.js say Y is normal to the marker
