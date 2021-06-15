@@ -342,11 +342,11 @@ We start this one with a simple button. -->
                 // box.rotation.x = 0;
                 // box.rotation.z = 0;
 
-                const hitTestResults = frame.getHitTestResults(hitTestSource);
-                if (hitTestResults.length > 0 && reticle && !objAnchor) {
+                const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
+                if (hitTestResults && hitTestResults.length > 0 && reticle) {
                     const hitPose = hitTestResults[0].getPose(referenceSpace);
                     const hitPoseV = hitTestResults[0].getPose(viewerSpace);
-                    box.visible = true;
+                    reticle.visible = true;
 
                     let vo = hitPoseV.transform.orientation;
                     euler = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
@@ -354,8 +354,13 @@ We start this one with a simple button. -->
                     vo = hitPose.transform.orientation;
                     va = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
 
-                    box.worldMatrix.fromArray(hitPose.transform.matrix);
-                    // box.matrix.decompose(box.position, box.quaternion, box.scale);
+                    reticle.matrix.fromArray(hitPose.transform.matrix);
+                    reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
+                    // if (offset < 0.004) {
+                    //     //TODO Remove
+                    //
+                    //     reticle.rotation.y += arJSSmesh.rotation.z;
+                    // }
 
                     // box.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z);
                     //
@@ -404,9 +409,11 @@ We start this one with a simple button. -->
                     // reticle.updateMatrixWorld(true);
 
 
-                    if (offset < 0.004 && fCounter < 5 && false) {
+                    const maxCount = 21;
+
+                    if (offset < 0.004 && fCounter < maxCount) {
                         fCounter += 1;
-                        markerOrientationS.push(arJSSmesh.rotation);
+                        markerOrientationS.push({rotation: arJSSmesh.rotation, offset: offset});
                         const vo = view.transform.orientation;
                         viewOrientationS.push(new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w])));
                     }
@@ -416,7 +423,7 @@ We start this one with a simple button. -->
                         viewOrientationS = [];
                     }
 
-                    if (fCounter >= 5) {
+                    if (fCounter >= maxCount) {
 
                         const vo = hitPose.transform.orientation;
                         va = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
@@ -453,12 +460,24 @@ We start this one with a simple button. -->
                     const vo = pose.transform.orientation;
                     vb = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
 
-                    box.position.set(pose.transform.position.x, pose.transform.position.y + 0.075,
-                        pose.transform.position.z);
+                    box.visible = true;
+                    box.matrix.fromArray(pose.transform.matrix);
+                    box.matrix.decompose(box.position, box.quaternion, box.scale);
+
+                    box.position.y += 0.075;
+
+
+                    markerOrientationS2.sort((a, b)=>{return a.rotation.y > b.rotation.y ? 1 : -1;});
+
+                    const rot = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)];
+                    //
+                    console.log(rot);
+                    box.rotation.y += rot.rotation.z ;
+
                     // box.quaternion.fromArray([pose.transform.orientation.x, pose.transform.orientation.y,
                     //     pose.transform.orientation.z, pose.transform.orientation.w])
 
-                    box.rotation = vb;
+                    // box.rotation = vb;
 
 
 
