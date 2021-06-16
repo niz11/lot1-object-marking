@@ -470,9 +470,8 @@ We start this one with a simple button. -->
                     markerOrientationS2.sort((a, b)=>{return a.rotation.y > b.rotation.y ? 1 : -1;});
 
                     const rot = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)];
-                    //
-                    console.log(rot);
-                    box.rotation.y += rot.rotation.z ;
+                    // box.rotation.y += rot.rotation.z ;
+                    box.rotation.y += vd;
 
                     // box.quaternion.fromArray([pose.transform.orientation.x, pose.transform.orientation.y,
                     //     pose.transform.orientation.z, pose.transform.orientation.w])
@@ -496,11 +495,21 @@ We start this one with a simple button. -->
 
                     for(let e of elems) {
                         let dpe = e.getAttribute("data-position").split(" ");
-                        let dpx = Number(dpe[0]) + box.position.x;
-                        let dpy = Number(dpe[1]) + box.position.y;
-                        let dpz = Number(dpe[2]) + box.position.z;
+                        // let dpx = Number(dpe[0]) + box.position.x;
+                        // let dpy = Number(dpe[1]) + box.position.y;
+                        // let dpz = Number(dpe[2]) + box.position.z;
 
-                        const dpv = new THREE.Vector3(dpx, dpy, dpz);
+                        let dpx = Number(dpe[0]);
+                        let dpy = Number(dpe[1]);
+                        let dpz = Number(dpe[2]);
+
+
+                        let dpv = new THREE.Vector3(dpx, dpy, dpz);
+
+                        dpv.applyQuaternion(box.quaternion);
+
+                        dpv.add(box.position);
+
                         const sx = dpv.clone();
 
                         const wh = viewport.width / 2.0;
