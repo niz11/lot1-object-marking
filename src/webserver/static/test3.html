@@ -467,11 +467,11 @@ We start this one with a simple button. -->
                     box.position.y += 0.075;
 
 
-                    markerOrientationS2.sort((a, b)=>{return a.rotation.y > b.rotation.y ? 1 : -1;});
+                    markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
 
                     const rot = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)];
-                    // box.rotation.y += rot.rotation.z ;
-                    box.rotation.y += vd;
+                    box.rotation.y += rot.rotation.z;
+                    // box.rotation.y += vd;
 
                     // box.quaternion.fromArray([pose.transform.orientation.x, pose.transform.orientation.y,
                     //     pose.transform.orientation.z, pose.transform.orientation.w])
@@ -489,6 +489,18 @@ We start this one with a simple button. -->
                     // box.matrix.fromArray(pose.transform.matrix);
 
                     box.visible = true;
+
+
+
+                    // console.log("Anchor ", pose.transform.position.x, pose.transform.position.y, pose.transform.position.z)
+                }
+
+
+
+                // Render the scene with THREE.WebGLRenderer.
+                renderer.render(scene, camera)
+
+                if (objAnchor) {
 
                     let elems = document.getElementsByClassName("p");
 
@@ -522,29 +534,29 @@ We start this one with a simple button. -->
                         e.style.top = (-50 * sx.y) + 50 + '%';
                         e.style.visibility = 'visible';
 
-                        raycaster.set(camera.position, dpv);
+                        // raycaster.set(dpv, camera.position.clone().sub(dpv).normalize());
 
-                        const intersections = raycaster.intersectObject(box);
-                        const intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
+                        raycaster.set(dpv, dpv.clone().sub(camera.position).normalize());
+
+                        // raycaster.setFromCamera(new THREE.Vector2(sx.x, sx.y), camera);
+
+                        box.updateMatrixWorld();
+
+                        const intersections = raycaster.intersectObjects([box]);
+                        const intersection = (intersections.length) > 0 ? intersections[0] : null;
 
                         if (intersection) {
                             console.log(intersection)
                             // e.style.visibility = 'visible';
+                            e.style.color = 'rgba(250, 0, 0, 1.0)'
+                        } else {
+                            e.style.color = 'rgba(0, 140, 186, 1.0)'
+                        }
 
-                        }
-                        else {
-                            // e.style.visibility = 'hidden';
-                        }
                     }
 
-                    // console.log("Anchor ", pose.transform.position.x, pose.transform.position.y, pose.transform.position.z)
+
                 }
-
-
-
-                // Render the scene with THREE.WebGLRenderer.
-                renderer.render(scene, camera)
-
             }
             // Queue up the next draw request.
             session.requestAnimationFrame(onXRFrame);
