@@ -42,6 +42,12 @@ app.get('/ex2', (req, res) => {
 	res.sendFile(path.join(__dirname, '/static/ex2.html'));
 });
 
+// Needs a url param of userId + modelName
+// e.g: https://localhost:3000/showModelBasedOnLocation/?userId=1&modelName=Astrunaut
+app.get('/showModelBasedOnLocation', (req, res) => {
+	res.sendFile(path.join(__dirname, '/static/showModelBasedOnLocation.html'));
+});
+
 // Serve the rest of the static folder. Need to improve with webpack or use a platform like React.
 app.use(express.static(path.join(__dirname, 'static')));
 app.use('/models', models);

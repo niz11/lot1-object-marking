@@ -9,7 +9,7 @@
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/addAno.css">
+    <link rel="stylesheet" href="/css/addAno.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- 3d model viewer links -->
     <!-- Loads <model-viewer> for modern browsers: -->
@@ -89,6 +89,9 @@
         fullscreen</i>
     <div id="distance"></div>
     <script>
+        const params = new URLSearchParams(document.location.search);
+        const userId = params.get('userId')
+        const modelName = params.get('modelName')
         //hotspot counter so we can keep track of how many we added on 3 because we already have hotspot-0 and hotspot-1 (set to 0 if you start with 0 hotspots)
         function addHotspot(position, normal, inputtext) {
             const viewer = document.querySelector('#modelblock');
