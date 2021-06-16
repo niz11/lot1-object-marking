@@ -1,629 +1,537 @@
 <!doctype html>
 <html>
+
 <head>
-    <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
-    <meta name='mobile-web-app-capable' content='yes'>
-    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Hello WebXR!</title>
 
-    <title>Barebones WebXR Camera Access</title>
-    <style>
-        #session-info {
-            font-weight: bold;
-            font-family: monospace;
-        }
-    </style>
+    <!-- three.js -->
+    <script src="new/three.js"></script>
+    <script src="new/GLTFLoader.js"></script>
+
+    <script src="new/EventDispatcher.js"></script>
+
+    <script src="jsartoolkit5/artoolkit.min.js"></script>
+    <script src="jsartoolkit5/artoolkit.api.js"></script>
+    <!-- include threex.artoolkit -->
+    <script src="threex/threex-artoolkitsource.js"></script>
+    <script src="threex/threex-artoolkitcontext.js"></script>
+    <script src="threex/threex-arbasecontrols.js"></script>
+    <script src="threex/threex-armarkercontrols.js"></script>
 </head>
+
 <body>
-<header>
-    <details open>
-        <summary>Camera Access Barebones</summary>
-        <p>
-            This sample demonstrates extremely simple use of WebXR's camera access by creating a rotating cube and
-            applying the camera's image as a texture to it.
-            <a class="back" href="./index.html">Back</a>
-        </p>
-        <div id="session-info"></div>
-        <div id="warning-zone"></div>
-        <button id="xr-button" class="barebones-button" disabled>XR not found</button>
-    </details>
-</header>
-<main style='text-align: center;'>
-    <p>Click 'Enter AR' to see content</p>
-</main>
-<script type="module">
-    import * as mat4 from "gl/src/mat4.js"
 
-    // XR globals.
-    let xrButton = document.getElementById('xr-button');
-    let xrSession = null;
-    let xrRefSpace = null;
+<!-- Starting an immersive WebXR session requires user interaction.
+We start this one with a simple button. -->
+<button onclick="activateXR()">Start Hello WebXR</button>
+<!-- <script type="module">
+    import {WebXRButton} from './webxr-button.js';
 
-    // WebGL scene globals.
-    let gl = null;
-    let glBinding = null;
-    let cubeRotation = 0.0;
-    let rotationSpeed = 0.01;
-    let shaderProgram = null;
-    let programInfo = null;
-    let buffers = null;
-    let texture = null;
 
-    // Vertex shader program
+</script> -->
+<script>
+
+    // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
+    const canvas = document.createElement("canvas");
+    document.body.appendChild(canvas);
+    const gl = canvas.getContext("webgl2", { xrCompatible: true });
+
+    initialize();
+
+    const arjsBuffer = gl.createFramebuffer();
+
+
+    let arjsW = 0;
+    let arjsH = 0;
+    const arjsBuffer2 = gl.createFramebuffer();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const vsSource = `
-    attribute vec4 aVertexPosition;
-    attribute vec2 aTextureCoord;
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
-    varying highp vec2 vTextureCoord;
-    void main(void) {
-    gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-    vTextureCoord = aTextureCoord;
-}
-    `;
+    	attribute vec2 aVertexPosition;
+    	attribute vec2 aTextureCoord;
+    	varying highp vec2 vTextureCoord;
+
+    	void main(void) {
+    		gl_Position = vec4(aVertexPosition, 1.0, 1.0);
+    		vTextureCoord = aTextureCoord;
+    	}
+    	`;
+
 
     // Fragment shader program
     const fsSource = `
     varying highp vec2 vTextureCoord;
     uniform sampler2D uSampler;
     void main(void) {
-    gl_FragColor = texture2D(uSampler, vTextureCoord);
-}
+    	gl_FragColor = texture2D(uSampler, vTextureCoord);
+    }
     `;
 
-    function checkSupportedState() {
-        navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-            if (supported) {
-                xrButton.innerHTML = 'Enter AR';
-            } else {
-                xrButton.innerHTML = 'AR not found';
+
+    indiceBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indiceBuffer);
+    const indices = [
+        0, 1, 3, 1, 2, 3
+    ]
+
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+    verts = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, verts);
+
+    const vertices =
+        [
+            1.0, 1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, -1.0, 0.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0
+        ]
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+
+    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+
+    programInfo = {
+        program: shaderProgram,
+        attribLocations: {
+            vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+            textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
+        },
+        uniformLocations: {
+            uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+        },
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const scene = new THREE.Scene();
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(10, 15, 10);
+    scene.add(directionalLight);
+
+    // Set up the WebGLRenderer, which handles rendering to the session's base layer.
+    const renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        preserveDrawingBuffer: true,
+        canvas: canvas,
+        context: gl
+    });
+    renderer.autoClear = false;
+
+
+    async function activateXR() {
+        console.log("Hi there");
+
+        const camera = new THREE.PerspectiveCamera();
+        camera.matrixAutoUpdate = false;
+
+        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'camera-access'] });
+        session.updateRenderState({
+            baseLayer: new XRWebGLLayer(session, gl)
+        });
+
+        const referenceSpace = await session.requestReferenceSpace('local');
+        const viewerSpace = await session.requestReferenceSpace('viewer');
+        const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+        const loader = new THREE.GLTFLoader();
+        let reticle;
+        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+            reticle = gltf.scene;
+            reticle.visible = false;
+            scene.add(reticle);
+        });
+
+        let flower;
+        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
+            flower = gltf.scene;
+        });
+
+        session.addEventListener("select", (event) => {
+            if (flower) {
+                flower.position.copy(reticle.position);
+                scene.add(flower);
             }
-
-            xrButton.disabled = !supported;
-        });
-    }
-
-    function initXR() {
-        if (!window.isSecureContext) {
-            let message = "WebXR unavailable due to insecure context";
-            document.getElementById("warning-zone").innerText = message;
-        }
-
-        if (navigator.xr) {
-            xrButton.addEventListener('click', onButtonClicked);
-            navigator.xr.addEventListener('devicechange', checkSupportedState);
-            checkSupportedState();
-        }
-    }
-
-    function onButtonClicked() {
-        if (!xrSession) {
-            navigator.xr.requestSession('immersive-ar', {
-                requiredFeatures: ['camera-access']
-            }).then(onSessionStarted, onRequestSessionError);
-        } else {
-            xrSession.end();
-        }
-    }
-
-    function onSessionStarted(session) {
-        xrSession = session;
-        xrButton.innerHTML = 'Exit AR';
-
-        session.addEventListener('end', onSessionEnded);
-        let canvas = document.createElement('canvas');
-        gl = canvas.getContext('webgl', {
-            xrCompatible: true
         });
 
-        glBinding = new XRWebGLBinding(session, gl);
+        let glBinding = new XRWebGLBinding(session, gl);
 
-        // Init cube geometry and cube's default texture.
-        initializeGLCube(gl);
-
-        session.updateRenderState({baseLayer: new XRWebGLLayer(session, gl)});
-        session.requestReferenceSpace('local').then((refSpace) => {
-            xrRefSpace = refSpace;
+        // Create a render loop that allows us to draw on the AR view.
+        const onXRFrame = (time, frame) => {
+            // Queue up the next draw request.
             session.requestAnimationFrame(onXRFrame);
-        });
-    }
 
-    function onRequestSessionError(ex) {
-        alert("Failed to start immersive AR session.");
-        console.error(ex.message);
-    }
 
-    function onEndSession(session) {
-        session.end();
-    }
 
-    function onSessionEnded(event) {
-        xrSession = null;
-        xrButton.innerHTML = 'Enter AR';
-        document.getElementById('session-info').innerHTML = '';
-        gl = null;
-    }
+            // Retrieve the pose of the device.
+            // XRFrame.getViewerPose can return null while the session attempts to establish tracking.
+            const pose = frame.getViewerPose(referenceSpace);
+            if (pose) {
+                const view = pose.views[0];
+                const viewport = session.renderState.baseLayer.getViewport(view);
 
-    function onXRFrame(t, frame) {
-        let session = frame.session;
-        session.requestAnimationFrame(onXRFrame);
-        let pose = frame.getViewerPose(xrRefSpace);
+                let tex = glBinding.getCameraImage(frame, view);
 
-        if (pose) {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
+                // gl.useProgram(shaderProgram);
+                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, arjsBuffer);
+                gl.framebufferTexture2D(
+                    gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                    gl.TEXTURE_2D, tex, 0);
 
-            gl.clearColor(0, 0, 0, 0);
+                gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, arjsBuffer2);
+                gl.blitFramebuffer(0, 0, viewport.width, viewport.height, 0, 0, arjsW, arjsH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
 
-            // Clear the framebuffer
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            for (let view of pose.views) {
-                let viewport = session.renderState.baseLayer.getViewport(view);
-                gl.viewport(viewport.x, viewport.y,
-                    viewport.width, viewport.height);
 
-                // Update camera image texture.
-                texture = glBinding.getCameraImage(frame, view);
 
-                // Render cube with camera image texture on each face.
-                drawScene(gl, programInfo, buffers, texture, rotationSpeed, view);
-            }
-        }
-    }
 
-    // This function is adapted from a publicly provided code sample found at
-    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL
-    function initializeGLCube(gl) {
-        // Initialize a shader program; this is where all the lighting
-        // for the vertices and so forth is established.
-        shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+                // gl.viewport(0, 0, arjsW, arjsH);
 
-        // Collect all the info needed to use the shader program.
-        // Look up which attributes our shader program is using
-        // for aVertexPosition, aTextureCoord and also
-        // look up uniform locations.
-        programInfo = {
-            program: shaderProgram,
-            attribLocations: {
-                vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-                textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
-            },
-            uniformLocations: {
-                projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-                uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
-            },
-        };
+                // gl.bindTexture(gl.TEXTURE_2D, tex);
+                let data = new Uint8ClampedArray(arjsW * arjsH * 4);
+                gl.readPixels(0, 0, arjsW, arjsH, gl.RGBA, gl.UNSIGNED_BYTE, data);
 
-        // Here's where we call the routine that builds all the
-        // objects we'll be drawing.
-        buffers = initBuffers(gl);
-        texture = loadTexture(gl, '../media/textures/cube-sea.png');
-    }
+                // arToolkitContext.update(data);
+                // gl.getT
 
-    // Initialize the buffers we'll need. For this demo, we just
-    // have one object -- a simple three-dimensional cube.
-    function initBuffers(gl) {
-        // Create a buffer for the cube's vertex positions.
-        const positionBuffer = gl.createBuffer();
 
-        // Select the positionBuffer as the one to apply buffer
-        // operations to from here out.
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-        // Now create an array of positions for the cube.
-        const positions = [
-            // Front face
-            -1.0,
-            -1.0,
-            1.0,
-            1.0,
-            -1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            -1.0,
-            1.0,
-            1.0,
 
-            // Back face
-            -1.0,
-            -1.0,
-            -1.0,
-            -1.0,
-            1.0,
-            -1.0,
-            1.0,
-            1.0,
-            -1.0,
-            1.0,
-            -1.0,
-            -1.0,
 
-            // Top face
-            -1.0,
-            1.0,
-            -1.0,
-            -1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            -1.0,
 
-            // Bottom face
-            -1.0,
-            -1.0,
-            -1.0,
-            1.0,
-            -1.0,
-            -1.0,
-            1.0,
-            -1.0,
-            1.0,
-            -1.0,
-            -1.0,
-            1.0,
 
-            // Right face
-            1.0,
-            -1.0,
-            -1.0,
-            1.0,
-            1.0,
-            -1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            -1.0,
-            1.0,
 
-            // Left face
-            -1.0,
-            -1.0,
-            -1.0,
-            -1.0,
-            -1.0,
-            1.0,
-            -1.0,
-            1.0,
-            1.0,
-            -1.0,
-            1.0,
-            -1.0,
-        ];
+                // gl.clearColor(0, 0, 0, 0);
+                //
+                // // Clear the framebuffer
+                // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                //
+                //
+                // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indiceBuffer);
+                // gl.bindBuffer(gl.ARRAY_BUFFER, verts);
+                // gl.vertexAttribPointer(
+                // 	0,
+                // 	2,
+                // 	gl.FLOAT,
+                // 	false,
+                // 	4 * 4,
+                // 	0,
+                // )
+                // gl.vertexAttribPointer(
+                // 	1,
+                // 	2,
+                // 	gl.FLOAT,
+                // 	false,
+                // 	4 * 4,
+                // 	2 * 4,
+                // )
+                //
+                // gl.activeTexture(gl.TEXTURE0);
+                // gl.bindTexture(gl.TEXTURE_2D, tex);
+                // // this.gl.viewport(0, 0, width, height);
+                //
+                // gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+                //
+                // {
+                // 	const vertexCount = 6;
+                // 	const type = gl.UNSIGNED_SHORT;
+                // 	const offset = 0;
+                // 	gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+                // }
+                //
+                //
+                // let data = new Uint8Array(viewport.width * viewport.height * 4);
+                // gl.readPixels(0, 0, viewport.width, viewport.height, gl.RGBA, gl.UNSIGNED_BYTE, data);
 
-        // Now pass the list of positions into WebGL to build the
-        // shape. We do this by creating a Float32Array from the
-        // JavaScript array, then use it to fill the current buffer.
-        gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array(positions),
-            gl.STATIC_DRAW
-        );
 
-        // Now set up the texture coordinates for the faces.
-        const textureCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 
-        const textureCoordinates = [
-            // Front
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-            // Back
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-            // Top
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-            // Bottom
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-            // Right
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-            // Left
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            1.0,
-            1.0,
-            0.0,
-            1.0,
-        ];
 
-        gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array(textureCoordinates),
-            gl.STATIC_DRAW
-        );
 
-        // Build the element array buffer; this specifies the indices
-        // into the vertex arrays for each face's vertices.
 
-        const indexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
-        // This array defines each face as two triangles, using the
-        // indices into the vertex array to specify each triangle's
-        // position.
 
-        const indices = [
-            0,
-            1,
-            2,
-            0,
-            2,
-            3, // front
-            4,
-            5,
-            6,
-            4,
-            6,
-            7, // back
-            8,
-            9,
-            10,
-            8,
-            10,
-            11, // top
-            12,
-            13,
-            14,
-            12,
-            14,
-            15, // bottom
-            16,
-            17,
-            18,
-            16,
-            18,
-            19, // right
-            20,
-            21,
-            22,
-            20,
-            22,
-            23, // left
-        ];
 
-        // Now send the element array to GL
-        gl.bufferData(
-            gl.ELEMENT_ARRAY_BUFFER,
-            new Uint16Array(indices),
-            gl.STATIC_DRAW
-        );
 
-        return {
-            position: positionBuffer,
-            textureCoord: textureCoordBuffer,
-            indices: indexBuffer,
-        };
-    }
 
-    // Initialize a texture and load an image.
-    // When the image finished loading copy it into the texture.
-    function loadTexture(gl, url) {
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
 
-        // Because images have to be download over the internet
-        // they might take a moment until they are ready.
-        // Until then put a single pixel in the texture so we can
-        // use it immediately. When the image has finished downloading
-        // we'll update the texture with the contents of the image.
-        const level = 0;
-        const internalFormat = gl.RGBA;
-        const width = 1;
-        const height = 1;
-        const border = 0;
-        const srcFormat = gl.RGBA;
-        const srcType = gl.UNSIGNED_BYTE;
-        const pixel = new Uint8Array([0, 0, 255, 255]); // opaque blue
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            level,
-            internalFormat,
-            width,
-            height,
-            border,
-            srcFormat,
-            srcType,
-            pixel
-        );
 
-        const image = new Image();
-        image.onload = function () {
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(
-                gl.TEXTURE_2D,
-                level,
-                internalFormat,
-                srcFormat,
-                srcType,
-                image
-            );
 
-            // WebGL1 has different requirements for power of 2 images
-            // vs non power of 2 images so check if the image is a
-            // power of 2 in both dimensions.
-            if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-                // Yes, it's a power of 2. Generate mips.
-                gl.generateMipmap(gl.TEXTURE_2D);
-            } else {
-                // No, it's not a power of 2. Turn of mips and set
-                // wrapping to clamp to edge
-                gl.texParameteri(
-                    gl.TEXTURE_2D,
-                    gl.TEXTURE_WRAP_S,
-                    gl.CLAMP_TO_EDGE
-                );
-                gl.texParameteri(
-                    gl.TEXTURE_2D,
-                    gl.TEXTURE_WRAP_T,
-                    gl.CLAMP_TO_EDGE
-                );
+
+
+
+
+
+
+
+
+
+
+
+
+                gl.useProgram(shaderProgram);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
+
+                var texture = gl.createTexture();
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, arjsW, arjsH, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indiceBuffer);
+                gl.bindBuffer(gl.ARRAY_BUFFER, verts);
+                gl.vertexAttribPointer(
+                    0,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * 4,
+                    0,
+                )
+                gl.vertexAttribPointer(
+                    1,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * 4,
+                    2 * 4,
+                )
+
+                // gl.activeTexture(gl.TEXTURE0);
+                // gl.bindTexture(gl.TEXTURE_2D, tex);
+                // this.gl.viewport(0, 0, width, height);
+
+                gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+
+                {
+                    const vertexCount = 6;
+                    const type = gl.UNSIGNED_SHORT;
+                    const offset = 0;
+                    gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+                }
+
+
+                // const viewport = session.renderState.baseLayer.getViewport(view);
+                renderer.setSize(viewport.width, viewport.height);
+
+                // Use the view's transform matrix and projection matrix to configure the THREE.camera.
+                camera.matrix.fromArray(view.transform.matrix);
+                camera.projectionMatrix.fromArray(view.projectionMatrix);
+                camera.updateMatrixWorld(true);
+
+
+
+
+                // arToolkitContext.update(tex);
+
+                if (arJSSmarkerControls.object3d.visible) {
+                    let pos = arJSSmarkerControls.object3d.position;
+                    let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
+
+                    arJSSmesh.position.x = cpos.x * window.innerWidth / 2;
+                    arJSSmesh.position.y = cpos.y * window.innerHeight / -2;
+                }
+
+
+                //If marker was deected do hit test here
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
+                if (hitTestResults.length > 0 && reticle) {
+                    const hitPose = hitTestResults[0].getPose(referenceSpace);
+                    reticle.visible = true;
+                    reticle.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z);
+                    reticle.updateMatrixWorld(true);
+                }
+
+                // Render the scene with THREE.WebGLRenderer.
+                renderer.render(scene, camera)
             }
         };
-        image.src = url;
 
-        return texture;
+        session.requestAnimationFrame(onXRFrame);
+
+        // animate();
     }
 
-    // Draw the scene.
-    function drawScene(gl, programInfo, buffers, texture, deltaTime, view) {
-        // Set the drawing position to the "identity" point, which is
-        // the center of the scene.
-        const modelViewMatrix = mat4.create();
+    /** ARJS Initialization **/
+    var arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
+    var arToolkitSource, arToolkitContext;
 
-        // Now move the drawing position a bit to where we want to
-        // start drawing the square.
+    var firstUpdate = false;
+    function initialize() {
+        arJSScene = new THREE.Scene();
 
-        mat4.translate(
-            modelViewMatrix, // destination matrix
-            modelViewMatrix, // matrix to translate
-            [-0.0, 1.0, -6.0]
-        ); // amount to translate
-        mat4.rotate(
-            modelViewMatrix, // destination matrix
-            modelViewMatrix, // matrix to rotate
-            cubeRotation, // amount to rotate in radians
-            [0, 0, 1]
-        ); // axis to rotate around (Z)
-        mat4.rotate(
-            modelViewMatrix, // destination matrix
-            modelViewMatrix, // matrix to rotate
-            cubeRotation * 0.7, // amount to rotate in radians
-            [0, 1, 0]
-        ); // axis to rotate around (X)
+        let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+        arJSScene.add(ambientLight);
 
-        // Tell WebGL how to pull out the positions from the position
-        // buffer into the vertexPosition attribute
-        {
-            const numComponents = 3;
-            const type = gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-            gl.vertexAttribPointer(
-                programInfo.attribLocations.vertexPosition,
-                numComponents,
-                type,
-                normalize,
-                stride,
-                offset
-            );
-            gl.enableVertexAttribArray(
-                programInfo.attribLocations.vertexPosition
-            );
-        }
+        arJSScamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / -2, window.innerHeight / 2, -100, 100);
+        arJSScene.add(arJSScamera);
 
-        // Tell WebGL how to pull out the texture coordinates from
-        // the texture coordinate buffer into the textureCoord attribute.
-        {
-            const numComponents = 2;
-            const type = gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
-            gl.vertexAttribPointer(
-                programInfo.attribLocations.textureCoord,
-                numComponents,
-                type,
-                normalize,
-                stride,
-                offset
-            );
-            gl.enableVertexAttribArray(
-                programInfo.attribLocations.textureCoord
-            );
-        }
-
-        // Tell WebGL which indices to use to index the vertices
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
-
-        // Tell WebGL to use our program when drawing
-
-        gl.useProgram(programInfo.program);
-
-        // Set the shader uniforms
-        gl.uniformMatrix4fv(
-            programInfo.uniformLocations.projectionMatrix,
-            false,
-            view.projectionMatrix
+        arJSSmesh = new THREE.Mesh(
+            new THREE.BoxGeometry(5, 10, 10),
+            new THREE.MeshBasicMaterial({color: 0xff0000})
         );
-        gl.uniformMatrix4fv(
-            programInfo.uniformLocations.modelViewMatrix,
-            false,
-            modelViewMatrix
-        );
+        arJSScene.add(arJSSmesh);
+        arJSScamera.position.z = 5;
 
-        // Specify the texture to map onto the faces.
+        // arToolkitSource = new THREEx.ArToolkitSource({
+        //     sourceType: 'webcam',
+        //     showVideo: true
+        // });
+        //
+        // arToolkitSource.init(function onReady() {
+        //     onResize()
+        // });
 
-        // Tell WebGL we want to affect texture unit 0
-        gl.activeTexture(gl.TEXTURE0);
+        // handle resize
+        window.addEventListener('resize', function () {
+            onResize()
+        });
 
-        // Bind the texture to texture unit 0
-        gl.bindTexture(gl.TEXTURE_2D, texture);
+        window.addEventListener('arjs-video-loaded', function () {
+            onResize()
+        });
 
-        // Tell the shader we bound the texture to texture unit 0
-        gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
-
-        {
-            const vertexCount = 36;
-            const type = gl.UNSIGNED_SHORT;
-            const offset = 0;
-            gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+        function onResize() {
+            // arToolkitSource.onResizeElement();
+            // arToolkitSource.copyElementSizeTo(renderer.domElement)
+            if (arToolkitContext.arController !== null) {
+                // arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)
+            }
         }
 
-        // Update the rotation for the next draw
-        cubeRotation += deltaTime;
 
-        // gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
-        // gl.clear(gl.COLOR_BUFFER_BIT);
+        arToolkitContext = new THREEx.ArToolkitContext({
+            cameraParametersUrl: 'data/camera_para.dat',
+            detectionMode: 'mono',
+            canvasWidth: 80 * 9,
+            canvasHeight: 60 * 9,
+            maxDetectionRate: 30
+        });
+
+        arJSScamera2 = new THREE.Camera();
+        arToolkitContext.init(function onCompleted() {
+            arJSScamera2.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+            arjsW = arToolkitContext.arController.canvas.width;
+            arjsH = arToolkitContext.arController.canvas.height;
+            console.log("SIZE: W: ", arjsW, " H: ", arjsH);
+
+
+            //
+            let rb = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, arjsW, arjsH);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, rb);
+        });
+
+        let patternArray = ["letterA", "letterB", "letterC", "letterD", "letterF", "kanji", "hiro"];
+        for (let i = 6; i < 7; i++) {
+            let markerRoot = new THREE.Group();
+            arJSSmarkerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+                type: 'pattern', patternUrl: "data/" + patternArray[i] + ".patt",
+            });
+        }
     }
 
-    // Initialize a shader program, so WebGL knows how to draw our data
-    //
+
+
+    window.addEventListener("markerFound", function (e) {
+        console.log("Found")
+        console.log(e.detail);
+    });
+    window.addEventListener("markerLost", function (e) {
+        console.log("Lost")
+        console.log(e.detail);
+    });
+
+
+    function update() {
+        // console.log('upd');
+        // if (arToolkitSource.ready !== false) {
+        //     arToolkitContext.update(arToolkitSource.domElement);
+        //     if (!firstUpdate) {
+        //         window.dispatchEvent(new CustomEvent('resize'));
+        //         firstUpdate = true;
+        //     }
+        // }
+
+        if (arJSSmarkerControls.object3d.visible) {
+            let pos = arJSSmarkerControls.object3d.position;
+            let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
+            // document.getElementById('mcx').innerText = 'x: ' + cpos.x;
+            // document.getElementById('mcy').innerText = 'y: ' + cpos.y;
+            // document.getElementById('mcz').innerText = 'z: ' + cpos.z;
+
+            arJSSmesh.position.x = cpos.x * window.innerWidth / 2;
+            arJSSmesh.position.y = cpos.y * window.innerHeight / -2;
+        }
+
+        // document.getElementById('mcw').innerText = 'visible: ' + markerControls.object3d.visible;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        update();
+        // renderer.render(arJSScene, arJSScamera);
+    }
+    // initialize();
+    // animate();
+
+
     function initShaderProgram(gl, vsSource, fsSource) {
         const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
         const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
@@ -648,9 +556,7 @@
         return shaderProgram;
     }
 
-    // creates a shader of the given type, uploads the source and
-    // compiles it.
-    //
+
     function loadShader(gl, type, source) {
         const shader = gl.createShader(type);
 
@@ -675,12 +581,7 @@
 
         return shader;
     }
-
-    function isPowerOf2(value) {
-        return (value & (value - 1)) == 0;
-    }
-
-    initXR();
 </script>
 </body>
+
 </html>
