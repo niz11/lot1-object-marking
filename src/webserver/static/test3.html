@@ -145,7 +145,7 @@ We start this one with a simple button. -->
 
 
 
-
+    let arrow;
 
 
 
@@ -168,8 +168,9 @@ We start this one with a simple button. -->
     let arjsW = 0;
     let arjsH = 0;
     const arjsBuffer2 = gl.createFramebuffer();
-
+    let raycaster = new THREE.Raycaster();
     const scene = new THREE.Scene();
+    let camera;
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
     directionalLight.position.set(10, 15, 10);
@@ -185,7 +186,7 @@ We start this one with a simple button. -->
         });
         renderer.autoClear = false;
 
-        const camera = new THREE.PerspectiveCamera();
+        camera = new THREE.PerspectiveCamera();
         camera.matrixAutoUpdate = false;
         let uiElement = document.getElementById('infoBox');
         let content = document.getElementById('con');
@@ -199,7 +200,7 @@ We start this one with a simple button. -->
         });
 
 
-        let raycaster = new THREE.Raycaster();
+
 
         box = new THREE.Mesh(
             new THREE.BoxGeometry(0.1, 0.24, 0.15),
@@ -287,7 +288,11 @@ We start this one with a simple button. -->
 
                 let offset = 100;
 
-                // camera.matrix.decompose(camera.position, camera.quaternion, camera.scale)
+
+                let camPos = new THREE.Vector3();
+                let camQua = new THREE.Quaternion();
+                let camSca = new THREE.Vector3();
+                camera.matrix.decompose(camPos, camQua, camSca);
 
                 vd += 0.01;
 
@@ -493,14 +498,6 @@ We start this one with a simple button. -->
 
 
                     // console.log("Anchor ", pose.transform.position.x, pose.transform.position.y, pose.transform.position.z)
-                }
-
-
-
-                // Render the scene with THREE.WebGLRenderer.
-                renderer.render(scene, camera)
-
-                if (objAnchor) {
 
                     let elems = document.getElementsByClassName("p");
 
@@ -534,9 +531,16 @@ We start this one with a simple button. -->
                         e.style.top = (-50 * sx.y) + 50 + '%';
                         e.style.visibility = 'visible';
 
-                        // raycaster.set(dpv, camera.position.clone().sub(dpv).normalize());
 
-                        raycaster.set(dpv, dpv.clone().sub(camera.position).normalize());
+
+                        let dir = camPos.sub(dpv).add(new THREE.Vector3(0, 0.005, 0)).normalize();
+                        raycaster.set(dpv, dir);
+
+                        scene.remove ( arrow );
+                        arrow = new THREE.ArrowHelper(dir, dpv, 100, 0xffffff );
+                        scene.add( arrow );
+
+                        // raycaster.set(dpv, dpv.clone().sub(camera.position).normalize());
 
                         // raycaster.setFromCamera(new THREE.Vector2(sx.x, sx.y), camera);
 
@@ -546,14 +550,23 @@ We start this one with a simple button. -->
                         const intersection = (intersections.length) > 0 ? intersections[0] : null;
 
                         if (intersection) {
-                            console.log(intersection)
                             // e.style.visibility = 'visible';
-                            e.style.color = 'rgba(250, 0, 0, 1.0)'
+                            e.style.backgroundColor = 'rgba(250, 0, 0, 1.0)'
                         } else {
-                            e.style.color = 'rgba(0, 140, 186, 1.0)'
+                            e.style.backgroundColor = 'rgba(0, 140, 1, 1.0)'
                         }
 
                     }
+                }
+
+
+
+                // Render the scene with THREE.WebGLRenderer.
+                renderer.render(scene, camera)
+
+                if (objAnchor) {
+
+
 
 
                 }
