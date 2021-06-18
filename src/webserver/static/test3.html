@@ -99,6 +99,24 @@
 <button onclick="activateXR()" >Start Hello WebXR</button>
 <script>
 
+    let jsonData, src;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            jsonData = data;
+            addModel(data[0])
+            src = data[0].src;
+            var select = document.getElementById("modelSelection");
+
+            for (const val of data) {
+                let option = document.createElement("option");
+                option.value = val.modelName;
+                option.text = val.modelName;
+                select.appendChild(option);
+            }
+        });
+
+
     let objAnchor = null;
     let markerOrientationS = [];
     let markerOrientationS2;
