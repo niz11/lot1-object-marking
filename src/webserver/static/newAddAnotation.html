@@ -57,7 +57,7 @@
     </div>
     <script>
         let jsonData, src;
-        fetch(`https://localhost:3000/models`)
+        fetch(`/models`)
             .then(response => response.json())
             .then(data => {
                 jsonData = data;
@@ -75,7 +75,7 @@
         function getComboA(selectObject) {
             var value = selectObject.value;
             // Need to fetch data again, incease hotspots were added
-            fetch(`https://localhost:3000/models`)
+            fetch(`/models`)
                 .then(response => response.json())
                 .then(data => {
                     jsonData = data;
@@ -140,7 +140,7 @@
                 element.appendChild(document.createTextNode(inputtext));
                 document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
                 document.querySelector('input').value = "";
-                fetch('https://localhost:3000/models/add-hospot', {
+                fetch('/models/add-hospot', {
                     method: 'post',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -187,7 +187,7 @@
     <script>
         function removeHotspot() {
             selectedHotSpot.remove()
-            fetch('https://localhost:3000/models/remove-hospot', {
+            fetch('/models/remove-hospot', {
                 method: 'delete',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
