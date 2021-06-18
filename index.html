@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Test</title>
+  <!-- <link href="style.css" rel="stylesheet"> -->
+</head>
+
+<body>
+
+  <div>
+    <h1 id="demo">Artworks Homepage</h1>
+    <p id="demo1">Drag and drop your pictures here to create your very own 3D model!</p>
+
+  </div>
+
+  <form class="box" method="post" action="" enctype="multipart/form-data">
+    <div class="box__input">
+      <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
+      <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
+      <button class="box__button" id='upload_images' type="submit">Upload</button>
+    </div>
+    <div class="box__uploading">Uploading…</div>
+    <div class="box__success">Done!</div>
+    <div class="box__error">Error! <span></span>.</div>
+  </form>
+
+  <model-viewer src="/object_files/AnyConv.com__texturedMesh.glb"
+              ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+              alt="A 3D model of an astronaut"
+              ar
+              auto-rotate
+              camera-controls>
+  </model-viewer>
+
+  <!-- src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" -->
+
+
+  <!--<script src="localhost:8080/js/hs"></script>-->
+</body>
+
+<script>
+  const server = 'http://localhost:8080/'
+
+ function sendPhotos() {
+    // let langSelect = document.getElementById("languages");
+
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 201) {
+            console.log(xhr.responseText);
+        }
+    };
+    xhr.open("POST", 'http://localhost:8080/meshroom-pipeline');
+    xhr.setRequestHeader("Content-type", "application/json");
+    // setAuthorization(xhr);
+    xhr.send(JSON.stringify({
+        // "name": moduleName,
+        // "langcode": language
+    }));
+}
+
+document.getElementById('upload_images').addEventListener('click', () => {
+  sendPhotos();
+});
+     
+        
+    
+    
+    </script>
+    <style>
+        .box__dragndrop,
+        .box__uploading,
+        .box__success,
+        .box__error {
+            display: none;
+        }
+        /* body {background-color: black;} */
+
+        model-viewer#reveal {
+        --poster-color: transparent;
+        }
+
+    </style>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+
+</html>
