@@ -39,6 +39,17 @@ const ModelSchema = new Schema({
 			type: Number
 		}
 	},
+	marker: {
+		distance: {
+			type: Number
+		},
+		rotation: {
+			type: Number
+		},
+		scaling: {
+			type: Number
+		}
+	},
 	date: {
 		type: Date,
 		default: Date.now

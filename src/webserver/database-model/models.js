@@ -39,6 +39,11 @@ router.post('/add-model', async (req, res) => {
 			location: {
 				latitude: req.body.latitude,
 				longitude: req.body.longitude
+			},
+			marker: {
+				distance: req.body.distance,
+				rotation: req.body.rotation,
+				scaling: req.body.scaling
 			}
 		});
 
@@ -107,6 +112,21 @@ router.post('/update-location', async (req, res) => {
 	if (model.length === 1) {
 		model[0].location.latitude = req.body.latitude;
 		model[0].location.longitude = req.body.longitude;
+		model[0].save().then((model) => res.json(model));
+	} else {
+		res.status(404).json('No Model with input src exists');
+	}
+});
+
+router.post('/update-marker', async (req, res) => {
+	if (!req.body.src || !req.body.distance || !req.body.rotation || !req.body.scaling) {
+		return res.status(404).json('Missing params: src, distance, rotation  or scaling');
+	}
+	model = await Model.find({ src: req.body.src });
+	if (model.length === 1) {
+		model[0].marker.distance = req.body.distance;
+		model[0].marker.rotation = req.body.rotation;
+		model[0].marker.scaling = req.body.scaling;
 		model[0].save().then((model) => res.json(model));
 	} else {
 		res.status(404).json('No Model with input src exists');
