@@ -260,7 +260,6 @@
                 if (hitTestResults && hitTestResults.length > 0 && reticle) {
                     const hitPose = hitTestResults[0].getPose(referenceSpace);
                     reticle.visible = false; //TODO: find a way to show that environment is recognized
-
                     reticle.matrix.fromArray(hitPose.transform.matrix);
                     reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
 
@@ -276,7 +275,8 @@
                     }
 
                     if (fCounter >= maxCount) {
-
+                        //TODO: use Anchor at current viewing pose to calculate distance between hit test and marker center point
+                        //      for better alignment between virtual and real geometry
                         markerOrientationS2 = markerOrientationS;
                         hitTestResults[0].createAnchor().then((anchor) => {
                             objAnchor = anchor;
