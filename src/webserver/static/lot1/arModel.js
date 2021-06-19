@@ -99,11 +99,11 @@ class ArModel {
     mesh = null;
     offset = new THREE.Vector3();
 
-    timeStep = 1 / 30;
-    curTime = performance.now();
-    accDelta = 0;
+    #timeStep = 1 / 30;
+    #curTime = performance.now();
+    #accDelta = 0;
 
-    raycaster = new THREE.Raycaster();
+    #raycaster = new THREE.Raycaster();
 
     constructor(databaseModel) {
         this.name = databaseModel.name;
@@ -120,40 +120,43 @@ class ArModel {
         }
     }
 
-    loadModelFromSource(scene) {
+    loadModelFromSource(scene, onLoaded) {
         const loader = new THREE.GLTFLoader();
         let _this = this;
-        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+        loader.load(this.src, function (gltf) {
             _this.mesh = gltf.scene;
             scene.add(_this.mesh);
+            onLoaded();
         });
     }
 
     update(pose, camera, cameraPosition) {
+        if (!this.mesh) return;
+
         this.#updateModel(pose);
         this.#updateHotspots(camera, cameraPosition)
-        let prevTime = this.curTime;
+        let prevTime = this.#curTime;
         // max 3 updates to counteract death cycle
-        for (let i = 0; i < 3 && this.accDelta >= this.timeStep; ++i) {
+        for (let i = 0; i < 3 && this.#accDelta >= this.#timeStep; ++i) {
             for (let hs in this.hotspots){
                 hs.update();
             }
-            this.accDelta -= this.timeStep;
+            this.#accDelta -= this.#timeStep;
         }
 
-        this.curTime = performance.now();
-        let curDelta = this.accDelta + this.curTime - prevTime;
+        this.#curTime = performance.now();
+        let curDelta = this.#accDelta + this.#curTime - prevTime;
 
         let delta = 1.0;
-        if (curDelta <= this.timeStep) {
-            delta = this.accDelta / this.timeStep;
+        if (curDelta <= this.#timeStep) {
+            delta = this.#accDelta / this.#timeStep;
         }
 
         for (let hs in this.hotspots){
             hs.interpolation(delta);
         }
-        this.curTime = performance.now();
-        this.accDelta += this.curTime - prevTime;
+        this.#curTime = performance.now();
+        this.#accDelta += this.#curTime - prevTime;
     }
 
     #updateModel(pose){
@@ -179,8 +182,8 @@ class ArModel {
 
             // raycast
             let dir = cameraPosition.clone().sub(hs.position).normalize();
-            this.raycaster.set(hs.position, dir);
-            const intersections = this.raycaster.intersectObject(box);
+            this.#raycaster.set(hs.position, dir);
+            const intersections = this.#raycaster.intersectObject(box);
             const intersects = (intersections.length) > 0;
 
             hs.setVisibility(intersects)
