@@ -79,40 +79,34 @@
         })
 
         function createDBEntry(){
-            let model = {
-                src: "",
-                name: name,
+            console.log(JSON.stringify({
+                src: "./ar/models/" + name + ".gltf",
+                modelName: name,
                 alt: name,
-                hotspots: [],
-                location: {
-                    longitude: 0,
-                    latency: 0,
-                },
-                marker: {
-                    distance: dist,
-                    rotation: rot,
-                    scaling: scal,
-                }
-            }
-
+                longitude: 0,
+                latitude: 0,
+                distance: dist,
+                rotation: rot,
+                scaling: scal,
+            }))
             fetch('/models/add-model',
                 {
                     method: 'post',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        src: "ar/models/" + name + ".gltf",
-                        name: name,
+                        src: "./ar/models/" + name + ".gltf",
+                        modelName: name,
                         alt: name,
-                        hotspots: [],
-                        longitude: 0,
-                        latency: 0,
-                        distance: dist,
-                        rotation: rot,
-                        scaling: scal,
+                        longitude: '' + 0,
+                        latitude: '' + 0,
+                        distance: '' + dist,
+                        rotation: '' + rot,
+                        scaling: '' + scal,
                     })
                 }
-
-            )
+            ).catch(e => {
+                console.log(e);
+            })
         }
     }
 </script>

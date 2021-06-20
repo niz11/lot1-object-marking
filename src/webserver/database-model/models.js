@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 
 router.post('/add-model', async (req, res) => {
 	if (!req.body.src || !req.body.modelName || !req.body.latitude || !req.body.longitude) {
-		return res.status(404).json('Missing params: src, model name, latitude or longitude');
+		return res.status(401).json('Missing params: src, model name, latitude or longitude');
 	}
 	modelCheck = await Model.find({ src: req.body.src });
 	if (modelCheck.length === 0) {
@@ -22,7 +22,7 @@ router.post('/add-model', async (req, res) => {
 		if (req.body.hotspots && Array.isArray(req.body.hotspots)) {
 			hotspots = req.body.hotspots.map((hotspot) => {
 				if (!hotspot.position || !hotspot.normal || !hotspot.text) {
-					return res.status(404).json('One of the Hotspots is missing a position, a normal or a text');
+					return res.status(402).json('One of the Hotspots is missing a position, a normal or a text');
 				}
 				return {
 					position: hotspot.position,
@@ -49,7 +49,7 @@ router.post('/add-model', async (req, res) => {
 
 		newModel.save().then((post) => res.json(post));
 	} else {
-		res.status(404).json('Model already exsist in DB');
+		res.status(403).json('Model already exsist in DB');
 	}
 });
 
