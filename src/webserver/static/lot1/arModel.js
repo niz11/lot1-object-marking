@@ -23,6 +23,8 @@ class Hotspot {
         this.normal.x = +n[0];
         this.normal.y = +n[1];
         this.normal.z = +n[2];
+
+        this.createDOMElement();
     }
 
     createDOMElement() {
