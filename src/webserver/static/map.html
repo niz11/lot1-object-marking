@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Models Map Page</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+</head>
+<style>
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+</style>
+<body>
+    <div id="mapid" style="width: 600px; height: 400px;"></div>
+    <script>
+
+        const mymap = L.map('mapid').setView([51.505, -0.09], 13);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1
+        }).addTo(mymap);
+
+        L.marker([51.5, -0.09]).addTo(mymap)
+            .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+        var popup = L.popup();
+
+        function onMapClick(e) {
+            popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(mymap);
+        }
+
+        mymap.on('click', onMapClick);
+
+        fetch(`/models`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0){
+                    data.map((model ,index)=>{
+                        if (model.location.latitude &&  model.location.longitude){
+                            L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                .bindPopup(`<b>${model.modelName}</b><br />`).openPopup();
+                            if (index === model.length - 1){
+                                mymap.setView(model.location.latitude, model.location.longitude)
+                            }
+                        }
+                    })
+                } 
+            });
+
+    </script>
+
+
+
+</body>
+
+</html>
