@@ -160,7 +160,7 @@ class ArModel {
 
     update(pose, camera, cameraPosition) {
         if (!this.mesh) return;
-        this.mesh.visible = true; //TODO: Remove
+        // this.mesh.visible = true;
         this.#updateModel(pose);
         this.#updateHotspots(camera, cameraPosition)
         let prevTime = this.#curTime;

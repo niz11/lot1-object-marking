@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <div class="foot">
+    <div class="foot" id="footer">
         <div id="ax"></div>
         <div id="ay"></div>
         <div id="az"></div>
@@ -100,7 +100,7 @@
         <div id="bz"></div>
 
         <div id="rx">Instructions:</div>
-        <div id="ry">    1. Look around with the camera around the artwork for better AR tracking</div>
+        <div id="ry">    1. Shake your phone a bit to initialize AR tracking</div>
         <div id="rz">    2. Point the camera to the middle of the marker until the box is green </div>
     </div>
 
@@ -173,6 +173,11 @@
         arHs2.rPosition = new THREE.Vector3(+0.06, 0, 0);
         arHs2.text = "Right"
         arHs2.updateDOMElement();
+
+        let arHs3 = new Hotspot();
+        arHs3.rPosition = new THREE.Vector3(0, +0.09, 0);
+        arHs3.text = "Fish"
+        arHs3.updateDOMElement();
 
         arModel.hotspots.push(arHs1, arHs2);
 
@@ -321,6 +326,7 @@
 
                         arModel.relativeRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
                         hitTestResults[0].createAnchor().then((anchor) => {
+                            document.getElementById("footer").style.visibility = 'hidden';
                             objAnchor = anchor;
                         }, (error) => {
                             console.error("Could not create anchor: " + error);
@@ -343,6 +349,7 @@
                 }
 
                 if (objAnchor) {
+
                     // Query most recent pose of the anchor relative to some reference space:
                     const pose = frame.getPose(objAnchor.anchorSpace, referenceSpace);
                     arModel.update(pose, camera, camPos);
