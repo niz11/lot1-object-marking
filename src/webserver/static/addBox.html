@@ -65,7 +65,6 @@
             new THREE.BoxGeometry(width, height, depth),
             new THREE.MeshBasicMaterial({color: 0x0000ff}) //blue
         );
-        mesh.material.wireframe = true;
 
         let exporter = new GLTFExporter();
         exporter.parse(mesh, function (json){

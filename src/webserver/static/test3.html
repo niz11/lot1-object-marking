@@ -27,21 +27,23 @@
         display: block;
         width: 20px;
         height: 20px;
+        transform: translate(-10px, -10px);
         border-radius: 10px;
         border: none;
-        background-color: #008CBA;
+        background-color: #008CBA00;
         box-sizing: border-box;
-        visibility: visible;
+        /*visibility: hidden;*/
         position: fixed;
     }
 
     div.tb{
-        border-radius: 20px;
-        background: #00000099;
-        padding: 1em;
-        position: absolute;
+        border-radius: 5px;
+        background: #00000000;
+        color: #FFFFFF00;
+        padding: 0.5em;
+        position: fixed;
         transform: translate(10px, 10px);
-
+        /*visibility: hidden;*/
     }
 
     div.con {
@@ -81,8 +83,6 @@
 </style>
 <body>
 <div id="infoBox">
-    <button class="p" data-position="-0.12 0.0 0.0">
-    </button>
 
     <div class="con" id = "con">
         <div class="cen">
@@ -106,24 +106,23 @@
 
 </div>
 <button onclick="activateXR()" >Start Hello WebXR</button>
-<script>
+<script type = module>
+    import {ArModel, Hotspot} from "./lot1/arModel.js";
 
-    let jsonData, src;
-    fetch(`/models`)
-        .then(response => response.json())
-        .then(data => {
-            jsonData = data;
-            addModel(data[0])
-            src = data[0].src;
-            var select = document.getElementById("modelSelection");
+    let arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
+    let arToolkitSource, arToolkitContext;
 
-            for (const val of data) {
-                let option = document.createElement("option");
-                option.value = val.modelName;
-                option.text = val.modelName;
-                select.appendChild(option);
-            }
-        });
+    let firstUpdate = false;
+
+    initialize();
+
+
+
+
+
+
+
+
 
 
     let objAnchor = null;
@@ -134,13 +133,6 @@
     const canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
     const gl = canvas.getContext("webgl2", { xrCompatible: true });
-
-    var arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
-    var arToolkitSource, arToolkitContext;
-
-    var firstUpdate = false;
-
-    initialize();
 
     const arjsBuffer = gl.createFramebuffer();
 
@@ -159,7 +151,38 @@
     directionalLight.position.set(10, 15, 10);
     scene.add(directionalLight);
 
-    async function activateXR() {
+    let dbModel;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            const model = data.filter(model => model.modelName === 'FishBox');
+            dbModel = model[0];
+            loadArModel();
+        });
+
+    let arModel;
+
+    function loadArModel() {
+        arModel = new ArModel(dbModel);
+        let arHs1 = new Hotspot();
+        arHs1.rPosition = new THREE.Vector3(-0.06, 0, 0);
+        arHs1.text = "Left"
+        arHs1.updateDOMElement();
+
+        let arHs2 = new Hotspot();
+        arHs2.rPosition = new THREE.Vector3(+0.06, 0, 0);
+        arHs2.text = "Right"
+        arHs2.updateDOMElement();
+
+        arModel.hotspots.push(arHs1, arHs2);
+
+        arModel.loadModelFromSource(scene, function () {
+            arModel.computeOffsetFromMesh();
+        })
+    }
+
+
+    window.activateXR = async function activateXR() {
         // Set up the WebGLRenderer, which handles rendering to the session's base layer.
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -180,13 +203,6 @@
             baseLayer: new XRWebGLLayer(session, gl)
         });
 
-        box = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1, 0.24, 0.15),
-            new THREE.MeshBasicMaterial({color: 0x0000ff}) //blue
-        );
-        box.visible = false;
-        box.material.wireframe = true;
-        scene.add(box);
 
         const referenceSpace = await session.requestReferenceSpace('local');
         const viewerSpace = await session.requestReferenceSpace('viewer');
@@ -202,10 +218,6 @@
             scene.add(reticle);
         });
 
-        let flower;
-        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
-            flower = gltf.scene;
-        });
 
         let glBinding = new XRWebGLBinding(session, gl);
 
@@ -290,7 +302,7 @@
                     reticle.matrix.fromArray(hitPose.transform.matrix);
                     reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
 
-                    const maxCount = 21;
+                    const maxCount = 11;
 
                     if (offset < 0.004 && fCounter < maxCount) {
                         fCounter += 1;
@@ -305,6 +317,9 @@
                         //TODO: use Anchor at current viewing pose to calculate distance between hit test and marker center point
                         //      for better alignment between virtual and real geometry
                         markerOrientationS2 = markerOrientationS;
+                        markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
+
+                        arModel.relativeRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
                         hitTestResults[0].createAnchor().then((anchor) => {
                             objAnchor = anchor;
                         }, (error) => {
@@ -330,63 +345,8 @@
                 if (objAnchor) {
                     // Query most recent pose of the anchor relative to some reference space:
                     const pose = frame.getPose(objAnchor.anchorSpace, referenceSpace);
+                    arModel.update(pose, camera, camPos);
 
-                    box.visible = true;
-                    box.matrix.fromArray(pose.transform.matrix);
-                    box.matrix.decompose(box.position, box.quaternion, box.scale);
-
-                    //TODO: Get normal vector from object orientation and move object accordingly
-                    box.position.y += 0.075;
-
-
-                    markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
-
-                    const rot = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)];
-                    box.rotation.y += rot.rotation.z;
-
-                    box.visible = true;
-
-                    let elems = document.getElementsByClassName("p");
-                    for(let e of elems) {
-                        let dpe = e.getAttribute("data-position").split(" ");
-
-                        let dpx = Number(dpe[0]);
-                        let dpy = Number(dpe[1]);
-                        let dpz = Number(dpe[2]);
-
-
-                        let dpv = new THREE.Vector3(dpx, dpy, dpz);
-
-                        dpv.applyQuaternion(box.quaternion);
-
-                        dpv.add(box.position);
-
-                        const sx = dpv.clone();
-
-                        sx.project(camera);
-                        e.style.left = (50 * sx.x) + 50 + '%';
-                        e.style.top = (-50 * sx.y) + 50 + '%';
-                        e.style.visibility = 'visible';
-
-
-
-                        let dir = camPos.sub(dpv).normalize();
-                        raycaster.set(dpv, dir);
-
-                        box.updateMatrixWorld();
-
-                        const intersections = raycaster.intersectObjects([box]);
-                        const intersection = (intersections.length) > 0 ? intersections[0] : null;
-
-                        if (intersection) {
-                            // e.style.visibility = 'hidden';
-                            e.style.backgroundColor = 'rgba(250, 0, 0, 1.0)'
-                        } else {
-                            // e.style.visibility = 'visible';
-                            e.style.backgroundColor = 'rgba(0, 140, 180, 1.0)'
-                        }
-
-                    }
                 }
 
                 // Render the scene with THREE.WebGLRenderer.
