@@ -92,7 +92,15 @@
         const params = new URLSearchParams(document.location.search);
         const userId = params.get('userId')
         const modelName = params.get('modelName')
-        //hotspot counter so we can keep track of how many we added on 3 because we already have hotspot-0 and hotspot-1 (set to 0 if you start with 0 hotspots)
+        let model;
+        fetch(`/models`)
+            .then(response => response.json())
+            .then(data => {
+                jsonData = data;
+                // Here: Add user ID to if statement
+                model = jsonData.filter(model => model.modelName === modelName);
+                if (model) removeAllHotspots();
+            });
         function addHotspot(position, normal, inputtext) {
             const viewer = document.querySelector('#modelblock');
             const hotspotCounter = document.getElementsByClassName("hotspot").length
@@ -144,26 +152,14 @@
         }
     </script>
     <script>
-
-        // setInterval(() => {
-        //     getLocation()
-        // }, 2000)
-
-        // setTimeout(() => {
-        //     addModel()
-        // },3000)
-
-        // setTimeout(() => {
-        //     removeModel()
-        // },10000)
         let id;
         function success(pos) {
-            const objectLatitude = 52.48979763883894;
-            const objectLongitude = 13.390766864570562;
+            const objectLatitude = model ? model.location.latitude : 0;
+            const objectLongitude = model ? model.location.longitude : 0;
             const usersLatitude = pos.coords.latitude;
             const usersLongitude = pos.coords.longitude;
-            const radius = 5;
-            const d = getDistance(objectLatitude,objectLongitude,usersLatitude,usersLongitude);
+            const radius = 15;
+            const d = getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude);
             console.log("Distance from user to object: ", d);
             const modelStatus = document.getElementById("body").className;
             if (d < radius) {
@@ -194,14 +190,13 @@
             document.getElementById("noModelTextBox").textContent = "Please Enable Location"
         }
 
-        function addModel() {
-            console.log("addModel");
+        function addModel(model) {
+            console.log(model);
             const viewer = document.querySelector('#modelblock');
-            viewer.src = "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.glb"
-            addHotspot("0.00960422567398053m 0.09505953028582997m 0.04447080215735666m", "-5.551115123125784e-17m 0.42171139628954796m 0.9067301132307894m", "First HS");
-            addHotspot("-0.01194014640005309m 0.1888m 0.0014m", "-0.394m 0.605m 0.691555m", "Second HS");
-            document.getElementById("body").className = "model";
-            document.getElementById("noModelTextBox").style.opacity = 0;
+            viewer.src = model.src;
+            model.hotspots.map(ano => {
+                addHotspot(ano.position, ano.normal, ano.text)
+            })
         }
 
         function removeModel() {
