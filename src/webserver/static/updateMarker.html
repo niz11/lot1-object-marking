@@ -25,11 +25,12 @@
         <label for="mscal">Marker-Scaling:</label>
         <input type="text" id="mscal" name="mscal" ><br><br>
 
-        <input type="submit" value="Submit" onsubmit="">
+        <button onclick="updateMarker()">Update</button>
     </div>
 </div>
 <script>
     let jsonData;
+    let chosenModel;
     fetch(`/models`)
         .then(response => response.json())
         .then(data => {
@@ -57,11 +58,32 @@
             });
     }
     function addModel(model) {
+        chosenModel = model;
         document.getElementById("alt").value = model.alt;
         document.getElementById("src").value = model.src;
-        document.getElementById("mdist").value = "" + model.distance;
-        document.getElementById("mrot").value = "" + model.rotation;
-        document.getElementById("mscal").value = "" + model.scaling;
+        if (model.marker) {
+            document.getElementById("mdist").value = "" + model.marker.distance;
+            document.getElementById("mrot").value = "" + model.marker.rotation;
+            document.getElementById("mscal").value = "" + model.marker.scaling;
+        }
+
+    }
+
+    function updateMarker() {
+        if (chosenModel) {
+            fetch('/models/update-marker', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    src: chosenModel.src,
+                    distance: "" + document.getElementById("mdist").value,
+                    rotation: "" + document.getElementById("mrot").value,
+                    scaling: "" + document.getElementById("mscal").value
+                })
+            }).catch(e => {
+                console.log(e);
+            })
+        }
     }
 </script>
 </body>
