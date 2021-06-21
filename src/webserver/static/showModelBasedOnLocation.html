@@ -97,7 +97,6 @@
             .then(response => response.json())
             .then(data => {
                 jsonData = data;
-                console.log(data);
                 // Here: Add user ID to if statement
                 model = jsonData.filter(model => model.modelName === modelName);
                 if (model) removeAllHotspots();
@@ -153,18 +152,6 @@
         }
     </script>
     <script>
-
-        // setInterval(() => {
-        //     getLocation()
-        // }, 2000)
-
-        // setTimeout(() => {
-        //     addModel()
-        // },3000)
-
-        // setTimeout(() => {
-        //     removeModel()
-        // },10000)
         let id;
         function success(pos) {
             const objectLatitude = model ? model.location.latitude : 0;
