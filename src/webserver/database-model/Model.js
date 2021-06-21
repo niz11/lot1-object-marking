@@ -6,8 +6,7 @@ const Schema = mongoose.Schema;
 const ModelSchema = new Schema({
 	modelName: {
 		type: String,
-		required: true,
-		unique: true
+		required: true
 	},
 	src: {
 		type: String,
@@ -20,8 +19,7 @@ const ModelSchema = new Schema({
 	hotspots: [
 		{
 			text: {
-				type: String,
-				unique: true
+				type: String
 			},
 			position: {
 				type: String
