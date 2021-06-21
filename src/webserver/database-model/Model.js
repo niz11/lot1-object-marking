@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Create Schema
-// modelName, src and hotspots text are unique.
+// src is unique across DB.
+// modelName should be unique within a users profile.
+// Hotspot text should be unique within a model.
 const ModelSchema = new Schema({
 	modelName: {
 		type: String,
