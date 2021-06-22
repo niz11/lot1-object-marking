@@ -17,13 +17,41 @@
 
 </head>
 <style>
-        body, html {
-            padding: 0;
-            margin: 0;
-        }
+    html,
+    body {
+        height: 100%;
+    }
+
+    #mapid {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .img-wrap {
+        width: 200px;
+        height: 150px;
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .img-wrap>img {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-height: 100%;
+        min-width: 100%;
+        transform: translate(-50%, -50%);
+    }
 </style>
+
 <body>
-    <div id="mapid" style="width: 600px; height: 400px;"></div>
+    <div id="mapid"></div>
+    <div id="locateMe">
+        Locate me
+    </div>
     <script>
 
         const mymap = L.map('mapid').setView([51.505, -0.09], 13);
@@ -33,9 +61,6 @@
             tileSize: 512,
             zoomOffset: -1
         }).addTo(mymap);
-
-        L.marker([51.5, -0.09]).addTo(mymap)
-            .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
 
         var popup = L.popup();
 
@@ -51,18 +76,50 @@
         fetch(`/models`)
             .then(response => response.json())
             .then(data => {
-                if (data.length > 0){
-                    data.map((model ,index)=>{
-                        if (model.location.latitude &&  model.location.longitude){
+                if (data.length > 0) {
+                    data.map((model, index) => {
+                        if (model.location.latitude && model.location.longitude) {
                             L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(`<b>${model.modelName}</b><br />`).openPopup();
-                            if (index === model.length - 1){
+                                .bindPopup(`<b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/astro.png"></div>`).openPopup();
+                            if (index === model.length - 1) {
                                 mymap.setView(model.location.latitude, model.location.longitude)
                             }
                         }
                     })
-                } 
+                }
             });
+        // placeholders for the L.marker and L.circle representing user's current position and accuracy    
+        let current_position, current_accuracy;
+
+        function onLocationFound(e) {
+            // if position defined, then remove the existing position marker and accuracy circle from the map
+            if (current_position) {
+                mymap.removeLayer(current_position);
+                mymap.removeLayer(current_accuracy);
+            }
+
+            let radius = e.accuracy / 2;
+
+            current_position = L.marker(e.latlng).addTo(mymap)
+                .bindPopup("You are within " + radius + " meters from this point");
+
+            current_accuracy = L.circle(e.latlng, radius).addTo(mymap);
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        mymap.on('locationfound', onLocationFound);
+        mymap.on('locationerror', onLocationError);
+
+        // wrap mymap.locate in a function    
+        function locate() {
+            mymap.locate({ setView: false, maxZoom: 13 });
+        }
+
+        // call locate every 3 seconds... forever
+        setInterval(locate, 3000);
 
     </script>
 
