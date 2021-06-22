@@ -28,22 +28,17 @@
     }
 
     .img-wrap {
-        width: 200px;
-        height: 150px;
-        position: relative;
-        display: inline-block;
-        overflow: hidden;
-        margin: 0;
+		width: 200px;
+		height: 180px;
+		display: inline-block;
+		overflow: hidden;
     }
 
     .img-wrap>img {
-        display: block;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        min-height: 100%;
-        min-width: 100%;
-        transform: translate(-50%, -50%);
+height: 100%;
+    }
+    .artWorkPopUp{
+        text-align: center;
     }
 </style>
 
@@ -80,7 +75,7 @@
                     data.map((model, index) => {
                         if (model.location.latitude && model.location.longitude) {
                             L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(`<b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/astro.png"></div>`).openPopup();
+                                .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
                             if (index === model.length - 1) {
                                 mymap.setView(model.location.latitude, model.location.longitude)
                             }
