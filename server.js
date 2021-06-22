@@ -32,7 +32,7 @@ app.use(busboy({
   highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 })); // Insert the busboy middle-ware
 
-let uploadPath = path.join(__dirname, 'uploaded-images/images'); // Register the upload path
+let uploadPath = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/images'); // Register the upload path
 fs.ensureDir(uploadPath); // Make sure that he upload path exits
 
 // var output_folder_length;
@@ -91,7 +91,7 @@ app.post('/meshroom-pipeline', async function (req, res) {
   await fs.mkdir(upload_folder);
   console.log("New folder created!");
   let received_images = 0; // number of images fully received
-  
+
   req.pipe(req.busboy); // Pipe it trough busboy
   req.busboy.on('file', (fieldname, file, filename) => {
     console.log(`Upload of '${filename}' started`);
@@ -151,9 +151,11 @@ async function initiateMeshroomPipeline(request_id) {
   let input_path;
   // meshroom will scip building 3D model from scratch, because image-signatures already known --> safes time
   if (testing) {
+    // input already known to meshromm-cache --> skipping rendering-time
     input_path = path.join(__dirname, 'Meshroom-AliceVision\\input\\dataset_monstree-master\\mini3');
   } else {
-    input_path = path.join(__dirname, 'uploaded-images/images' + request_id);
+    // real input path with freshly send images from frontend
+    input_path = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/images' + request_id);
   }
   // const output_path = path.join(__dirname, 'Meshroom-AliceVision\\output\\output' + (output_dir_length + 1));
   const output_path = path.join(__dirname, 'Meshroom-AliceVision\\output\\output' + request_id);
