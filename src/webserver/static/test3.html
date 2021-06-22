@@ -11,10 +11,11 @@
     <script src="new/three.js"></script>
     <script src="new/GLTFLoader.js"></script>
 
-    <script src="new/EventDispatcher.js"></script>
+    <script src="new/EventDispatcher.js"></script> <!-- TODO: Can be removed when dependency to arjs is removed -->
 
     <script src="jsartoolkit5/artoolkit.min.js"></script>
     <script src="jsartoolkit5/artoolkit.api.js"></script>
+
     <!-- include threex.artoolkit -->
     <script src="threex/threex-artoolkitsource.js"></script>
     <script src="threex/threex-artoolkitcontext.js"></script>
@@ -26,33 +27,33 @@
         display: block;
         width: 20px;
         height: 20px;
+        transform: translate(-10px, -10px);
         border-radius: 10px;
         border: none;
-        background-color: #008CBA;
+        background-color: #008CBA00;
         box-sizing: border-box;
-        visibility: visible;
+        /*visibility: hidden;*/
         position: fixed;
     }
 
-    /*button[slot="hotspot-hand"]{*/
-    /*    --min-hotspot-opacity: 0;*/
-    /*    background-color: red;*/
-    /*}*/
+    div.tb{
+        border-radius: 5px;
+        background: #00000000;
+        color: #FFFFFF00;
+        padding: 0.5em;
+        position: fixed;
+        transform: translate(10px, 10px);
+        /*visibility: hidden;*/
+    }
+
     div.con {
-        /*background-color: rgba(127, 127, 127, 0.90);*/
-        /*position: relative;*/
         position: fixed;
         top: 50%;
         left: 50%;
         margin-top: -50px; /* Negative half of height. */
         margin-left: -50px; /* Negative half of width. */
-
-        /*min-height: 100vh;*/
-        /*visibility: hidden;*/
     }
     div.cen {
-        /*background-color: rgba(127, 127, 127, 0.90);*/
-        /*position: relative;*/
         width: 100px;
         height: 100px;
         vertical-align: middle;
@@ -65,10 +66,8 @@
         bottom: 0;
         left: 0;
         position: fixed;
-        /*padding: 1em;*/
         text-align: center;
         width: 100%;
-        /*visibility: collapse;*/
     }
     #annotation{
         background-color: #888888;
@@ -84,8 +83,6 @@
 </style>
 <body>
 <div id="infoBox">
-    <button class="p" data-position="-0.12 0.0 0.0">
-    </button>
 
     <div class="con" id = "con">
         <div class="cen">
@@ -93,7 +90,7 @@
         </div>
     </div>
 
-    <div class="foot">
+    <div class="foot" id="footer">
         <div id="ax"></div>
         <div id="ay"></div>
         <div id="az"></div>
@@ -103,61 +100,39 @@
         <div id="bz"></div>
 
         <div id="rx">Instructions:</div>
-        <div id="ry">    1. Look around with the camera around the artwork for better AR tracking</div>
+        <div id="ry">    1. Shake your phone a bit to initialize AR tracking</div>
         <div id="rz">    2. Point the camera to the middle of the marker until the box is green </div>
     </div>
 
 </div>
-<!-- Starting an immersive WebXR session requires user interaction.
-We start this one with a simple button. -->
 <button onclick="activateXR()" >Start Hello WebXR</button>
-<!-- <script type="module">
-    import {WebXRButton} from './webxr-button.js';
+<script type = module>
+    import {ArModel, Hotspot} from "./lot1/arModel.js";
+
+    let arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
+    let arToolkitSource, arToolkitContext;
+
+    let firstUpdate = false;
+
+    initialize();
 
 
-</script> -->
-<script>
+
+
+
+
+
+
+
 
     let objAnchor = null;
-
-
     let markerOrientationS = [];
-    let viewOrientationS = []; //TODO: REMOVE
-
-    let markerOrientationS2 = []; //TODO: REMOVE
-    let viewOrientationS2 = []; //TODO: REMOVE
-
-
-    let va, vb, vc, vd; //TODO: REMOVE
-
-    let euler; //TODO: REMOVE
-
-
-    vd = 0;
-
+    let markerOrientationS2;
 
     // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
     const canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
     const gl = canvas.getContext("webgl2", { xrCompatible: true });
-
-
-
-
-
-
-
-
-
-
-    var arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
-    var arToolkitSource, arToolkitContext;
-
-    var mx, my, mz;
-
-    var firstUpdate = false;
-
-    initialize();
 
     const arjsBuffer = gl.createFramebuffer();
 
@@ -168,14 +143,51 @@ We start this one with a simple button. -->
     let arjsW = 0;
     let arjsH = 0;
     const arjsBuffer2 = gl.createFramebuffer();
-
+    let raycaster = new THREE.Raycaster();
     const scene = new THREE.Scene();
+    let camera;
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
     directionalLight.position.set(10, 15, 10);
     scene.add(directionalLight);
 
-    async function activateXR() {
+    let dbModel;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            const model = data.filter(model => model.modelName === 'FishBox');
+            dbModel = model[0];
+            loadArModel();
+        });
+
+    let arModel;
+
+    function loadArModel() {
+        arModel = new ArModel(dbModel);
+        let arHs1 = new Hotspot();
+        arHs1.rPosition = new THREE.Vector3(-0.06, 0, 0);
+        arHs1.text = "Left"
+        arHs1.updateDOMElement();
+
+        let arHs2 = new Hotspot();
+        arHs2.rPosition = new THREE.Vector3(+0.06, 0, 0);
+        arHs2.text = "Right"
+        arHs2.updateDOMElement();
+
+        let arHs3 = new Hotspot();
+        arHs3.rPosition = new THREE.Vector3(0, +0.09, 0);
+        arHs3.text = "Fish"
+        arHs3.updateDOMElement();
+
+        arModel.hotspots.push(arHs1, arHs2);
+
+        arModel.loadModelFromSource(scene, function () {
+            arModel.computeOffsetFromMesh();
+        })
+    }
+
+
+    window.activateXR = async function activateXR() {
         // Set up the WebGLRenderer, which handles rendering to the session's base layer.
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -185,33 +197,16 @@ We start this one with a simple button. -->
         });
         renderer.autoClear = false;
 
-        const camera = new THREE.PerspectiveCamera();
+        camera = new THREE.PerspectiveCamera();
         camera.matrixAutoUpdate = false;
         let uiElement = document.getElementById('infoBox');
         let content = document.getElementById('con');
         content.style.visibility = 'visible';
-        // content.style.minHeight = '100vh';
-        // content.style.minHeight = '100hw';
         const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'anchors', 'camera-access', 'plane-detection'],
             optionalFeatures: ['dom-overlay'], domOverlay: { root: uiElement } });
         session.updateRenderState({
             baseLayer: new XRWebGLLayer(session, gl)
         });
-
-
-        let raycaster = new THREE.Raycaster();
-
-        box = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1, 0.24, 0.15),
-            new THREE.MeshBasicMaterial({color: 0x0000ff}) //blue
-        );
-        box.visible = false;
-        box.material.wireframe = true;
-        scene.add(box);
-
-
-
-
 
 
         const referenceSpace = await session.requestReferenceSpace('local');
@@ -228,24 +223,11 @@ We start this one with a simple button. -->
             scene.add(reticle);
         });
 
-        let flower;
-        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/sunflower/sunflower.gltf", function (gltf) {
-            flower = gltf.scene;
-        });
-
 
         let glBinding = new XRWebGLBinding(session, gl);
 
-        // Create a render loop that allows us to draw on the AR view.
+
         const onXRFrame = (time, frame) => {
-
-
-
-
-            // Retrieve the pose of the device.
-            // XRFrame.getViewerPose can return null while the session attempts to establish tracking.
-
-            const poseV = frame.getViewerPose(viewerSpace);
             const pose = frame.getViewerPose(referenceSpace);
             if (pose) {
                 const view = pose.views[0];
@@ -255,10 +237,7 @@ We start this one with a simple button. -->
 
                     let tex = glBinding.getCameraImage(frame, view);
 
-
-
-
-                    //TODO: try PBO's to enhance performance
+                    //TODO: try PBO's to enhance performance, try zoom for performance improvement, try OpenCV for better tracking
                     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, arjsBuffer);
                     gl.framebufferTexture2D(
                         gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
@@ -277,29 +256,25 @@ We start this one with a simple button. -->
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
 
-                // const viewport = session.renderState.baseLayer.getViewport(view);
                 renderer.setSize(viewport.width, viewport.height);
 
-                // Use the view's transform matrix and projection matrix to configure the THREE.camera.
                 camera.matrix.fromArray(view.transform.matrix);
                 camera.projectionMatrix.fromArray(view.projectionMatrix);
                 camera.updateMatrixWorld(true);
 
                 let offset = 100;
 
-                // camera.matrix.decompose(camera.position, camera.quaternion, camera.scale)
 
-                vd += 0.01;
+                let camPos = new THREE.Vector3();
+                let camQua = new THREE.Quaternion();
+                let camSca = new THREE.Vector3();
+                camera.matrix.decompose(camPos, camQua, camSca);
+
 
 
                 if (!objAnchor && arJSSmarkerControls.object3d.visible) {
                     let pos = arJSSmarkerControls.object3d.position;
                     let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
-
-
-                    // document.getElementById('rx').innerHTML = 'x: ' + arJSSmarkerControls.object3d.rotation.x;
-                    // document.getElementById('ry').innerHTML = 'y: ' + arJSSmarkerControls.object3d.rotation.y;
-                    // document.getElementById('rz').innerHTML = 'z: ' + arJSSmarkerControls.object3d.rotation.z;
 
 
                     arJSSmesh.position.x = cpos.x * viewport.width / 2.0;
@@ -310,16 +285,11 @@ We start this one with a simple button. -->
                         arJSScamera.top = viewport.height  / 2.0;
                         arJSScamera.bottom = -viewport.height  / 2.0;
                         arJSScamera.updateProjectionMatrix();
-                        console.log("Updating Projection Matrix!")
                     }
 
                     arJSSmesh.position.z = 4.0;
 
                     arJSSmesh.rotation.z = Math.PI - arJSSmarkerControls.object3d.rotation.z;
-
-                    mx.rotation.z = arJSSmarkerControls.object3d.rotation.x;
-                    my.rotation.z = arJSSmarkerControls.object3d.rotation.y;
-                    mz.rotation.z = arJSSmarkerControls.object3d.rotation.z;
 
                     const ratio = viewport.width / viewport.height;
 
@@ -330,101 +300,33 @@ We start this one with a simple button. -->
                     renderer.render(arJSScene, arJSScamera);
                 }
 
-
-                // const pv = frame.getPose(viewerSpace, referenceSpace);
-                // const pv = view;
-                // const pv = frame.getPose(referenceSpace, viewerSpace);
-
-                // box.position.set(pv.transform.position.x, pv.transform.position.y, pv.transform.position.z);
-                // box.quaternion.fromArray([pv.transform.orientation.x, pv.transform.orientation.y,
-                //     pv.transform.orientation.z, pv.transform.orientation.w])
-                // box.translateZ(-0.5);
-                // box.rotation.x = 0;
-                // box.rotation.z = 0;
-
-                const hitTestResults = frame.getHitTestResults(hitTestSource);
-                if (hitTestResults.length > 0 && reticle && !objAnchor) {
+                const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
+                if (hitTestResults && hitTestResults.length > 0 && reticle) {
                     const hitPose = hitTestResults[0].getPose(referenceSpace);
-                    const hitPoseV = hitTestResults[0].getPose(viewerSpace);
-                    box.visible = true;
+                    reticle.visible = false; //TODO: find a way to show that environment is recognized
+                    reticle.matrix.fromArray(hitPose.transform.matrix);
+                    reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
 
-                    let vo = hitPoseV.transform.orientation;
-                    euler = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
+                    const maxCount = 11;
 
-                    vo = hitPose.transform.orientation;
-                    va = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
-
-                    box.worldMatrix.fromArray(hitPose.transform.matrix);
-                    // box.matrix.decompose(box.position, box.quaternion, box.scale);
-
-                    // box.position.set(hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z);
-                    //
-                    // box.lookAt(camera.position);
-                    //
-                    // const lx = box.rotation.x;
-                    // const ly = box.rotation.y;
-                    // const lz = box.rotation.z;
-                    //
-                    // // box.rotation.x = va.x;
-                    // // box.rotation.z = va.z;
-                    //
-                    // document.getElementById('ax').innerHTML = 'ax: ' + (va.x / Math.PI * 180);
-                    // document.getElementById('ay').innerHTML = 'ay: ' + (va.y / Math.PI * 180);
-                    // document.getElementById('az').innerHTML = 'az: ' + (va.z / Math.PI * 180);
-                    //
-                    // document.getElementById('bx').innerHTML = 'bx: ' + (euler.x / Math.PI * 180);
-                    // document.getElementById('by').innerHTML = 'by: ' + (euler.y / Math.PI * 180);
-                    // document.getElementById('bz').innerHTML = 'bz: ' + (euler.z / Math.PI * 180);
-                    //
-                    // document.getElementById('rx').innerHTML = 'brx: ' + (box.rotation.x / Math.PI * 180);
-                    // document.getElementById('ry').innerHTML = 'bry: ' + (box.rotation.y / Math.PI * 180);
-                    // document.getElementById('rz').innerHTML = 'brz: ' + (box.rotation.z / Math.PI * 180);
-                    //
-                    // box.quaternion.fromArray([hitPose.transform.orientation.x, hitPose.transform.orientation.y,
-                    //     hitPose.transform.orientation.z, hitPose.transform.orientation.w]);
-                    //
-                    // box.rotation.y = lz;
-
-
-
-
-
-
-                    // box.rotation.y -= camera.rotation.y;
-                    // box.rotation.y += arJSSmesh.rotation.y;
-
-
-
-                    // box.rotation.y = 0;
-
-                    // reticle.rotation.setFromQuaternion(new THREE.Quaternion().fromArray([hitPose.transform.orientation.x, hitPose.transform.orientation.y,
-                    //     hitPose.transform.orientation.z, hitPose.transform.orientation.w]))
-
-                    //
-                    // reticle.updateMatrixWorld(true);
-
-
-                    if (offset < 0.004 && fCounter < 5 && false) {
+                    if (offset < 0.004 && fCounter < maxCount) {
                         fCounter += 1;
-                        markerOrientationS.push(arJSSmesh.rotation);
-                        const vo = view.transform.orientation;
-                        viewOrientationS.push(new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w])));
+                        markerOrientationS.push({rotation: arJSSmesh.rotation, offset: offset});
                     }
                     else {
                         fCounter = 0;
                         markerOrientationS = [];
-                        viewOrientationS = [];
                     }
 
-                    if (fCounter >= 5) {
-
-                        const vo = hitPose.transform.orientation;
-                        va = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
-                        //TODO: choose median
+                    if (fCounter >= maxCount) {
+                        //TODO: use Anchor at current viewing pose to calculate distance between hit test and marker center point
+                        //      for better alignment between virtual and real geometry
                         markerOrientationS2 = markerOrientationS;
-                        viewOrientationS2 = viewOrientationS;
-                        // console.log("HP ", hitPose.transform.position.x, hitPose.transform.position.y, hitPose.transform.position.z)
+                        markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
+
+                        arModel.relativeRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
                         hitTestResults[0].createAnchor().then((anchor) => {
+                            document.getElementById("footer").style.visibility = 'hidden';
                             objAnchor = anchor;
                         }, (error) => {
                             console.error("Could not create anchor: " + error);
@@ -447,76 +349,15 @@ We start this one with a simple button. -->
                 }
 
                 if (objAnchor) {
+
                     // Query most recent pose of the anchor relative to some reference space:
                     const pose = frame.getPose(objAnchor.anchorSpace, referenceSpace);
+                    arModel.update(pose, camera, camPos);
 
-                    const vo = pose.transform.orientation;
-                    vb = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().fromArray([vo.x, vo.y, vo.z, vo.w]));
-
-                    box.position.set(pose.transform.position.x, pose.transform.position.y + 0.075,
-                        pose.transform.position.z);
-                    // box.quaternion.fromArray([pose.transform.orientation.x, pose.transform.orientation.y,
-                    //     pose.transform.orientation.z, pose.transform.orientation.w])
-
-                    box.rotation = vb;
-
-
-
-                    // box.rotation.y += markerOrientationS2[2].z
-
-                    // box.position.set(pose.transform.position.x, pose.transform.position.y + 0.075, pose.transform.position.z);
-                    // box.rotation.y = markerOrientationS2[2].z - viewOrientationS2[2].y;
-                    // box.updateMatrixWorld(true);
-
-                    // box.matrix.fromArray(pose.transform.matrix);
-
-                    box.visible = true;
-
-                    let elems = document.getElementsByClassName("p");
-
-
-                    for(let e of elems) {
-                        let dpe = e.getAttribute("data-position").split(" ");
-                        let dpx = Number(dpe[0]) + box.position.x;
-                        let dpy = Number(dpe[1]) + box.position.y;
-                        let dpz = Number(dpe[2]) + box.position.z;
-
-                        const dpv = new THREE.Vector3(dpx, dpy, dpz);
-                        const sx = dpv.clone();
-
-                        const wh = viewport.width / 2.0;
-                        const hh = viewport.height / 2.0;
-
-                        sx.project(camera);
-                        // e.style.left = (wh * sx.x) + wh + 'px';
-                        // e.style.top = -(hh * sx.y) + hh + 'px';
-                        e.style.left = (50 * sx.x) + 50 + '%';
-                        e.style.top = (-50 * sx.y) + 50 + '%';
-                        e.style.visibility = 'visible';
-
-                        raycaster.set(camera.position, dpv);
-
-                        const intersections = raycaster.intersectObject(box);
-                        const intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
-
-                        if (intersection) {
-                            console.log(intersection)
-                            // e.style.visibility = 'visible';
-
-                        }
-                        else {
-                            // e.style.visibility = 'hidden';
-                        }
-                    }
-
-                    // console.log("Anchor ", pose.transform.position.x, pose.transform.position.y, pose.transform.position.z)
                 }
-
-
 
                 // Render the scene with THREE.WebGLRenderer.
                 renderer.render(scene, camera)
-
             }
             // Queue up the next draw request.
             session.requestAnimationFrame(onXRFrame);
@@ -528,6 +369,7 @@ We start this one with a simple button. -->
     /** ARJS Initialization **/
 
     function initialize() {
+        //TODO: Remove ARJS dependency and only rely on artoolkit
         arJSScene = new THREE.Scene();
 
         let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
@@ -543,32 +385,9 @@ We start this one with a simple button. -->
             new THREE.MeshBasicMaterial({color: 0xff0000})
         );
 
-        mx = new THREE.Mesh(new THREE.BoxGeometry(50, 100, 5), new THREE.MeshBasicMaterial({color: 0xff0000}));
-        my = new THREE.Mesh(new THREE.BoxGeometry(50, 100, 5), new THREE.MeshBasicMaterial({color: 0x00ff00}));
-        mz = new THREE.Mesh(new THREE.BoxGeometry(50, 100, 5), new THREE.MeshBasicMaterial({color: 0x0000ff}));
-
-
-
         arJSSmesh.material.wireframe = true;
-        mx.material.wireframe = true;
-        my.material.wireframe = true;
-        mz.material.wireframe = true;
         arJSScene.add(arJSSmesh);
-        arJSScene.add(mx);
-        arJSScene.add(my);
-        arJSScene.add(mz);
         arJSScamera.position.z = 5;
-
-        mx.position.x = -window.innerWidth + window.innerWidth * 0.3;
-        my.position.x = -window.innerWidth + window.innerWidth * 1.01;
-        mz.position.x = -window.innerWidth + window.innerWidth * 1.7;
-
-
-
-        mx.position.y = -window.innerHeight * 0.2;
-        my.position.y = -window.innerHeight * 0.2;
-        mz.position.y = -window.innerHeight * 0.2;
-
 
         // handle resize
         window.addEventListener('resize', function () {
@@ -583,6 +402,7 @@ We start this one with a simple button. -->
         }
 
 
+        //TODO: find better variables for more robust tracking
         arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: 'data/camera_para.dat',
             detectionMode: 'mono',
@@ -596,10 +416,7 @@ We start this one with a simple button. -->
             arJSScamera2.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
             arjsW = arToolkitContext.arController.canvas.width;
             arjsH = arToolkitContext.arController.canvas.height;
-            console.log("SIZE: W: ", arjsW, " H: ", arjsH);
 
-
-            //
             let rb = gl.createRenderbuffer();
             gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
             gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
@@ -615,11 +432,6 @@ We start this one with a simple button. -->
             });
         }
     }
-
-    window.addEventListener("markerFound", function (e) {
-    });
-    window.addEventListener("markerLost", function (e) {
-    });
 </script>
 </body>
 

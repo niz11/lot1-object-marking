@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update AR Marker</title>
+</head>
+<body>
+<div id="displayblocks">
+    <div id="formblock">
+        <label for="modelSelection">Model: </label>
+        <select id="modelSelection" onchange="getComboA(this)"></select><br><br>
+
+        <label for="alt">Alternative Name:</label>
+        <input type="text" id="alt" name="alt" disabled><br><br>
+
+        <label for="src">Source:</label>
+        <input type="text" id="src" name="src" disabled><br><br>
+
+        <label for="mdist">Marker-Distance:</label>
+        <input type="text" id="mdist" name="mdist" ><br><br>
+
+        <label for="mrot">Marker-Rotation:</label>
+        <input type="text" id="mrot" name="mrot" ><br><br>
+
+        <label for="mscal">Marker-Scaling:</label>
+        <input type="text" id="mscal" name="mscal" ><br><br>
+
+        <button onclick="updateMarker()">Update</button>
+    </div>
+</div>
+<script>
+    let jsonData;
+    let chosenModel;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            jsonData = data;
+            addModel(data[0])
+            console.log(data)
+            let select = document.getElementById("modelSelection");
+
+            for (const val of data) {
+                let option = document.createElement("option");
+                option.value = val.modelName;
+                option.text = val.modelName;
+                select.appendChild(option);
+            }
+        });
+    function getComboA(selectObject) {
+        var value = selectObject.value;
+        // Need to fetch data again, incease hotspots were added
+        fetch(`/models`)
+            .then(response => response.json())
+            .then(data => {
+                jsonData = data;
+                const model = jsonData.filter(model => model.modelName === value);
+                addModel(model[0]);
+            });
+    }
+    function addModel(model) {
+        chosenModel = model;
+        document.getElementById("alt").value = model.alt;
+        document.getElementById("src").value = model.src;
+        if (model.marker) {
+            document.getElementById("mdist").value = "" + model.marker.distance;
+            document.getElementById("mrot").value = "" + model.marker.rotation;
+            document.getElementById("mscal").value = "" + model.marker.scaling;
+        }
+
+    }
+
+    function updateMarker() {
+        if (chosenModel) {
+            fetch('/models/update-marker', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    src: chosenModel.src,
+                    distance: "" + document.getElementById("mdist").value,
+                    rotation: "" + document.getElementById("mrot").value,
+                    scaling: "" + document.getElementById("mscal").value
+                })
+            }).catch(e => {
+                console.log(e);
+            })
+        }
+    }
+</script>
+</body>
+</html>

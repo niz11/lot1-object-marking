@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Create Schema
-// modelName, src and hotspots text are unique.
+// src is unique across DB.
+// modelName should be unique within a users profile.
+// Hotspot text should be unique within a model.
 const ModelSchema = new Schema({
 	modelName: {
 		type: String,
-		required: true,
-		unique: true
+		required: true
 	},
 	src: {
 		type: String,
@@ -20,8 +21,7 @@ const ModelSchema = new Schema({
 	hotspots: [
 		{
 			text: {
-				type: String,
-				unique: true
+				type: String
 			},
 			position: {
 				type: String
@@ -36,6 +36,17 @@ const ModelSchema = new Schema({
 			type: Number
 		},
 		longitude: {
+			type: Number
+		}
+	},
+	marker: {
+		distance: {
+			type: Number
+		},
+		rotation: {
+			type: Number
+		},
+		scaling: {
 			type: Number
 		}
 	},

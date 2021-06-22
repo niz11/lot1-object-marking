@@ -1,3 +1,4 @@
 {
-    "ext": "html"
+    "ext": "html, glb",
+    "watch": ["/saved-models"]
 }
