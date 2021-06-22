@@ -12,7 +12,7 @@
     <h1 id="demo">Artworks Homepage</h1>
     <p id="demo1">Drag and drop your pictures here to create your very own 3D model!</p>
   </div>
-
+  <!-- form tag will interfere with xmlhttprequest if action not exact url as from xmlhttp call-->
   <!-- <form class="box" method="post" action="https://localhost:8080/meshroom-pipeline" enctype="multipart/form-data"> -->
   <div class="box__input">
     <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected"
@@ -40,6 +40,7 @@
   const server = 'https://localhost:8080/'
   const message_body = document.getElementById("status_message");
 
+  // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
   function sendPhotos() {
 
     let files = document.getElementById("file").files;
@@ -80,6 +81,7 @@
     sendPhotos();
   });
 
+  // continous to ask/poll for ready rendered 3D model with given id every 2 seconds if not finished yet
   function startLongPolling(model_id) {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -89,15 +91,15 @@
       } else if (this.readyState == 4 && this.status == 200) {
         console.log(xhr.responseText);
         message_body.innerText = xhr.responseText;
-        setTimeout(() => {startLongPolling(model_id)}, 2000);
+        setTimeout(() => { startLongPolling(model_id) }, 2000);
       } else if (this.readyState == 4 && this.status == 201) {
         console.log(xhr.responseText);
         message_body.innerText = "Model was created successfully! Here is the result:";
         // document.getElementById("status_message").innerText = "Haloooooooooo????????"
         // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/meshroom-pipeline/?id=' + model_id)
         const model_src = 'https://localhost:8080/meshroom-pipeline-model/?id=' + model_id;
-        document.getElementById("model_viewer_container").innerHTML = 
-        `<model-viewer src="` + model_src + `"    
+        document.getElementById("model_viewer_container").innerHTML =
+          `<model-viewer src="` + model_src + `"    
               ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
               alt="A 3D model of an astronaut"
               ar
@@ -105,7 +107,7 @@
               camera-controls
               id="model_viewer">
         </model-viewer>`
-      } 
+      }
     };
     xhr.open("GET", 'https://localhost:8080/meshroom-pipeline/?id=' + model_id);
     xhr.send();
@@ -135,14 +137,15 @@
   model-viewer#reveal {
     --poster-color: transparent;
   }
-  model-viewer {
-  width: 800px;
-  height: 600px;
-}
 
-#status_message {
-  padding: 10px;
-}
+  model-viewer {
+    width: 800px;
+    height: 600px;
+  }
+
+  #status_message {
+    padding: 10px;
+  }
 </style>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 

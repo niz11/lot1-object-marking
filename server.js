@@ -9,7 +9,8 @@ const obj2gltf = require('obj2gltf'); // converting .obj to .gltf/.glb
 const app = express();
 const port = 8080;
 
-const testing = true;
+// skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
+const testing = false;
 
 // app.use(cors());
 // app.options('*', cors());
@@ -26,6 +27,7 @@ app.use(function (req, res, next) {
   next();
 });
 
+// module to manage upload of images, max 2MiB buffer --> images are directly written to disk
 app.use(busboy({
   highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 })); // Insert the busboy middle-ware
@@ -40,17 +42,19 @@ app.get('/', function (req, res) {
   console.log('GET request to the homepage');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+// path to request the finished 3D model with given id
 app.get('/meshroom-pipeline-model', function (req, res) {
   const model_id = req.query.id;
   console.log('GET request to the 3D object-model.glb with id: ' + model_id);
   res.sendFile(path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb'));
 });
 
-app.get('/object_files/AnyConv.com__texturedMesh.glb', function (req, res) {
-  console.log('GET request to the 3D object');
-  res.sendFile(path.join(__dirname, 'object_files/AnyConv.com__texturedMesh.glb'));
-});
+// app.get('/object_files/AnyConv.com__texturedMesh.glb', function (req, res) {
+//   console.log('GET request to the 3D object');
+//   res.sendFile(path.join(__dirname, 'object_files/AnyConv.com__texturedMesh.glb'));
+// });
 
+// path to request whether a 3D model generation is already finished
 app.get('/meshroom-pipeline', function (req, res) {
   const model_id = req.query.id;
   console.log('GET request to the 3D object with id: ' + model_id);
@@ -78,6 +82,7 @@ app.get('/meshroom-pipeline', function (req, res) {
   // res.sendFile(path.join(__dirname, 'object_files/AnyConv.com__texturedMesh.glb'));
 });
 
+// path to post the images and trigger the pipeline
 app.post('/meshroom-pipeline', async function (req, res) {
   let image_count = req.query.images;
   const request_id = Math.round(Math.random() * 10_000_000);
@@ -86,6 +91,7 @@ app.post('/meshroom-pipeline', async function (req, res) {
   await fs.mkdir(upload_folder);
   console.log("New folder created!");
   let received_images = 0; // number of images fully received
+  
   req.pipe(req.busboy); // Pipe it trough busboy
   req.busboy.on('file', (fieldname, file, filename) => {
     console.log(`Upload of '${filename}' started`);
@@ -109,45 +115,35 @@ app.post('/meshroom-pipeline', async function (req, res) {
           response: '3D creation in Progress! This can take from a few minutes to several hours. \n You can either wait on the website,' +
             ' or come back later and request the 3D model with id: ' + request_id + '. In that case, please write it down to remember.'
         }
+        // response is send to tell frontend of successfull initiation of the 3D-modelling-pipeline
         res.json(response);
+        // waits until meshromm finished rendering 
         await initiateMeshroomPipeline(request_id);
         const options = {
           binary: true
         }
         let model_output = path.join(__dirname, 'Meshroom-AliceVision/output/output' + request_id);
+        // convert .obj to .glb with node module (obj2gltf)
         obj2gltf(model_output + '/texturedMesh.obj', options)
           .then(async function (glb) {
-            fs.writeFileSync(model_output + '/model' + request_id +'.glb', glb);
+            fs.writeFileSync(model_output + '/model' + request_id + '.glb', glb);
+            // after .glb file got written do disk, the model_id will be removed from the current_working_buffer 
             current_modelling_processes.delete(request_id.toString());
             console.log('Pipeline Callback finished! \n Ready to send 3D-model-file to requester with output_file_id: ' + request_id);
           });
-        
-        // res.sendFile(path.join(__dirname, 'Meshroom-AliceVision/output/output' + output_folder_length + '/texturedMesh.obj'));
       }
     });
   });
-
-
-
 });
+
 app.post('/', function (req, res) {
   console.log('POST request to the homepage');
   res.send('POST request to the homepage');
 });
 
-
-async function readDirLength() {
-  try {
-    const files = await fs.promises.readdir(path.join(__dirname, '/Meshroom-AliceVision/output'));
-    return files.length;
-  } catch (err) {
-    console.error('Error occured while reading directory!', err);
-  }
-}
-
 // start node-child-process to run the meshroom-pipeline asynchronously
 async function initiateMeshroomPipeline(request_id) {
-  const output_dir_length = await readDirLength();
+  // const output_dir_length = await readDirLength();
   // output_folder_length = output_dir_length;
 
   console.log('3D model computation in progress...');
@@ -195,6 +191,7 @@ async function initiateMeshroomPipeline(request_id) {
   }); */
 }
 
+// for https
 const httpsOptions = {
   key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')), // 'server.key'
   cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem')) // 'server.cert'
@@ -203,5 +200,14 @@ const httpsOptions = {
 https.createServer(httpsOptions, app).listen(port, () => {
   console.log(`3D modelling app listening at https://localhost:${port}`);
 });
+
+// async function readDirLength() {
+//   try {
+//     const files = await fs.promises.readdir(path.join(__dirname, '/Meshroom-AliceVision/output'));
+//     return files.length;
+//   } catch (err) {
+//     console.error('Error occured while reading directory!', err);
+//   }
+// }
 
 
