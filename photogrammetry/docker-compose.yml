@@ -44,7 +44,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./model
+      device: ../src/webserver/static/saved-models
   log:
     driver: local
     driver_opts:

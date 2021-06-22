@@ -2,6 +2,18 @@ const express = require('express');
 const router = express.Router();
 const Model = require('./Model');
 
+const MonsterTree3 = new Model({modelName: 'MonsterTree3', src: '/saved-models/model.glb'});
+//MonsterTree3.save();
+console.log('added MonsterTree 3D Model to Database');
+
+const schachtel = new Model({modelName: 'Schachtel', src: '/saved-models/schachtel.glb'});
+//schachtel.save();
+console.log('added Schachtel 3D Model to Database');
+
+const lowPoly = new Model({modelName: 'low-Poly', src: '/saved-models/lowPoly.glb'});
+//lowPoly.save();
+console.log('added low poly 3D Model to Database');
+
 router.get('/test', (req, res) => {
 	res.json({ msg: 'Users works' });
 });
