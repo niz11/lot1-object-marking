@@ -27,13 +27,8 @@
     <div class="box__error">Error! <span></span>.</div>
     <!-- </form> -->
 
-    <!-- /object_files/AnyConv.com__texturedMesh.glb -->
     <div id="model_viewer_container"></div>
 
-    <!-- src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" -->
-
-
-    <!--<script src="localhost:8080/js/hs"></script>-->
 </body>
 
 <script>
@@ -60,8 +55,6 @@
       }
     };
     xhr.open("POST", 'https://localhost:8080/meshroom-pipeline/?images=' + image_count);
-    // xhr.setRequestHeader("Content-type", "application/json");
-    // setAuthorization(xhr);
     xhr.send(formData);
 
     xhr.upload.onprogress = function (event) {
@@ -95,8 +88,8 @@
       } else if (this.readyState == 4 && this.status == 201) {
         console.log(xhr.responseText);
         message_body.innerText = "Model was created successfully! Here is the result:";
-        // document.getElementById("status_message").innerText = "Haloooooooooo????????"
         // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/meshroom-pipeline/?id=' + model_id)
+        
         const model_src = 'https://localhost:8080/meshroom-pipeline-model/?id=' + model_id;
         document.getElementById("model_viewer_container").innerHTML =
           `<model-viewer src="` + model_src + `"    

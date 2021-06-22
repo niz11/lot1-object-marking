@@ -35,7 +35,6 @@ app.use(busboy({
 let uploadPath = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/images'); // Register the upload path
 fs.ensureDir(uploadPath); // Make sure that he upload path exits
 
-// var output_folder_length;
 
 // REST interface
 app.get('/', function (req, res) {
@@ -48,11 +47,6 @@ app.get('/meshroom-pipeline-model', function (req, res) {
   console.log('GET request to the 3D object-model.glb with id: ' + model_id);
   res.sendFile(path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb'));
 });
-
-// app.get('/object_files/AnyConv.com__texturedMesh.glb', function (req, res) {
-//   console.log('GET request to the 3D object');
-//   res.sendFile(path.join(__dirname, 'object_files/AnyConv.com__texturedMesh.glb'));
-// });
 
 // path to request whether a 3D model generation is already finished
 app.get('/meshroom-pipeline', function (req, res) {
@@ -78,8 +72,6 @@ app.get('/meshroom-pipeline', function (req, res) {
       console.log("An error occurred.");
     }
   }
-
-  // res.sendFile(path.join(__dirname, 'object_files/AnyConv.com__texturedMesh.glb'));
 });
 
 // path to post the images and trigger the pipeline
@@ -143,9 +135,6 @@ app.post('/', function (req, res) {
 
 // start node-child-process to run the meshroom-pipeline asynchronously
 async function initiateMeshroomPipeline(request_id) {
-  // const output_dir_length = await readDirLength();
-  // output_folder_length = output_dir_length;
-
   console.log('3D model computation in progress...');
   const meshrom_exe_path = path.join(__dirname, 'Meshroom-AliceVision\\Pipeline_2021\\Meshroom-2021.1.0\\meshroom_batch.exe');
   let input_path;
@@ -171,26 +160,6 @@ async function initiateMeshroomPipeline(request_id) {
     }
   }
   return startMeshroom();
-  // minimum required args are 'input' and 'output'
-  /* const child = await execFile(meshrom_exe_path, ['--input', input_path, '--output', output_path], (err, stdout, stderr) => {
-    if (err) {
-      throw err;
-    }
-    console.log(stdout);
-    console.error(stderr);
-  }); */
-  /*   use event hooks to provide a callback to execute when data are available: --> somehow prints data to console only when 
-    process finished */
-  // child.stdout.on('data', function(data) {
-  //   console.log(data.toString()); 
-  // });
-  /*   The exit event isn't guaranteed to be fired. For instance, if the process failed to spawn,
-   the error event is called. However, if the process did spawn and another error is caused, both handlers 
-   will be called. 
-   */
-  /* child.on('exit', function() {
-    console.log("Pipeline Finished rendering 3D model!");
-  }); */
 }
 
 // for https
@@ -203,13 +172,5 @@ https.createServer(httpsOptions, app).listen(port, () => {
   console.log(`3D modelling app listening at https://localhost:${port}`);
 });
 
-// async function readDirLength() {
-//   try {
-//     const files = await fs.promises.readdir(path.join(__dirname, '/Meshroom-AliceVision/output'));
-//     return files.length;
-//   } catch (err) {
-//     console.error('Error occured while reading directory!', err);
-//   }
-// }
 
 
