@@ -55,6 +55,8 @@ docker exec photogrammetry photogrammetry <i>subdirectory_name [meshroom graph]<
 
 ### start pipeline (remote / with docker API)
 
+NodeJS SDK: https://github.com/apocas/dockerode
+
 TODO
 
 ### SSH
