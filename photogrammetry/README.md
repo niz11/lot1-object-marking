@@ -75,3 +75,4 @@ ssh -p 2222 root@[docker-host]
 - optimize meshroom graph parameters
 - publish preview while calculating
 - add image compression tool to pipeline
+- presets for different image capturing conditions
