@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Node.js upload images</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+  <style>
+    div.preview-images>img {
+      width: 30%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-8 mt-3">
+        <h4>Node.js upload images - bezkoder.com</h4>
+          <div class="form-group">
+            <input type="file" name="file" id="input-files" class="form-control-file border" />
+          </div>
+          <button type="submit" onClick="onSubmit()" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+    <hr />
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="preview-images"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      let imagesPreview = function (input, placeToInsertImagePreview) {
+        if (input.files) {
+          let reader = new FileReader();
+          reader.onload = function (event) {
+            $($.parseHTML("<img>"))
+              .attr("src", event.target.result)
+              .appendTo(placeToInsertImagePreview);
+          };
+          reader.readAsDataURL(input.files[0]);
+        }
+      };
+      $("#input-files").on("change", function () {
+        imagesPreview(this, "div.preview-images");
+      });
+    });
+    async function onSubmit(e) {
+      const formData = new FormData();
+      const imagefile = document.querySelector('#input-files');
+      formData.append("file", imagefile.files[0]);
+      const res = await fetch('/uploadImage', {
+        method: 'POST',
+        body: formData
+      })
+      const json = await res.json();
+      console.log(json);
+    }
+  </script>
+</body>
+
+</html>

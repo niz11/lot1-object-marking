@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const bodyParser = require('body-parser');
+const uploadFile = require('./uploader');
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -41,6 +42,8 @@ app.get('/', (req, res) => {
 app.get('/ex2', (req, res) => {
 	res.sendFile(path.join(__dirname, '/static/ex2.html'));
 });
+
+app.post('/uploadImage', uploadFile.uploadFile);
 
 // Needs a url param of userId + modelName
 // e.g: https://localhost:3000/showModelBasedOnLocation/?userId=1&modelName=Astrunaut
