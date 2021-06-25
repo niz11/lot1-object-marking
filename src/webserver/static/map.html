@@ -48,6 +48,9 @@ height: 100%;
         Locate me
     </div>
     <script>
+        const params = new URLSearchParams(document.location.search);
+        const userId = params.get('userId')
+        const modelName = params.get('modelName')
 
         const mymap = L.map('mapid').setView([51.505, -0.09], 13);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -68,16 +71,47 @@ height: 100%;
 
         mymap.on('click', onMapClick);
 
+        const popUp = (name) => {
+            console.log(popUp);
+            return `<div class="artWorkPopUp">
+                        <b>${name}</b>
+                        <br />
+                        <a href="/showModelBasedOnLocation.html?userId=1&modelName=${name}">See model in AR Once inside radius</a>
+                    </div>`
+        }
         fetch(`/models`)
             .then(response => response.json())
             .then(data => {
                 if (data.length > 0) {
+                    // Show one model on map if it's in URL parmas. Need to check also user id
+                    if (modelName){
+                        console.log(modelName);
+                        let model = data.filter(model => model.modelName === modelName)
+                        model = model.length > 0 ? model[0] : model
+                        console.log(model);
+                        if (model && model.location.latitude && model.location.longitude) {
+                            L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                .bindPopup(popUp(model.modelName)).openPopup();
+                                // Comment out img for now
+                                // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                            const latLngs = [[model.location.latitude, model.location.longitude]];
+                            const markerBounds = L.latLngBounds(latLngs);
+                            mymap.fitBounds(markerBounds);
+                            map.setZoom(13);
+                        }
+                    }
+                    // Add all models to map
                     data.map((model, index) => {
                         if (model.location.latitude && model.location.longitude) {
                             L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                                .bindPopup(popUp(model.modelName)).openPopup();
+                                // Comment out img for now
+                                // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
                             if (index === model.length - 1) {
-                                mymap.setView(model.location.latitude, model.location.longitude)
+                            const latLngs = [[model.location.latitude, model.location.longitude]];
+                            const markerBounds = L.latLngBounds(latLngs);
+                            mymap.fitBounds(markerBounds);
+                            map.setZoom(13);
                             }
                         }
                     })
