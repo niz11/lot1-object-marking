@@ -90,7 +90,7 @@ height: 100%;
                         model = model.length > 0 ? model[0] : model
                         console.log(model);
                         if (model && model.location.latitude && model.location.longitude) {
-                            L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                            L.circleMarker([model.location.latitude, model.location.longitude], {radius: 5}).addTo(mymap)
                                 .bindPopup(popUp(model.modelName)).openPopup();
                                 // Comment out img for now
                                 // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
@@ -105,6 +105,7 @@ height: 100%;
                         if (model.location.latitude && model.location.longitude) {
                             L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
                                 .bindPopup(popUp(model.modelName)).openPopup();
+                            L.circleMarker([model.location.latitude, model.location.longitude], {radius: 10}).addTo(mymap)
                                 // Comment out img for now
                                 // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
                             if (index === model.length - 1) {
@@ -136,7 +137,7 @@ height: 100%;
         }
 
         function onLocationError(e) {
-            alert(e.message);
+            alert("Please reload if you want to update your location. Otherwise, close this message and continue tour");
         }
 
         mymap.on('locationfound', onLocationFound);
@@ -147,7 +148,7 @@ height: 100%;
             mymap.locate({ setView: false, maxZoom: 13 });
         }
 
-        // call locate every 3 seconds... forever
+        // call locate every 3 seconds.
         setInterval(locate, 3000);
 
     </script>
