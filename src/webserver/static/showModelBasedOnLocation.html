@@ -91,7 +91,6 @@
     <script>
         const params = new URLSearchParams(document.location.search);
         const userId = params.get('userId')
-        console.log(userId);
         const modelName = params.get('modelName')
         let models, model;
         fetch(`/models`)
