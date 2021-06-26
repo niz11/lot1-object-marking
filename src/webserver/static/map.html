@@ -84,9 +84,8 @@
             .then(data => {
                 if (data.length > 0) {
                     // Show one model on map if it's in URL parmas. Need to check also user id
-                    if (modelName) {
-                        console.log(modelName);
-                        let model = data.filter(model => model.modelName === modelName)
+                    if (modelName && userId) {
+                        let model = data.filter(model => model.modelName === modelName && model.user === userId)
                         model = model.length > 0 ? model[0] : model
                         console.log(model);
                         if (model && model.location.latitude && model.location.longitude) {
