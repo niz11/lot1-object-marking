@@ -61,7 +61,9 @@ router.post('/add-model', async (req, res) => {
 			marker: {
 				distance: req.body.distance ? req.body.distance : 0,
 				rotation: req.body.rotation ? req.body.rotation : 0,
-				scaling: req.body.scaling ? req.body.scaling : 0
+				scaling: req.body.scaling ? req.body.scaling : 0,
+				group: req.body.group ? req.body.group : 0,
+				markerId: req.body.markerId ? req.body.markerId : 0
 			},
 			user: req.body.userId
 		});
@@ -108,7 +110,9 @@ router.post('/update-model', async (req, res) => {
 		model[0].marker = {
 			distance: req.body.distance,
 			rotation: req.body.rotation,
-			scaling: req.body.scaling
+			scaling: req.body.scaling,
+			group: req.body.group,
+			markerId: req.body.markerId
 		};
 
 		model[0].save().then((model) => res.json(model));
@@ -218,6 +222,8 @@ router.post('/update-marker', async (req, res) => {
 		model[0].marker.distance = req.body.distance;
 		model[0].marker.rotation = req.body.rotation;
 		model[0].marker.scaling = req.body.scaling;
+		model[0].marker.group = req.body.group;
+		model[0].marker.markerId = req.body.markerId;
 		model[0].save().then((model) => res.json(model));
 	} else {
 		res.status(404).json('No Model with input src exists');
