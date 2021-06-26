@@ -9,7 +9,7 @@ router.get('/test', (req, res) => {
 router.get('/', (req, res) => {
 	Model.find()
 		.then((models) => res.json(models))
-		.catch((err) => res.status(404).json({ nopostsfound: 'No posts found' }));
+		.catch((err) => res.status(404).json({ noModels: 'No models found' }));
 });
 
 router.post('/user', (req, res) => {
@@ -18,7 +18,7 @@ router.post('/user', (req, res) => {
 	}
 	Model.find({ user: req.body.userId })
 		.then((models) => res.json(models))
-		.catch((err) => res.status(404).json({ nopostsfound: 'No posts found' }));
+		.catch((err) => res.status(404).json({ noModels: 'No models found' }));
 });
 
 router.post('/add-model', async (req, res) => {

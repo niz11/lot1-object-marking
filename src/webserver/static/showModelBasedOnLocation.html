@@ -92,13 +92,13 @@
         const params = new URLSearchParams(document.location.search);
         const userId = params.get('userId')
         const modelName = params.get('modelName')
-        let model;
+        let models, model;
         fetch(`/models`)
             .then(response => response.json())
             .then(data => {
                 jsonData = data;
-                // Here: Add user ID to if statement
-                model = jsonData.filter(model => model.modelName === modelName);
+                models = jsonData.filter(model => model.modelName === modelName && model.user === userId);
+                model = models[0];
                 if (model) removeAllHotspots();
             });
         function addHotspot(position, normal, inputtext) {
@@ -191,7 +191,6 @@
         }
 
         function addModel(model) {
-            console.log(model);
             const viewer = document.querySelector('#modelblock');
             viewer.src = model.src;
             model.hotspots.map(ano => {
