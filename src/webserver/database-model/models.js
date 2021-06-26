@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Model = require('./Model');
 
-
 router.get('/test', (req, res) => {
 	res.json({ msg: 'Users works' });
 });
@@ -13,12 +12,24 @@ router.get('/', (req, res) => {
 		.catch((err) => res.status(404).json({ nopostsfound: 'No posts found' }));
 });
 
+router.post('/user', (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
+	Model.find({ user: req.body.userId })
+		.then((models) => res.json(models))
+		.catch((err) => res.status(404).json({ nopostsfound: 'No posts found' }));
+});
+
 router.post('/add-model', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src || !req.body.modelName) {
 		return res.status(404).json('Missing params: src, model name');
 	}
 
-	modelCheck = await Model.find({ src: req.body.src });
+	modelCheck = await Model.find({ src: req.body.src, user: req.body.userId });
 	// Need also to add here the user. If the user has already a model with that name
 	if (modelCheck.modelName === req.body.modelName) {
 		return res.status(404).json('User already has a model with the input model name');
@@ -51,22 +62,26 @@ router.post('/add-model', async (req, res) => {
 				distance: req.body.distance ? req.body.distance : 0,
 				rotation: req.body.rotation ? req.body.rotation : 0,
 				scaling: req.body.scaling ? req.body.scaling : 0
-			}
+			},
+			user: req.body.userId
 		});
 
 		newModel.save().then((post) => res.json(post));
 	} else {
-		res.status(404).json('Model with this src, already exsist in DB');
+		res.status(404).json('User already has a model with input src');
 	}
 });
 
 // Update model, need to send to rout the whle models data
 router.post('/update-model', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src || !req.body.newSrc) {
 		return res.status(404).json('Missing params: src and model name');
 	}
 	// Find model
-	model = await Model.find({ src: req.body.src });
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
 	if (model.length === 1) {
 		let hotspots;
 		// Add hostspots
@@ -104,23 +119,28 @@ router.post('/update-model', async (req, res) => {
 
 // Need to add here users data.
 router.delete('/remove-model', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src) {
 		return res.status(404).json('Missing params: src');
 	}
-	model = await Model.find({ src: req.body.src });
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
 	if (model.length === 1) {
-		model[0].remove().then(() => res.json(`Model with src: ${model.src}, was removed`));
+		model[0].remove().then(() => res.json(`Model with src: ${model[0].src}, was removed`));
 	} else {
 		res.status(404).json('No Model with input src exists');
 	}
 });
 
 router.post('/add-hospot', async (req, res) => {
-	console.log(req.body);
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src || !req.body.position || !req.body.normal || !req.body.text) {
 		return res.status(404).json('Missing params: src, position, normal or text');
 	}
-	model = await Model.find({ src: req.body.src });
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
 	console.log(model);
 	if (model.length === 1) {
 		const exist = model[0].hotspots.filter((hotspot) => {
@@ -143,10 +163,13 @@ router.post('/add-hospot', async (req, res) => {
 });
 
 router.delete('/remove-hospot', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src || !req.body.text) {
 		return res.status(404).json('Missing params: src, position, normal or text');
 	}
-	model = await Model.find({ src: req.body.src });
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
 	if (model.length === 1) {
 		const exist = model[0].hotspots.filter((hotspot) => {
 			return hotspot.text === req.body.text;
@@ -167,10 +190,13 @@ router.delete('/remove-hospot', async (req, res) => {
 });
 
 router.post('/update-location', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src || !req.body.latitude || !req.body.longitude) {
 		return res.status(404).json('Missing params: src, latitude or longitude');
 	}
-	model = await Model.find({ src: req.body.src });
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
 	if (model.length === 1) {
 		model[0].location.latitude = req.body.latitude;
 		model[0].location.longitude = req.body.longitude;
@@ -181,10 +207,13 @@ router.post('/update-location', async (req, res) => {
 });
 
 router.post('/update-marker', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
 	if (!req.body.src || !req.body.distance || !req.body.rotation || !req.body.scaling) {
 		return res.status(404).json('Missing params: src, distance, rotation  or scaling');
 	}
-	model = await Model.find({ src: req.body.src });
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
 	if (model.length === 1) {
 		model[0].marker.distance = req.body.distance;
 		model[0].marker.rotation = req.body.rotation;
