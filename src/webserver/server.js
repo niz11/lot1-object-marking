@@ -37,7 +37,7 @@ mongoose.connect(
 
 const server = https.createServer(certOptions, app);
 app.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname, '/views/index.html'));
+	res.sendFile(path.join(__dirname, '/static/index123.html'));
 });
 
 app.get('/ex2', (req, res) => {
