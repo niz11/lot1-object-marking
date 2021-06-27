@@ -6,6 +6,7 @@ const https = require('https');
 
 const mongoose = require('mongoose');
 const models = require('./database-model/models');
+const users = require('./database-model/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,7 @@ app.get('/showModelBasedOnLocation', (req, res) => {
 // Serve the rest of the static folder. Need to improve with webpack or use a platform like React.
 app.use(express.static(path.join(__dirname, 'static')));
 app.use('/models', models);
+app.use('/users', users);
 
 server.listen(PORT, () => {
 	console.log(`server is listening on ${PORT}`);

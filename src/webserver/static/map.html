@@ -17,14 +17,41 @@
 
 </head>
 <style>
-        body, html {
-            padding: 0;
-            margin: 0;
-        }
+    html,
+    body {
+        height: 100%;
+    }
+
+    #mapid {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .img-wrap {
+        width: 200px;
+        height: 180px;
+        display: inline-block;
+        overflow: hidden;
+    }
+
+    .img-wrap>img {
+        height: 100%;
+    }
+
+    .artWorkPopUp {
+        text-align: center;
+    }
 </style>
+
 <body>
-    <div id="mapid" style="width: 600px; height: 400px;"></div>
+    <div id="mapid"></div>
+    <div id="locateMe">
+        Locate me
+    </div>
     <script>
+        const params = new URLSearchParams(document.location.search);
+        const userId = params.get('userId')
+        const modelName = params.get('modelName')
 
         const mymap = L.map('mapid').setView([51.505, -0.09], 13);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -33,9 +60,6 @@
             tileSize: 512,
             zoomOffset: -1
         }).addTo(mymap);
-
-        L.marker([51.5, -0.09]).addTo(mymap)
-            .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
 
         var popup = L.popup();
 
@@ -48,21 +72,93 @@
 
         mymap.on('click', onMapClick);
 
+        const popUp = (name) => {
+            return `<div class="artWorkPopUp">
+                        <b>${name}</b>
+                        <br />
+                        <a href="/showModelBasedOnLocation.html?userId=1&modelName=${name}">See model in AR Once inside radius</a>
+                    </div>`
+        }
         fetch(`/models`)
             .then(response => response.json())
             .then(data => {
-                if (data.length > 0){
-                    data.map((model ,index)=>{
-                        if (model.location.latitude &&  model.location.longitude){
+                if (data.length > 0) {
+                    // Show one model on map if it's in URL parmas. Need to check also user id
+                    if (modelName && userId) {
+                        let model = data.filter(model => model.modelName === modelName && model.user === userId)
+                        model = model.length > 0 ? model[0] : model
+                        console.log(model);
+                        if (model && model.location.latitude && model.location.longitude) {
                             L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(`<b>${model.modelName}</b><br />`).openPopup();
-                            if (index === model.length - 1){
-                                mymap.setView(model.location.latitude, model.location.longitude)
+                                .bindPopup(popUp(model.modelName)).openPopup();
+                            L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+
+                            // Comment out img for now
+                            // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                            const latLngs = [[model.location.latitude, model.location.longitude]];
+                            const markerBounds = L.latLngBounds(latLngs);
+                            mymap.fitBounds(markerBounds);
+                            map.setZoom(13);
+                        }
+                    }
+                    // Add all models to map
+                    data.map((model, index) => {
+                        if (model.location.latitude && model.location.longitude) {
+                            L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                .bindPopup(popUp(model.modelName)).openPopup();
+                            L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+                            // Comment out img for now
+                            // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                            if (index === model.length - 1) {
+                                const latLngs = [[model.location.latitude, model.location.longitude]];
+                                const markerBounds = L.latLngBounds(latLngs);
+                                mymap.fitBounds(markerBounds);
+                                map.setZoom(13);
                             }
                         }
                     })
-                } 
+                }
             });
+        // placeholders for the L.marker and L.circle representing user's current position and accuracy    
+        let current_position, current_accuracy;
+
+        var blueDotIcon = L.icon({
+            iconUrl: './images/usersLocationIcon.png',
+
+            iconSize: [20, 20], // size of the icon
+            shadowSize: [20, 20], // size of the shadow
+            iconAnchor: [10, 10], // point of the icon which will correspond to marker's location
+        });
+        function onLocationFound(e) {
+            // if position defined, then remove the existing position marker and accuracy circle from the map
+            if (current_position) {
+                mymap.removeLayer(current_position);
+                mymap.removeLayer(current_accuracy);
+            }
+
+            let radius = e.accuracy / 2;
+
+            current_position = L.marker(e.latlng, {icon: blueDotIcon}).addTo(mymap)
+                .bindPopup("You are within " + radius + " meters from this point");
+
+            current_accuracy = L.circle(e.latlng, radius).addTo(mymap);
+        }
+
+        function onLocationError(e) {
+            console.log("Can't get location");
+            alert("Please reload if you want to update your location. Otherwise, close this message and continue tour");
+        }
+
+        mymap.on('locationfound', onLocationFound);
+        mymap.on('locationerror', onLocationError);
+
+        // wrap mymap.locate in a function    
+        function locate() {
+            mymap.locate({ setView: false, maxZoom: 13 });
+        }
+
+        // call locate every 7 seconds.
+        setInterval(locate, 7000);
 
     </script>
 
