@@ -57,9 +57,18 @@
     </div>
     <script>
         let jsonData, src;
-        fetch(`/models`)
-            .then(response => response.json())
+        const params = new URLSearchParams(document.location.search);
+        const userId = params.get('userId')
+        let noModels = false;
+        fetch('/models/user', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId
+            })
+        }).then(response => response.json())
             .then(data => {
+                noModels = data.noModels ? true : false;
                 jsonData = data;
                 addModel(data[0])
                 src = data[0].src;
@@ -71,13 +80,24 @@
                     option.text = val.modelName;
                     select.appendChild(option);
                 }
-            });
+            }).catch(e => {
+                console.log(e);
+            })
+
+
         function getComboA(selectObject) {
             var value = selectObject.value;
             // Need to fetch data again, incease hotspots were added
-            fetch(`/models`)
+            fetch('/models/user', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: userId
+                })
+            })
                 .then(response => response.json())
                 .then(data => {
+                    noModels = data.noModels ? true : false;
                     jsonData = data;
                     const model = jsonData.filter(model => model.modelName === value);
                     if (model) removeAllHotspots();
@@ -147,7 +167,8 @@
                         src: src,
                         position: position.toString(),
                         normal: normal ? normal.toString() : '',
-                        text: inputtext
+                        text: inputtext,
+                        userId: userId
 
                     })
                 }).catch(e => {
@@ -192,7 +213,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     src: src,
-                    text: selectedHotSpot.textContent
+                    text: selectedHotSpot.textContent,
+                    userId: userId
                 })
             }).catch(e => {
                 console.log(e);
