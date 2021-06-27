@@ -1,0 +1,444 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Hello WebXR!</title>
+
+    <!-- three.js -->
+    <script src="new/three.js"></script>
+    <script src="new/GLTFLoader.js"></script>
+
+</head>
+<style>
+    button.p{
+        display: block;
+        width: 20px;
+        height: 20px;
+        transform: translate(-10px, -10px);
+        border-radius: 10px;
+        border: none;
+        background-color: #008CBA00;
+        box-sizing: border-box;
+        /*visibility: hidden;*/
+        position: fixed;
+    }
+
+    div.tb{
+        border-radius: 5px;
+        background: #00000000;
+        color: #FFFFFF00;
+        padding: 0.5em;
+        position: fixed;
+        transform: translate(10px, 10px);
+        /*visibility: hidden;*/
+    }
+
+    div.con {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin-top: -50px; /* Negative half of height. */
+        margin-left: -50px; /* Negative half of width. */
+    }
+    div.cen {
+        width: 100px;
+        height: 100px;
+        vertical-align: middle;
+        text-align: center;
+        display: table-cell;
+    }
+    div.foot {
+        background-color: rgba(0, 0, 0, 0.30);
+        color: rgb(255,255,255);
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        text-align: center;
+        width: 100%;
+    }
+    #annotation{
+        background-color: #888888;
+        position: absolute;
+        transform: translate(10px, 10px);
+        border-radius: 10px;
+        padding: 10px;
+    }
+    /* This keeps child nodes hidden while the element loads */
+    :not(:defined) > * {
+        display: none;
+    }
+</style>
+<body>
+<div id="infoBox">
+
+    <div class="con" id = "con">
+        <div class="cen">
+            +
+        </div>
+    </div>
+
+    <div class="foot" id="footer">
+        <div id="ax"></div>
+        <div id="ay"></div>
+        <div id="az"></div>
+
+        <div id="bx"></div>
+        <div id="by"></div>
+        <div id="bz"></div>
+
+        <div id="rx">Instructions:</div>
+        <div id="ry">    1. Shake your phone a bit to initialize AR tracking</div>
+        <div id="rz">    2. Point the camera to the middle of the marker until the box is green </div>
+    </div>
+
+</div>
+<button onclick="activateXR()" >Start Hello WebXR</button>
+<script type = module>
+    import {ArModel, Hotspot} from "./lot1/arModel.js";
+
+    let arJSScene, arJSScamera, arJSScamera2, arJSSmesh, arJSSmarkerControls;
+    let arToolkitSource, arToolkitContext;
+
+    let firstUpdate = false;
+
+
+    let arucoLoaded = false;
+    let markers = [];
+
+    let worker = null;
+
+    let waitingForFrame = true;
+
+
+    let objAnchor = null;
+    let markerOrientationS = [];
+    let markerOrientationS2;
+
+    // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
+    const canvas = document.createElement("canvas");
+    document.body.appendChild(canvas);
+    const gl = canvas.getContext("webgl2", { xrCompatible: true });
+
+    const arjsBuffer = gl.createFramebuffer();
+    let rb = gl.createRenderbuffer();
+
+    function resizeBuffer(){
+        gl.deleteFramebuffer(arjsBuffer2);
+        gl.deleteRenderbuffer(rb);
+        arjsBuffer2 = gl.createFramebuffer();
+        rb = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, arjsW, arjsH);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, rb);
+
+        console.log("Resizing Buffer W:", arjsW, " H: ", arjsH);
+    }
+
+
+    let fCounter = 0;
+    let box = null;
+
+    const arjsW = 360;
+    let arjsH = 576;
+    let arjsFov = 70 * Math.PI / 180;
+    let arjsFol = (arjsH / 2) / Math.tan(arjsFov);
+    let arjsBuffer2 = gl.createFramebuffer();
+    let raycaster = new THREE.Raycaster();
+    const scene = new THREE.Scene();
+    let camera;
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(10, 15, 10);
+    scene.add(directionalLight);
+
+    let dbModel;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            const model = data.filter(model => model.modelName === 'FishBox');
+            dbModel = model[0];
+            loadArModel();
+        });
+
+    let arModel;
+
+    function loadArModel() {
+        arModel = new ArModel(dbModel);
+        let arHs1 = new Hotspot();
+        arHs1.rPosition = new THREE.Vector3(-0.06, 0, 0);
+        arHs1.text = "Left"
+        arHs1.updateDOMElement();
+
+        let arHs2 = new Hotspot();
+        arHs2.rPosition = new THREE.Vector3(+0.06, 0, 0);
+        arHs2.text = "Right"
+        arHs2.updateDOMElement();
+
+        let arHs3 = new Hotspot();
+        arHs3.rPosition = new THREE.Vector3(0, +0.09, 0);
+        arHs3.text = "Fish"
+        arHs3.updateDOMElement();
+
+        arModel.hotspots.push(arHs1, arHs2);
+
+        arModel.loadModelFromSource(scene, function () {
+            arModel.computeOffsetFromMesh();
+        })
+    }
+
+
+    window.activateXR = async function activateXR() {
+        // Set up the WebGLRenderer, which handles rendering to the session's base layer.
+        const renderer = new THREE.WebGLRenderer({
+            alpha: true,
+            preserveDrawingBuffer: true,
+            canvas: canvas,
+            context: gl
+        });
+        renderer.autoClear = false;
+
+        camera = new THREE.PerspectiveCamera();
+        camera.matrixAutoUpdate = false;
+        let uiElement = document.getElementById('infoBox');
+        let content = document.getElementById('con');
+        content.style.visibility = 'visible';
+        const session = await navigator.xr.requestSession("immersive-ar", { requiredFeatures: ['hit-test', 'anchors', 'camera-access', 'plane-detection'],
+            optionalFeatures: ['dom-overlay'], domOverlay: { root: uiElement } });
+        session.updateRenderState({
+            baseLayer: new XRWebGLLayer(session, gl)
+        });
+
+
+
+
+
+
+
+
+        arJSScene = new THREE.Scene();
+
+        let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+        arJSScene.add(ambientLight);
+
+        // arJSScamera = new THREE.OrthographicCamera(-1.0, 1.0, -1.0, 1.0, -10.0, 10.0);
+        arJSScamera = new THREE.OrthographicCamera(-window.innerWidth, window.innerWidth, -window.innerHeight, window.innerHeight, -100.0, 100.0);
+        arJSScene.add(arJSScamera);
+
+        arJSSmesh = new THREE.Mesh(
+            // new THREE.BoxGeometry(0.05, 0.1, 0.05),
+            new THREE.BoxGeometry(50, 100, 5),
+            new THREE.MeshBasicMaterial({color: 0xff0000})
+        );
+
+        arJSSmesh.material.wireframe = true;
+        arJSScene.add(arJSSmesh);
+        arJSScamera.position.z = 5;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        const referenceSpace = await session.requestReferenceSpace('local');
+        const viewerSpace = await session.requestReferenceSpace('viewer');
+        const hitTestSource = await session.requestHitTestSource({
+            space: viewerSpace,
+            entityTypes : ["plane", "point"],
+        });
+        const loader = new THREE.GLTFLoader();
+        let reticle;
+        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+            reticle = gltf.scene;
+            reticle.visible = false;
+            scene.add(reticle);
+        });
+
+
+        let glBinding = new XRWebGLBinding(session, gl);
+
+
+
+        worker = new Worker('new/offscreenworker.js');
+
+        worker.onmessage = (e) => {
+            if (e.data.type === 'loaded') {
+                arucoLoaded = true;
+                waitingForFrame = true;
+                console.log('load msg received')
+            }
+            else if (e.data.type === 'arPose') {
+                waitingForFrame = true;
+                markers = e.data.data.slice(0);
+            }
+        }
+
+        const onXRFrame = (time, frame) => {
+            const pose = frame.getViewerPose(referenceSpace);
+            if (pose) {
+                const view = pose.views[0];
+                const viewport = session.renderState.baseLayer.getViewport(view);
+
+                camera.matrix.fromArray(view.transform.matrix);
+                camera.projectionMatrix.fromArray(view.projectionMatrix);
+                camera.updateMatrixWorld(true);
+
+                if (arJSScamera.right !== viewport.width / 2.0){
+                    // console.log(camera.fov);
+                    // console.log(2.0 * Math.atan( 1.0/camera.projectionMatrix.elements[5] ) * 180.0 / Math.PI);
+                    arJSScamera.left = -viewport.width / 2.0;
+                    arJSScamera.right = viewport.width / 2.0;
+                    arJSScamera.top = viewport.height  / 2.0;
+                    arJSScamera.bottom = -viewport.height  / 2.0;
+                    arJSScamera.updateProjectionMatrix();
+                    arjsH = arjsW / viewport.width * viewport.height;
+                    arjsFov = 2.0 * Math.atan( 1.0/camera.projectionMatrix.elements[5] );
+                    let l = arjsW > arjsH ? arjsW : arjsH;
+                    arjsFol = (l / 2) / Math.tan(arjsFov);
+                    resizeBuffer();
+                }
+
+                if (!objAnchor && arucoLoaded && waitingForFrame){
+                    waitingForFrame = false;
+                    let tex = glBinding.getCameraImage(frame, view);
+
+                    //TODO: try PBO's to enhance performance, try zoom for performance improvement, try OpenCV for better tracking
+                    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, arjsBuffer);
+                    gl.framebufferTexture2D(
+                        gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                        gl.TEXTURE_2D, tex, 0);
+
+                    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, arjsBuffer2);
+                    gl.blitFramebuffer(0, 0, viewport.width, viewport.height, 0, 0, arjsW, arjsH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
+
+                    let data = new Uint8ClampedArray(arjsW * arjsH * 4);
+                    gl.readPixels(0, 0, arjsW, arjsH, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+
+                    worker.postMessage({focL: arjsFol, w: arjsW, h: arjsH, imgData: data});
+                    // arToolkitContext.update(data); TODO
+                }
+
+
+                gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
+
+                renderer.setSize(viewport.width, viewport.height);
+
+
+
+                let offset = 100;
+
+
+                let camPos = new THREE.Vector3();
+                let camQua = new THREE.Quaternion();
+                let camSca = new THREE.Vector3();
+                camera.matrix.decompose(camPos, camQua, camSca);
+
+
+
+                if (!objAnchor) { //TODO
+                    // let pos = arJSSmarkerControls.object3d.position;
+                    // let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
+                    //
+                    //
+                    // arJSSmesh.position.x = cpos.x * viewport.width / 2.0;
+                    // arJSSmesh.position.y = cpos.y * viewport.height / -2.0;
+
+                    //
+                    // arJSSmesh.position.z = 4.0;
+                    //
+                    // arJSSmesh.rotation.z = Math.PI - arJSSmarkerControls.object3d.rotation.z;
+                    //
+                    // const ratio = viewport.width / viewport.height;
+                    //
+                    // offset = cpos.x * cpos.x * ratio + cpos.y * cpos.y / ratio ;
+                    // if (offset < 0.004)  arJSSmesh.material.color.setRGB(0.0, 1.0, 0.0);
+                    // else arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
+                    //
+                    // renderer.render(arJSScene, arJSScamera);
+                    if (markers.length > 0) console.log(markers);
+                }
+
+                const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
+                if (hitTestResults && hitTestResults.length > 0 && reticle) {
+                    const hitPose = hitTestResults[0].getPose(referenceSpace);
+                    reticle.visible = false; //TODO: find a way to show that environment is recognized
+                    reticle.matrix.fromArray(hitPose.transform.matrix);
+                    reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
+
+                    const maxCount = 11;
+
+                    if (offset < 0.004 && fCounter < maxCount) {
+                        fCounter += 1;
+                        markerOrientationS.push({rotation: arJSSmesh.rotation, offset: offset});
+                    }
+                    else {
+                        fCounter = 0;
+                        markerOrientationS = [];
+                    }
+
+                    if (fCounter >= maxCount) {
+                        //TODO: use Anchor at current viewing pose to calculate distance between hit test and marker center point
+                        //      for better alignment between virtual and real geometry
+                        markerOrientationS2 = markerOrientationS;
+                        markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
+
+                        arModel.relativeRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
+                        hitTestResults[0].createAnchor().then((anchor) => {
+                            document.getElementById("footer").style.visibility = 'hidden';
+                            objAnchor = anchor;
+                        }, (error) => {
+                            console.error("Could not create anchor: " + error);
+                        });
+                        console.log("Created Anchor!")
+                    }
+
+                }
+
+
+
+                const trackedAnchors = frame.trackedAnchors;
+
+                if (objAnchor && !trackedAnchors.has(objAnchor)) {
+                    // Handle anchor tracking loss - `anchor` was present
+                    // in the previous frame but is no longer tracked.
+                    objAnchor = null;
+                    box.visible = false;
+                    console.log("Lost anchor...")
+                }
+
+                if (objAnchor) {
+
+                    // Query most recent pose of the anchor relative to some reference space:
+                    const pose = frame.getPose(objAnchor.anchorSpace, referenceSpace);
+                    arModel.update(pose, camera, camPos);
+
+                }
+
+                // Render the scene with THREE.WebGLRenderer.
+                renderer.render(scene, camera)
+            }
+            // Queue up the next draw request.
+            session.requestAnimationFrame(onXRFrame);
+        };
+
+        session.requestAnimationFrame(onXRFrame);
+    }
+
+</script>
+</body>
+
+</html>
