@@ -9,6 +9,7 @@ server.csr
 server.crt
 server.key
 /src/web-app/node_modules/
+/web-app/node_modules/
 /.vscode/
 .DS_Store
 .env
