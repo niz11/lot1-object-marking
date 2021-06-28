@@ -139,23 +139,25 @@ let mCorners = null;
 function loadArUco() {
     console.log(cv2);
     dict =  new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
+    dict.maxCorrectionBits = 2;
     params = new cv2.aruco_DetectorParameters();
     params.cornerRefinementMethod = cv2.CORNER_REFINE_SUBPIX;
-    // params.adaptiveThreshWinSizeMin = 3;
-    // params.adaptiveThreshWinSizeMax  = 33; //C
-    // params.adaptiveThreshWinSizeStep  = 4; //C
+    params.adaptiveThreshWinSizeMin = 5;
+    params.adaptiveThreshWinSizeMax  = 25; //C
+    params.adaptiveThreshWinSizeStep  = 5; //C
+    params.adaptiveThreshConstant   = 9; //C
     // params.minMarkerPerimeterRate   = 0.03;
-    // params.maxMarkerPerimeterRate  = 6.0; //C
-    // params.polygonalApproxAccuracyRate = 0.08; //C
+    params.maxMarkerPerimeterRate  = 6.0; //C
+    params.polygonalApproxAccuracyRate = 0.08; //C
     // params.minCornerDistanceRate  = 0.05;
     // params.minMarkerDistanceRate  = 0.05;
     // params.minDistanceToBorder  = 3;
     //
     // params.minOtsuStdDev   = 5;
-    // params.perspectiveRemovePixelPerCell   = 5; //C
-    // params.perspectiveRemoveIgnoredMarginPerCell   = 0.19; //C
-    // params.maxErroneousBitsInBorderRate   = 0.5; //C
-    // params.errorCorrectionRate    = 0.7; //C
+    params.perspectiveRemovePixelPerCell   = 5; //C
+    params.perspectiveRemoveIgnoredMarginPerCell   = 0.19; //C
+    params.maxErroneousBitsInBorderRate   = 0.5; //C
+    params.errorCorrectionRate    = 0.7; //C
 
     //TODO: more params need changing?
 
@@ -184,12 +186,20 @@ cv().then((s) => { // weird workaround for now...
 
 // console.log('CV: ',cv);
 
+if (self.crossOriginIsolated) {
+    // Post SharedArrayBuffer
+    console.log('Cross Origin Isolated worker')
+} else {
+    // Do something else
+    console.log('Not Cross Origin Isolated worker')
+}
+
 
 onmessage = function (e) {
     let focL = e.data.focL;
     let width = e.data.w;
     let height = e.data.h;
-    let imgData = e.data.imgData;
+    let imgData = new Uint8Array(e.data.imgData);
 
     let markers = [];
 
@@ -199,10 +209,19 @@ onmessage = function (e) {
 
         // camMat.create(3, 3, cv2.CV_64F)
         // camMat.data64F.set([focL, 0, 0, 0, focL, 0, width / 2, height / 2, 1]);
+        rgbaDat.delete();
+        rgbaDat = new cv2.Mat();
         rgbaDat.create(height, width, cv2.CV_8UC4)
         rgbaDat.data.set(imgData);
         cv2.cvtColor(rgbaDat, rgbaDat, cv2.COLOR_RGBA2GRAY, 0);
         // cv2.flip(grayDat, grayDat, 0);
+
+
+        mIDs.delete();
+        mIDs = new cv2.Mat();
+
+        mCorners.delete();
+        mCorners = new cv2.MatVector();
 
         cv2.detectMarkers(rgbaDat, dict, mCorners, mIDs, params);
         // cv2.estimatePoseSingleMarkers(mCorners, 0.05, camMat, camDist, rvecs, tvecs);
@@ -243,15 +262,9 @@ onmessage = function (e) {
                 },
             })
         }
+        postMessage({
+            type: "arPose",
+            data: markers});
     }
 
-
-
-
-
-
-
-    postMessage({
-        type: "arPose",
-        data: markers});
 }

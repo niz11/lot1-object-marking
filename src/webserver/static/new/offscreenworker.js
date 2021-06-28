@@ -189,7 +189,7 @@ onmessage = function (e) {
     let focL = e.data.focL;
     let width = e.data.w;
     let height = e.data.h;
-    let imgData = e.data.imgData;
+    let imgData = new Uint8Array(e.data.imgData);
 
     let markers = [];
 

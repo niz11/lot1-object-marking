@@ -9,6 +9,12 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 const useMongoDB = true;
+
+app.all('/', function(req, res, next) {
+    res.header("Cross-Origin-Embedder-Policy", "require-corp");
+    res.header("Cross-Origin-Opener-Policy", "same-origin");
+    next();
+});
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -26,6 +32,7 @@ if (useMongoDB) {
         }
     );
 }
+
 
 app.use(express.static(path.join(__dirname,'static')));
 app.use('/models', models);
