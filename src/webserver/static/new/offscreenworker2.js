@@ -141,6 +141,22 @@ function loadArUco() {
     dict =  new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
     params = new cv2.aruco_DetectorParameters();
     params.cornerRefinementMethod = cv2.CORNER_REFINE_SUBPIX;
+    // params.adaptiveThreshWinSizeMin = 3;
+    // params.adaptiveThreshWinSizeMax  = 33; //C
+    // params.adaptiveThreshWinSizeStep  = 4; //C
+    // params.minMarkerPerimeterRate   = 0.03;
+    // params.maxMarkerPerimeterRate  = 6.0; //C
+    // params.polygonalApproxAccuracyRate = 0.08; //C
+    // params.minCornerDistanceRate  = 0.05;
+    // params.minMarkerDistanceRate  = 0.05;
+    // params.minDistanceToBorder  = 3;
+    //
+    // params.minOtsuStdDev   = 5;
+    // params.perspectiveRemovePixelPerCell   = 5; //C
+    // params.perspectiveRemoveIgnoredMarginPerCell   = 0.19; //C
+    // params.maxErroneousBitsInBorderRate   = 0.5; //C
+    // params.errorCorrectionRate    = 0.7; //C
+
     //TODO: more params need changing?
 
     camMat = new cv2.Mat();
@@ -168,7 +184,6 @@ cv().then((s) => { // weird workaround for now...
 
 // console.log('CV: ',cv);
 
-let first = true;
 
 onmessage = function (e) {
     let focL = e.data.focL;
@@ -182,38 +197,50 @@ onmessage = function (e) {
 
 
 
-        camMat.create(3, 3, cv2.CV_64F)
-        camMat.data64F.set([focL, 0, 0, 0, focL, 0, width / 2, height / 2, 1]);
+        // camMat.create(3, 3, cv2.CV_64F)
+        // camMat.data64F.set([focL, 0, 0, 0, focL, 0, width / 2, height / 2, 1]);
         rgbaDat.create(height, width, cv2.CV_8UC4)
         rgbaDat.data.set(imgData);
-        cv2.cvtColor(rgbaDat, grayDat, cv2.COLOR_RGBA2RGB, 0);
+        cv2.cvtColor(rgbaDat, rgbaDat, cv2.COLOR_RGBA2GRAY, 0);
+        // cv2.flip(grayDat, grayDat, 0);
 
-        cv2.detectMarkers(grayDat, dict, mCorners, mIDs, params);
-        cv2.estimatePoseSingleMarkers(mCorners, 0.05, camMat, camDist, rvecs, tvecs);
+        cv2.detectMarkers(rgbaDat, dict, mCorners, mIDs, params);
+        // cv2.estimatePoseSingleMarkers(mCorners, 0.05, camMat, camDist, rvecs, tvecs);
 
-        if (first) {
-            console.log(rgbaDat.data);
-            console.log(grayDat.data);
-            console.log(params);
-            console.log(mCorners.size());
-            first = false;
-        }
 
 
         for(let i=0; i < mIDs.rows; ++i) {
-            console.log('detected marker');
+            let corners = mCorners.get(i).data32F;
             markers.push({
                 id: mIDs.data32S[i],
+
                 // tvec: [tvecs.doublePtr(0, i)[0], tvecs.doublePtr(0, i)[1], tvecs.doublePtr(0, i)[2]],
                 // rvec: [rvecs.doublePtr(0, i)[0], rvecs.doublePtr(0, i)[1], rvecs.doublePtr(0, i)[2]]
 
-                tx: tvecs.doublePtr(0, i)[0],
-                ty: tvecs.doublePtr(0, i)[1],
-                tz: tvecs.doublePtr(0, i)[2],
+                // tx: tvecs.doublePtr(0, i)[0],
+                // ty: tvecs.doublePtr(0, i)[1],
+                // tz: tvecs.doublePtr(0, i)[2],
+                //
+                // rx: rvecs.doublePtr(0, i)[0],
+                // ry: rvecs.doublePtr(0, i)[1],
+                // rz: rvecs.doublePtr(0, i)[2],
 
-                rx: rvecs.doublePtr(0, i)[0],
-                ry: rvecs.doublePtr(0, i)[1],
-                rz: rvecs.doublePtr(0, i)[2],
+                c0: {
+                    x: corners[0],
+                    y: corners[1],
+                },
+                c1: {
+                    x: corners[2],
+                    y: corners[3],
+                },
+                c2: {
+                    x: corners[4],
+                    y: corners[5],
+                },
+                c3: {
+                    x: corners[6],
+                    y: corners[7],
+                },
             })
         }
     }

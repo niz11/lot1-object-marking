@@ -97,33 +97,78 @@
 
       let dictionary = new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
       let params = new cv2.aruco_DetectorParameters();
-      // params.cornerRefinementMethod = cv2.CORNER_REFINE_SUBPIX;
-      // params.adaptiveThreshWinSizeMin = 3;
-      // params.adaptiveThreshWinSizeMax  = 43; //C
-      // params.adaptiveThreshWinSizeStep  = 4; //C
-      // params.minMarkerPerimeterRate   = 0.03;
-      // params.maxMarkerPerimeterRate  = 6.0; //C
-      // params.polygonalApproxAccuracyRate = 0.08; //C
-      // params.minCornerDistanceRate  = 0.05;
-      // params.minMarkerDistanceRate  = 0.05;
-      // params.minDistanceToBorder  = 3;
-      //
-      // params.minOtsuStdDev   = 5;
-      // params.perspectiveRemovePixelPerCell   = 5; //C
-      // params.perspectiveRemoveIgnoredMarginPerCell   = 0.19; //C
-      // params.maxErroneousBitsInBorderRate   = 0.5; //C
-      // params.errorCorrectionRate    = 0.7; //C
+      params.cornerRefinementMethod = cv2.CORNER_REFINE_SUBPIX;
       let mIDs = new cv2.Mat();
-      let markerCorners = new cv2.MatVector();;
-      let rejectedCandidates = new cv2.MatVector();;
+      let markerCorners = new cv2.MatVector();
+      let rejectedCandidates = new cv2.MatVector();
       cv2.cvtColor(markerImage, markerImage, cv2.COLOR_RGBA2RGB);
       cv2.detectMarkers(markerImage, dictionary, markerCorners, mIDs, params, rejectedCandidates);
       cv2.drawDetectedMarkers(markerImage, markerCorners, mIDs);
-      cv2.cvtColor(markerImage, markerImage, cv2.COLOR_RGB2RGBA);
+
       console.log(rejectedCandidates.size());
       console.log(mIDs.size());
       console.log(mIDs.data);
+
+      let fov = 65.55 * Math.PI / 180;
+      let fol = (780 / 2) / Math.tan(fov / 2);
+      let camMat = new cv2.Mat();
+      camMat.create(3, 3, cv2.CV_64F);
+      camMat.data64F.set([fol, 0, 0, 0, fol, 0, 360 / 2, 780 / 2, 1]);
+      let camDist = cv2.matFromArray(5, 1, cv2.CV_64F, [0, 0, 0, 0, 0]);
+      let rvecs = new cv2.Mat();
+      let tvecs = new cv2.Mat();
+
+
+      let width = 360;
+      let height = 780;
+
+      console.log('corners')
+      console.log(markerCorners.get(0));
+
+      for(let i=0; i < mIDs.rows; ++i) {
+        let cornervec = markerCorners.get(i).data32F
+        cornervec[0] -= width/2;
+        cornervec[0] *= -1
+        cornervec[1] -= height/2;
+        // cornervec[1] *= -1
+        cornervec[2] -= width/2;
+        cornervec[2] *= -1
+        cornervec[3] -= height/2;
+        // cornervec[3] *= -1
+        cornervec[4] -= width/2;
+        cornervec[4] *= -1
+        cornervec[5] -= height/2;
+        // cornervec[5] *= -1
+        cornervec[6] -= width/2;
+        cornervec[6] *= -1
+        cornervec[7] -= height/2;
+        // cornervec[7] *= -1
+      }
+
+      console.log(markerCorners.get(0));
+
+      cv2.estimatePoseSingleMarkers(markerCorners, 0.05, camMat, camDist, rvecs, tvecs);
+
+      console.log('tvecs:');
+      console.log(tvecs);
+      console.log('rvecs:');
+      console.log(rvecs);
+
+      let objP = cv2.matFromArray(3, 1, cv2.CV_64F, [0, 0, 0]);
+      let imgP = new cv2.Mat();
+
+      let rv = cv2.matFromArray(3, 1, cv2.CV_64F, rvecs.doublePtr(0, 0));
+      let tv = cv2.matFromArray(3, 1, cv2.CV_64F, tvecs.doublePtr(0, 0));
+
+
+
+      console.log(imgP);
+
+      cv2.cvtColor(markerImage, markerImage, cv2.COLOR_RGB2RGBA);
       cv2.imshow("arucoCanvasOutput", markerImage);
+
+      context.fillRect(canvas.width / 2 - 2, 0, 4, canvas.height);
+      context.fillRect(0, canvas.height / 2 -2, canvas.width, 4);
     };
     reader.readAsText(file);
   }

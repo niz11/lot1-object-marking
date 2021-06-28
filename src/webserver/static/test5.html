@@ -166,6 +166,9 @@
 
     let arModel;
 
+    let perf = performance.now();
+    let perf2 = performance.now();
+
     function loadArModel() {
         arModel = new ArModel(dbModel);
         let arHs1 = new Hotspot();
@@ -238,7 +241,7 @@
         arJSScene.add(arJSSmesh);
         arJSScamera.position.z = 5;
 
-
+        arJSScamera2 = new THREE.OrthographicCamera(-window.innerWidth, window.innerWidth, -window.innerHeight, window.innerHeight, -100.0, 100.0);
 
 
 
@@ -271,7 +274,7 @@
 
 
 
-        worker = new Worker('new/offscreenworker.js');
+        worker = new Worker('new/offscreenworker2.js');
 
         worker.onmessage = (e) => {
             if (e.data.type === 'loaded') {
@@ -282,10 +285,13 @@
             else if (e.data.type === 'arPose') {
                 waitingForFrame = true;
                 markers = e.data.data.slice(0);
+                document.getElementById('ax').innerHTML = 'FrameTime: ' + Math.floor(performance.now() - perf);
+                perf = performance.now();
             }
         }
 
         const onXRFrame = (time, frame) => {
+
             const pose = frame.getViewerPose(referenceSpace);
             if (pose) {
                 const view = pose.views[0];
@@ -306,8 +312,10 @@
                     arjsH = arjsW / viewport.width * viewport.height;
                     arjsFov = 2.0 * Math.atan( 1.0/camera.projectionMatrix.elements[5] );
                     let l = arjsW > arjsH ? arjsW : arjsH;
-                    arjsFol = (l / 2) / Math.tan(arjsFov);
+                    arjsFol = (l / 2) / Math.tan(arjsFov / 2);
                     resizeBuffer();
+                    arJSScamera2.fov = arjsFov * 180 / Math.PI;
+                    arJSScamera2.aspect = arjsW / arjsH;
                 }
 
                 if (!objAnchor && arucoLoaded && waitingForFrame){
@@ -321,7 +329,7 @@
                         gl.TEXTURE_2D, tex, 0);
 
                     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, arjsBuffer2);
-                    gl.blitFramebuffer(0, 0, viewport.width, viewport.height, 0, 0, arjsW, arjsH, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+                    gl.blitFramebuffer(0, 0, viewport.width, viewport.height, 0, arjsH, arjsW, 0, gl.COLOR_BUFFER_BIT, gl.NEAREST);
                     gl.bindFramebuffer(gl.FRAMEBUFFER, arjsBuffer2);
 
                     let data = new Uint8ClampedArray(arjsW * arjsH * 4);
@@ -329,7 +337,6 @@
 
 
                     worker.postMessage({focL: arjsFol, w: arjsW, h: arjsH, imgData: data});
-                    // arToolkitContext.update(data); TODO
                 }
 
 
@@ -349,7 +356,7 @@
 
 
 
-                if (!objAnchor) { //TODO
+                if (!objAnchor && markers.length > 0) { //TODO
                     // let pos = arJSSmarkerControls.object3d.position;
                     // let cpos = new THREE.Vector3(pos.x, pos.y, pos.z).project(arJSScamera2);
                     //
@@ -369,15 +376,47 @@
                     // else arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
                     //
                     // renderer.render(arJSScene, arJSScamera);
-                    if (markers.length > 0) console.log(markers);
+                    // if (markers.length > 0) console.log(markers);
+
+                    // reticle.visible = true;
+                    let m = markers[0];
+                    // reticle.position.set(m.tx, m.tz, m.ty)
+                    // reticle.position.set(m.tz, m.tx, m.ty)
+
+                    //Corners are stored clockwise starting with the top left corner
+
+                    arJSSmesh.position.x = (m.c0.x + m.c1.x + m.c2.x + m.c3.x) / (2 * arjsW) - 1;
+                    arJSSmesh.position.y = (m.c0.y + m.c1.y + m.c2.y + m.c3.y) / (2 * arjsH) - 1;
+                    arJSSmesh.position.z = 4.0;
+
+                    let v = new THREE.Vector2();
+                    v.x = (m.c0.x - m.c3.x + m.c1.x - m.c2.x + m.c0.y - m.c1.y) / 3;
+                    v.y = (m.c0.y - m.c3.y + m.c1.y - m.c2.y - m.c0.x + m.c1.x) / 3;
+
+                    arJSSmesh.rotation.z = v.angle();
+
+                    const ratio = viewport.width / viewport.height;
+                    offset = arJSSmesh.position.x * arJSSmesh.position.x * ratio + arJSSmesh.position.y * arJSSmesh.position.y / ratio ;
+                    if (offset < 0.004)  arJSSmesh.material.color.setRGB(0.0, 1.0, 0.0);
+                    else arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
+
+                    arJSSmesh.position.x = arJSSmesh.position.x * viewport.width / 2.0;
+                    arJSSmesh.position.y = arJSSmesh.position.y * viewport.height / -2.0;
+
+                    document.getElementById('ay').innerHTML = 'Markers: ' + markers.length;
+                    document.getElementById('az').innerHTML = 'Y: ' + arJSSmesh.position.y;
+                    document.getElementById('bx').innerHTML = 'FrameTime: ' + Math.floor(performance.now() - perf2);
+                    perf2 = performance.now();
                 }
 
+                renderer.render(arJSScene, arJSScamera);
+
                 const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
-                if (hitTestResults && hitTestResults.length > 0 && reticle) {
-                    const hitPose = hitTestResults[0].getPose(referenceSpace);
-                    reticle.visible = false; //TODO: find a way to show that environment is recognized
-                    reticle.matrix.fromArray(hitPose.transform.matrix);
-                    reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
+                if (hitTestResults && hitTestResults.length > 0 && false) {
+                    // const hitPose = hitTestResults[0].getPose(referenceSpace);
+                    // reticle.visible = false; //TODO: find a way to show that environment is recognized
+                    // reticle.matrix.fromArray(hitPose.transform.matrix);
+                    // reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
 
                     const maxCount = 11;
 
