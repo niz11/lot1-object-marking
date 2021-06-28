@@ -97,8 +97,11 @@
             .then(response => response.json())
             .then(data => {
                 jsonData = data;
-                models = jsonData.filter(model => model.modelName === modelName && model.user === userId);
+                models = jsonData.filter(model => model.modelName === modelName);
+                // If there is a userId filter by it
+                models = userId ? models.filter(model => model.user === userId): models
                 model = models[0];
+                console.log(model);
                 if (model) removeAllHotspots();
             });
         function addHotspot(position, normal, inputtext) {
@@ -158,7 +161,7 @@
             const objectLongitude = model ? model.location.longitude : 0;
             const usersLatitude = pos.coords.latitude;
             const usersLongitude = pos.coords.longitude;
-            const radius = 15;
+            const radius = 30;
             const d = getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude);
             console.log("Distance from user to object: ", d);
             const modelStatus = document.getElementById("body").className;
@@ -190,12 +193,14 @@
             document.getElementById("noModelTextBox").textContent = "Please Enable Location"
         }
 
-        function addModel(model) {
+        function addModel() {
             const viewer = document.querySelector('#modelblock');
             viewer.src = model.src;
             model.hotspots.map(ano => {
                 addHotspot(ano.position, ano.normal, ano.text)
             })
+            document.getElementById("body").className = "model";
+            document.getElementById("noModelTextBox").style.opacity = 0;
         }
 
         function removeModel() {

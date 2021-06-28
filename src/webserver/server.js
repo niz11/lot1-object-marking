@@ -5,12 +5,10 @@ const fs = require('fs');
 const https = require('https');
 const app = express();
 const PORT = process.env.PORT || 3000;
-// Serve the rest of the static folder. Need to improve with webpack or use a platform like React.
-app.use(express.static(path.join(__dirname, 'public')));
+
 const mongoose = require('mongoose');
 const models = require('./database-model/models');
 const users = require('./database-model/users');
-
 
 const bodyParser = require('body-parser');
 // parse application/x-www-form-urlencoded
@@ -50,6 +48,8 @@ app.get('/showModelBasedOnLocation', (req, res) => {
 	res.sendFile(path.join(__dirname, '/static/showModelBasedOnLocation.html'));
 });
 
+// Serve the rest of the static folder. Need to improve with webpack or use a platform like React.
+app.use(express.static(path.join(__dirname, 'static')));
 app.use('/models', models);
 app.use('/users', users);
 

@@ -72,11 +72,12 @@
 
         mymap.on('click', onMapClick);
 
-        const popUp = (name) => {
+        const popUp = (name, userId) => {
+            const userIdParam = (userId) => `userId=${userId}&`;
             return `<div class="artWorkPopUp">
                         <b>${name}</b>
                         <br />
-                        <a href="/showModelBasedOnLocation.html?userId=1&modelName=${name}">See model in AR Once inside radius</a>
+                        <a href="/showModelBasedOnLocation.html?${userId ? userIdParam(userId) : ``}modelName=${name}">See model in AR Once inside radius</a>
                     </div>`
         }
         fetch(`/models`)
@@ -86,11 +87,11 @@
                     // Show one model on map if it's in URL parmas. Need to check also user id
                     if (modelName && userId) {
                         let model = data.filter(model => model.modelName === modelName && model.user === userId)
+                        model = userId ? models.filter(model => model.user === userId) : model
                         model = model.length > 0 ? model[0] : model
-                        console.log(model);
-                        if (model && model.location.latitude && model.location.longitude) {
+                        if (model && model.location && model.location.latitude && model.location.longitude) {
                             L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(popUp(model.modelName)).openPopup();
+                                .bindPopup(popUp(model.modelName, model.user)).openPopup();
                             L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
 
                             // Comment out img for now
@@ -103,17 +104,19 @@
                     }
                     // Add all models to map
                     data.map((model, index) => {
-                        if (model.location.latitude && model.location.longitude) {
-                            L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(popUp(model.modelName)).openPopup();
-                            L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
-                            // Comment out img for now
-                            // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
-                            if (index === model.length - 1) {
-                                const latLngs = [[model.location.latitude, model.location.longitude]];
-                                const markerBounds = L.latLngBounds(latLngs);
-                                mymap.fitBounds(markerBounds);
-                                map.setZoom(13);
+                        if (model.location) {
+                            if (model.location.latitude && model.location.longitude) {
+                                L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                    .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+                                // Comment out img for now
+                                // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                                if (index === model.length - 1) {
+                                    const latLngs = [[model.location.latitude, model.location.longitude]];
+                                    const markerBounds = L.latLngBounds(latLngs);
+                                    mymap.fitBounds(markerBounds);
+                                    map.setZoom(13);
+                                }
                             }
                         }
                     })
@@ -138,7 +141,7 @@
 
             let radius = e.accuracy / 2;
 
-            current_position = L.marker(e.latlng, {icon: blueDotIcon}).addTo(mymap)
+            current_position = L.marker(e.latlng, { icon: blueDotIcon }).addTo(mymap)
                 .bindPopup("You are within " + radius + " meters from this point");
 
             current_accuracy = L.circle(e.latlng, radius).addTo(mymap);
