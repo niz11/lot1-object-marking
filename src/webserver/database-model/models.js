@@ -49,6 +49,7 @@ router.post('/add-model', async (req, res) => {
 				};
 			});
 		}
+
 		const newModel = new Model({
 			modelName: req.body.modelName,
 			src: req.body.src,
@@ -67,6 +68,9 @@ router.post('/add-model', async (req, res) => {
 			},
 			user: req.body.userId
 		});
+		let marker = getGroupID(newModel);
+		newModel.marker.group = marker.group;
+		newModel.marker.id = marker.id;
 
 		newModel.save().then((post) => res.json(post));
 	} else {
@@ -111,9 +115,11 @@ router.post('/update-model', async (req, res) => {
 			distance: req.body.distance,
 			rotation: req.body.rotation,
 			scaling: req.body.scaling,
-			group: req.body.group,
-			markerId: req.body.markerId
 		};
+
+		let marker = getGroupID(model[0]);
+		model[0].marker.group = marker.group;
+		model[0].marker.id = marker.id;
 
 		model[0].save().then((model) => res.json(model));
 	} else {
@@ -204,6 +210,9 @@ router.post('/update-location', async (req, res) => {
 	if (model.length === 1) {
 		model[0].location.latitude = req.body.latitude;
 		model[0].location.longitude = req.body.longitude;
+		let marker = getGroupID(model[0]);
+		model[0].marker.group = marker.group;
+		model[0].marker.id = marker.id;
 		model[0].save().then((model) => res.json(model));
 	} else {
 		res.status(404).json('No Model with input src exists');
@@ -228,28 +237,8 @@ router.post('/update-marker', async (req, res) => {
 	}
 });
 
-router.post('/update-marker-id', async (req, res) => {
-	if (!req.body.userId) {
-		return res.status(404).json('Please first login and privide a userId');
-	}
-	if (!req.body.src || !req.body.group || !req.body.markerId) {
-		return res.status(404).json('Missing params: src, distance, rotation  or scaling');
-	}
-	model = await Model.find({ src: req.body.src, user: req.body.userId });
-	if (model.length === 1) {
-		model[0].marker.group = req.body.group;
-		model[0].marker.markerId = req.body.markerId;
-		model[0].save().then((model) => res.json(model));
-	} else {
-		res.status(404).json('No Model with input src exists');
-	}
-});
 
 function getGroupID(thisModel) {
-	let largestGroup = 0;
-	let largestGroupID = 0;
-	let curGroup = 0;
-
 	let models;
 	fetch(`/models`)
 		.then(response => response.json())
@@ -257,25 +246,58 @@ function getGroupID(thisModel) {
 			models = data;
 		});
 
-	for (let model of models) {
-		largestGroup = Math.max(largestGroup, model.marker.group);
+	let nearModels = models.filter(model => (getDistance(model.location.latitude, model.location.longitude,
+		thisModel.location.latitude, thisModel.location.longitude) < 500));
 
-		if (getDistance(model.location.latitude, model.location.longitude,
-				thisModel.location.latitude, thisModel.location.longitude) < 500) {
-			if (curGroup === 0) curGroup = model.marker.group;
-			if (curGroup === model.group) {
-				largestGroupID = Math.max(largestGroupID, model.marker.markerId);
-			}
-			else {
-				//TODO: merge groups and begin search from beginning
+	let groups = new Set(nearModels.map(m => m.marker.group));
+
+	if (groups.size > 1) {
+		merge(groups[0], groups[1]);
+		return getGroupID(thisModel);
+	}
+	else if (groups.size === 1) {
+		let curGroup = groups[0];
+
+		let freeId = -1;
+		for(let i = 0; i < 50; ++i) {
+			if (!nearModels.find(i)) {
+				freeId = i;
+				break;
 			}
 		}
+
+		return {group: curGroup, id: freeId};
 	}
 
-	if (curGroup === 0) curGroup = largestGroup + 1;
-	largestGroupID += 1;
+	let largestGroup = models.reduce((acc, m) => Math.max(acc, m.marker.group));
 
-	return {group: curGroup, id: largestGroupID};
+	return {group: largestGroup + 1, id: 0};
+}
+
+function merge(group1, group2){
+	let models;
+	fetch(`/models`)
+		.then(response => response.json())
+		.then(data => {
+			models = data;
+		});
+
+	let modelsG1 = models.filter(m => m.marker.group === group1);
+	let modelsG2 = models.filter(m => m.marker.group === group2);
+
+	for (let m of modelsG2) {
+		m.marker.group = '' + group1;
+		let freeId = -1;
+		for(let i = 0; i < 50; ++i) {
+			if (!modelsG1.find(i)) {
+				freeId = i;
+				break;
+			}
+		}
+		m.marker.markerId = '' + freeId;
+		m.save();
+		modelsG1.push(m);
+	}
 }
 
 function getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude) {
@@ -284,5 +306,6 @@ function getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongit
 	const a = 0.5 - Math.cos(dLat) / 2 + Math.cos(objectLatitude * Math.PI / 180) * Math.cos(usersLatitude * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
 	return Math.round(6371000 * 2 * Math.asin(Math.sqrt(a)));
 }
+
 
 module.exports = router;
