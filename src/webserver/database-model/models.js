@@ -222,6 +222,21 @@ router.post('/update-marker', async (req, res) => {
 		model[0].marker.distance = req.body.distance;
 		model[0].marker.rotation = req.body.rotation;
 		model[0].marker.scaling = req.body.scaling;
+		model[0].save().then((model) => res.json(model));
+	} else {
+		res.status(404).json('No Model with input src exists');
+	}
+});
+
+router.post('/update-marker-id', async (req, res) => {
+	if (!req.body.userId) {
+		return res.status(404).json('Please first login and privide a userId');
+	}
+	if (!req.body.src || !req.body.group || !req.body.markerId) {
+		return res.status(404).json('Missing params: src, distance, rotation  or scaling');
+	}
+	model = await Model.find({ src: req.body.src, user: req.body.userId });
+	if (model.length === 1) {
 		model[0].marker.group = req.body.group;
 		model[0].marker.markerId = req.body.markerId;
 		model[0].save().then((model) => res.json(model));
@@ -229,5 +244,45 @@ router.post('/update-marker', async (req, res) => {
 		res.status(404).json('No Model with input src exists');
 	}
 });
+
+function getGroupID(thisModel) {
+	let largestGroup = 0;
+	let largestGroupID = 0;
+	let curGroup = 0;
+
+	let models;
+	fetch(`/models`)
+		.then(response => response.json())
+		.then(data => {
+			models = data;
+		});
+
+	for (let model of models) {
+		largestGroup = Math.max(largestGroup, model.marker.group);
+
+		if (getDistance(model.location.latitude, model.location.longitude,
+				thisModel.location.latitude, thisModel.location.longitude) < 500) {
+			if (curGroup === 0) curGroup = model.marker.group;
+			if (curGroup === model.group) {
+				largestGroupID = Math.max(largestGroupID, model.marker.markerId);
+			}
+			else {
+				//TODO: merge groups and begin search from beginning
+			}
+		}
+	}
+
+	if (curGroup === 0) curGroup = largestGroup + 1;
+	largestGroupID += 1;
+
+	return {group: curGroup, id: largestGroupID};
+}
+
+function getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude) {
+	const dLat = (usersLatitude - objectLatitude) * Math.PI / 180;
+	const dLon = (usersLongitude - objectLongitude) * Math.PI / 180;
+	const a = 0.5 - Math.cos(dLat) / 2 + Math.cos(objectLatitude * Math.PI / 180) * Math.cos(usersLatitude * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
+	return Math.round(6371000 * 2 * Math.asin(Math.sqrt(a)));
+}
 
 module.exports = router;
