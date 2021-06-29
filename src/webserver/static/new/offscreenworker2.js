@@ -139,7 +139,7 @@ let mCorners = null;
 function loadArUco() {
     console.log(cv2);
     dict =  new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
-    dict.maxCorrectionBits = 2;
+    // dict.maxCorrectionBits = 2;
     params = new cv2.aruco_DetectorParameters();
     params.cornerRefinementMethod = cv2.CORNER_REFINE_SUBPIX;
     params.adaptiveThreshWinSizeMin = 5;
@@ -147,17 +147,17 @@ function loadArUco() {
     params.adaptiveThreshWinSizeStep  = 5; //C
     params.adaptiveThreshConstant   = 9; //C
     // params.minMarkerPerimeterRate   = 0.03;
-    params.maxMarkerPerimeterRate  = 6.0; //C
-    params.polygonalApproxAccuracyRate = 0.08; //C
+    params.maxMarkerPerimeterRate  = 4.0; //C
+    params.polygonalApproxAccuracyRate = 0.16; //C
     // params.minCornerDistanceRate  = 0.05;
     // params.minMarkerDistanceRate  = 0.05;
     // params.minDistanceToBorder  = 3;
     //
     // params.minOtsuStdDev   = 5;
-    params.perspectiveRemovePixelPerCell   = 5; //C
-    params.perspectiveRemoveIgnoredMarginPerCell   = 0.19; //C
-    params.maxErroneousBitsInBorderRate   = 0.5; //C
-    params.errorCorrectionRate    = 0.7; //C
+    params.perspectiveRemovePixelPerCell   = 4;
+    params.perspectiveRemoveIgnoredMarginPerCell   = 0.25; //C
+    params.maxErroneousBitsInBorderRate   = 0.7; //C
+    params.errorCorrectionRate    = 1.0; //C
 
     //TODO: more params need changing?
 
