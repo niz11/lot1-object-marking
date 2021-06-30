@@ -68,7 +68,7 @@ router.post('/add-model', async (req, res) => {
 			},
 			user: req.body.userId
 		});
-		let marker = getGroupID(newModel);
+		let marker = await getGroupID(newModel);
 		newModel.marker.group = marker.group;
 		newModel.marker.id = marker.id;
 
@@ -117,7 +117,7 @@ router.post('/update-model', async (req, res) => {
 			scaling: req.body.scaling,
 		};
 
-		let marker = getGroupID(model[0]);
+		let marker = await getGroupID(model[0]);
 		model[0].marker.group = marker.group;
 		model[0].marker.id = marker.id;
 
@@ -210,7 +210,7 @@ router.post('/update-location', async (req, res) => {
 	if (model.length === 1) {
 		model[0].location.latitude = req.body.latitude;
 		model[0].location.longitude = req.body.longitude;
-		let marker = getGroupID(model[0]);
+		let marker = await getGroupID(model[0]);
 		model[0].marker.group = marker.group;
 		model[0].marker.id = marker.id;
 		model[0].save().then((model) => res.json(model));
@@ -238,7 +238,7 @@ router.post('/update-marker', async (req, res) => {
 });
 
 
-function getGroupID(thisModel) {
+async function getGroupID(thisModel) {
 	let models;
 	fetch(`/models`)
 		.then(response => response.json())
@@ -252,8 +252,8 @@ function getGroupID(thisModel) {
 	let groups = new Set(nearModels.map(m => m.marker.group));
 
 	if (groups.size > 1) {
-		merge(groups[0], groups[1]);
-		return getGroupID(thisModel);
+		await merge(groups[0], groups[1]);
+		return await getGroupID(thisModel);
 	}
 	else if (groups.size === 1) {
 		let curGroup = groups[0];
@@ -274,7 +274,7 @@ function getGroupID(thisModel) {
 	return {group: largestGroup + 1, id: 0};
 }
 
-function merge(group1, group2){
+async function merge(group1, group2){
 	let models;
 	fetch(`/models`)
 		.then(response => response.json())
@@ -295,7 +295,7 @@ function merge(group1, group2){
 			}
 		}
 		m.marker.markerId = '' + freeId;
-		m.save();
+		await m.save();
 		modelsG1.push(m);
 	}
 }
