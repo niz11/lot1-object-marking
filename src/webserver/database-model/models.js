@@ -70,7 +70,7 @@ router.post('/add-model', async (req, res) => {
 		});
 		let marker = await getGroupID(newModel);
 		newModel.marker.group = marker.group;
-		newModel.marker.id = marker.id;
+		newModel.marker.markerId = marker.id;
 
 		newModel.save().then((post) => res.json(post));
 	} else {
@@ -119,7 +119,7 @@ router.post('/update-model', async (req, res) => {
 
 		let marker = await getGroupID(model[0]);
 		model[0].marker.group = marker.group;
-		model[0].marker.id = marker.id;
+		model[0].marker.markerId = marker.id;
 
 		model[0].save().then((model) => res.json(model));
 	} else {
@@ -211,8 +211,9 @@ router.post('/update-location', async (req, res) => {
 		model[0].location.latitude = req.body.latitude;
 		model[0].location.longitude = req.body.longitude;
 		let marker = await getGroupID(model[0]);
+		console.log()
 		model[0].marker.group = marker.group;
-		model[0].marker.id = marker.id;
+		model[0].marker.markerId = marker.id;
 		model[0].save().then((model) => res.json(model));
 	} else {
 		res.status(404).json('No Model with input src exists');
@@ -241,21 +242,60 @@ router.post('/update-marker', async (req, res) => {
 async function getGroupID(thisModel) {
 	let models = await Model.find();
 
+	let largestGroup = models.reduce((acc, m) => m.marker != null ?
+		(m.marker.group != null ? Math.max(acc, +m.marker.group) : acc) : acc, 0);
+
+	let undefinedMarkerModels = models.filter(model => model.marker == null);
+	for (let model of undefinedMarkerModels) {
+		console.log('Model has no marker');
+		model.marker = {
+			distance: '0',
+			rotation: '0',
+			scaling: '0',
+			group: '' + ++largestGroup,
+			markerId: '0'
+		}
+		await model.save();
+	}
+
+	models = await Model.find();
+
+	undefinedMarkerModels = models.filter(model => model.marker.group == null);
+	for (let model of undefinedMarkerModels) {
+		console.log('Model has no marker group');
+		console.log(model);
+		model.marker.group = '' + ++largestGroup;
+		model.marker.markerId = '0';
+
+		await model.save();
+	}
+
+	models = await Model.find();
+
+	undefinedMarkerModels = models.filter(model => model.marker.markerId == null);
+	for (let model of undefinedMarkerModels) {
+		console.log('Model has no marker id');
+		model.marker.markerId = '0';
+		await model.save();
+	}
+
+	models = await Model.find();
+
 	let nearModels = models.filter(model => (getDistance(model.location.latitude, model.location.longitude,
 		thisModel.location.latitude, thisModel.location.longitude) < 500));
 
-	let groups = new Set(nearModels.map(m => m.marker.group));
-
-	if (groups.size > 1) {
+	let groups = Array.from(new Set(nearModels.map(m => m.marker.group)));
+	console.log(groups)
+	if (groups.length > 1) {
 		await merge(groups[0], groups[1]);
 		return await getGroupID(thisModel);
 	}
-	else if (groups.size === 1) {
+	else if (groups.length === 1) {
 		let curGroup = groups[0];
 
 		let freeId = -1;
 		for(let i = 0; i < 50; ++i) {
-			if (!nearModels.find(i)) {
+			if (nearModels.filter(model => model.marker.markerId === i && model !== thisModel).length === 0) {
 				freeId = i;
 				break;
 			}
@@ -264,27 +304,33 @@ async function getGroupID(thisModel) {
 		return {group: curGroup, id: freeId};
 	}
 
-	let largestGroup = models.reduce((acc, m) => Math.max(acc, m.marker.group));
+	largestGroup = models.reduce((acc, m) => Math.max(acc, m.marker.group));
 
 	return {group: largestGroup + 1, id: 0};
 }
 
 async function merge(group1, group2){
+	console.log('Merging: ',group1, group2);
 	let models = await Model.find();
 
 	let modelsG1 = models.filter(m => m.marker.group === group1);
 	let modelsG2 = models.filter(m => m.marker.group === group2);
 
+	console.log(modelsG1.length)
+	console.log(modelsG2.length)
+
 	for (let m of modelsG2) {
+		console.log(m)
 		m.marker.group = '' + group1;
 		let freeId = -1;
 		for(let i = 0; i < 50; ++i) {
-			if (!modelsG1.find(i)) {
+			if (modelsG1.filter(model => model.marker.markerId === i).length === 0) {
 				freeId = i;
 				break;
 			}
 		}
 		m.marker.markerId = '' + freeId;
+		console.log(m)
 		await m.save();
 		modelsG1.push(m);
 	}
