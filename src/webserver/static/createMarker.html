@@ -1,186 +1,171 @@
 <!DOCTYPE html>
 <!DOCTYPE html>
 <head>
-  <style>
-    canvas {
-      border: 1px solid black;
-    }
-  </style>
 </head>
 <body>
-<div id="arucoCodeArea">
-  <button id="arucoTryIt" disabled="true" onclick="createAruco()">Generate Marker</button><br>
-  <button id="arucoTryIt2" disabled="true" onclick="load()">Load Image</button><br>
-  <input id="myFile" type="file"/>
-  <textarea id="myTextArea" rows="4" columns="20"></textArea>
 
+<div id="displayblocks">
+    <div id="formblock">
+        <label for="modelSelection">Model: </label>
+        <select id="modelSelection" onchange="load(this)"></select><br><br>
+
+        <label for="alt">Alternative Name:</label>
+        <input type="text" id="alt" name="alt" disabled><br><br>
+    </div>
 </div>
-<div id="arucoShowcase">
-  <div>
-    <canvas id="arucoCanvasOutput"></canvas>
-  </div>
+
+<canvas id="canvas"></canvas>
+
+<div>
+    <button id="generate" disabled onclick="createMarker()">Generate</button><br>
+    <div id="message" style="color: #ff0000; "></div><br>
+    <button id="download" disabled onclick="download()">Download</button><br>
 </div>
+
 <script async src="opencv/xtrWasm/bin/opencv.js" onload="onReady()"></script>
 <script>
-  let cv2;
-  var canvas = document.getElementById("arucoCanvasOutput");
-  var context = canvas.getContext("2d");
-  var theImage = null;
-  function createAruco(){
-    let markerId = 0;
-    let markerImage = new cv2.Mat();
-    let dictionary = new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
-    console.log(dictionary);
-    dictionary.drawMarker(markerId, 200, markerImage, 1);
-    cv2.imshow("arucoCanvasOutput", markerImage);
-    markerImage.delete(); dictionary.delete();
-    theImage = context.getImageData(0, 0, 200, 200);
-    redraw();
-  }
+    const params = new URLSearchParams(document.location.search);
+    const userId = params.get('userId');
 
-  function redraw(){
-    if (!theImage){
-      return;
+    console.log(userId);
+
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
+    let markerId = 0;
+
+    let cv2;
+    let canvas = document.getElementById("canvas");
+    let context = canvas.getContext("2d");
+
+
+    let jsonData;
+    let chosenModel;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            jsonData = data;
+            addModel(data[0])
+            console.log(data)
+            let select = document.getElementById("modelSelection");
+
+            for (const val of data) {
+                let option = document.createElement("option");
+                option.value = val.modelName;
+                option.text = val.modelName;
+                select.appendChild(option);
+            }
+        });
+    function load(selectObject) {
+        let value = selectObject.value;
+
+        fetch(`/models`)
+            .then(response => response.json())
+            .then(data => {
+                jsonData = data;
+                const model = jsonData.filter(model => model.modelName === value);
+                addModel(model[0]);
+            });
     }
 
-    var width = theImage.width;
-    var height = theImage.height;
+    function addModel(model) {
+        chosenModel = model;
+        document.getElementById("alt").value = model.alt;
+        if (model.marker) {
+            markerId = +model.marker.id;
+        }
 
-    var nTiles = 8;
-    var padding = 3;
-    var cornerLength = 4;
-    var dx = width / nTiles;
-    var dy = height / nTiles;
+    }
 
-    canvas.width = 2 * padding * dx + width;
-    canvas.height = 2 * padding * dy + height;
+    async function createMarker(){
+        let messageDiv = document.getElementById('message');
+        messageDiv.innerHTML = '';
+        if (markerId == null || markerId < 0 || markerId >= 50) {
+            messageDiv.innerHTML = 'Error: No valid marker could be generated - too many artworks, too close';
 
-    // clear background
-    context.fillStyle = "#ffffff";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+            if (userId){
+                let res = await fetch('/models/update-location', {
+                    method: 'post',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        src: chosenModel.src,
+                        userId: userId,
+                        longitude: chosenModel.location.longitude,
+                        latitude: chosenModel.location.latitude
+                    })
+                }).catch(e => {
+                    console.log(e);
 
-    // draw corners
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, dx, dy * cornerLength);
-    context.fillRect(0, 0, cornerLength * dx, dy);
-    context.fillRect(canvas.width - dx, canvas.height - dy * cornerLength, dx, dy * cornerLength);
-    context.fillRect(canvas.width - cornerLength * dx, canvas.height - dy, cornerLength * dx, dy);
-    context.fillRect(canvas.width - dx, 0, dx, dy * cornerLength);
-    context.fillRect(canvas.width - cornerLength * dx, 0, dx * cornerLength, dy);
-    context.fillRect(0, canvas.height - dy * cornerLength, dx, dy * cornerLength);
-    context.fillRect(0, canvas.height - dy, cornerLength * dx, dy);
-
-    // draw image
-    context.putImageData(theImage, padding * dx, padding * dy);
-  }
-
-  function load() {
-    var file = document.getElementById("myFile").files[0];
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      let obj = JSON.parse(e.target.result);
-
-      let data = new Uint8ClampedArray(780 * 360 * 4);
-
-      for (let i = 0; i < data.length; i++) {
-        data[i] = obj[i];
-      }
-
-      console.log(obj[0]);
-      let markerImage = new cv2.Mat(780, 360, cv2.CV_8UC4);
-      markerImage.data.set(data);
-      console.log(markerImage.data)
-      // cv2.cvtColor(markerImage, markerImage, cv2.COLOR_GRAY2RGBA);
-      console.log(markerImage.data)
-
-      cv2.flip(markerImage, markerImage, 0)
-
-      let dictionary = new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
-      let params = new cv2.aruco_DetectorParameters();
-      params.cornerRefinementMethod = cv2.CORNER_REFINE_SUBPIX;
-      let mIDs = new cv2.Mat();
-      let markerCorners = new cv2.MatVector();
-      let rejectedCandidates = new cv2.MatVector();
-      cv2.cvtColor(markerImage, markerImage, cv2.COLOR_RGBA2RGB);
-      cv2.detectMarkers(markerImage, dictionary, markerCorners, mIDs, params, rejectedCandidates);
-      cv2.drawDetectedMarkers(markerImage, markerCorners, mIDs);
-
-      console.log(rejectedCandidates.size());
-      console.log(mIDs.size());
-      console.log(mIDs.data);
-
-      let fov = 65.55 * Math.PI / 180;
-      let fol = (780 / 2) / Math.tan(fov / 2);
-      let camMat = new cv2.Mat();
-      camMat.create(3, 3, cv2.CV_64F);
-      camMat.data64F.set([fol, 0, 0, 0, fol, 0, 360 / 2, 780 / 2, 1]);
-      let camDist = cv2.matFromArray(5, 1, cv2.CV_64F, [0, 0, 0, 0, 0]);
-      let rvecs = new cv2.Mat();
-      let tvecs = new cv2.Mat();
+                })
+                if (!res.ok) {
+                    messageDiv.innerHTML = 'Error: No valid marker could be generated: Not authorized to generate a new one';
+                }
+            }
 
 
-      let width = 360;
-      let height = 780;
+            return;
+        }
 
-      console.log('corners')
-      console.log(markerCorners.get(0));
+        let markerImage = new cv2.Mat();
+        let dictionary = new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
+        console.log(dictionary);
+        dictionary.drawMarker(markerId, 200, markerImage, 1);
+        cv2.imshow("canvas", markerImage);
+        markerImage.delete(); dictionary.delete();
+        let image = context.getImageData(0, 0, 200, 200);
+        redraw(image);
+    }
 
-      for(let i=0; i < mIDs.rows; ++i) {
-        let cornervec = markerCorners.get(i).data32F
-        cornervec[0] -= width/2;
-        cornervec[0] *= -1
-        cornervec[1] -= height/2;
-        // cornervec[1] *= -1
-        cornervec[2] -= width/2;
-        cornervec[2] *= -1
-        cornervec[3] -= height/2;
-        // cornervec[3] *= -1
-        cornervec[4] -= width/2;
-        cornervec[4] *= -1
-        cornervec[5] -= height/2;
-        // cornervec[5] *= -1
-        cornervec[6] -= width/2;
-        cornervec[6] *= -1
-        cornervec[7] -= height/2;
-        // cornervec[7] *= -1
-      }
+    function redraw(image){
+        let width = image.width;
+        let height = image.height;
 
-      console.log(markerCorners.get(0));
+        let pixels = 6; // 4 dict size + 2 * 1 border size
+        let padding = 2; // 2 pixels between marker and new border 1 pixel for new border
+        let cornerLength = 3;
+        let px = width / pixels; // pixel sizes
+        let py = height / pixels;
 
-      cv2.estimatePoseSingleMarkers(markerCorners, 0.05, camMat, camDist, rvecs, tvecs);
+        let borderScale = 0.5; // half a pixel for border size
+        let bx = px * borderScale;
+        let by = py * borderScale;
 
-      console.log('tvecs:');
-      console.log(tvecs);
-      console.log('rvecs:');
-      console.log(rvecs);
+        canvas.width = 2 * padding * px + width;
+        canvas.height = 2 * padding * py + height;
 
-      let objP = cv2.matFromArray(3, 1, cv2.CV_64F, [0, 0, 0]);
-      let imgP = new cv2.Mat();
+        // clear background
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
-      let rv = cv2.matFromArray(3, 1, cv2.CV_64F, rvecs.doublePtr(0, 0));
-      let tv = cv2.matFromArray(3, 1, cv2.CV_64F, tvecs.doublePtr(0, 0));
+        // draw corners
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, bx, by * cornerLength);
+        context.fillRect(0, 0, cornerLength * bx, by);
+        context.fillRect(canvas.width - bx, canvas.height - by * cornerLength, bx, by * cornerLength);
+        context.fillRect(canvas.width - cornerLength * bx, canvas.height - by, cornerLength * bx, by);
+        context.fillRect(canvas.width - bx, 0, bx, by * cornerLength);
+        context.fillRect(canvas.width - cornerLength * bx, 0, bx * cornerLength, by);
+        context.fillRect(0, canvas.height - by * cornerLength, bx, by * cornerLength);
+        context.fillRect(0, canvas.height - by, cornerLength * bx, by);
 
+        // draw image
+        context.putImageData(image, padding * px, padding * py);
+    }
 
+    function download() {
+        link.href = canvas.toDataURL();
+        link.download = 'marker' + '.png';
+        link.click();
+    }
 
-      console.log(imgP);
-
-      cv2.cvtColor(markerImage, markerImage, cv2.COLOR_RGB2RGBA);
-      cv2.imshow("arucoCanvasOutput", markerImage);
-
-      context.fillRect(canvas.width / 2 - 2, 0, 4, canvas.height);
-      context.fillRect(0, canvas.height / 2 -2, canvas.width, 4);
-    };
-    reader.readAsText(file);
-  }
-
-  function onReady() {
-    // document.getElementById("arucoTryIt").disabled = false;
-    cv.then((s) => {
-      cv2 = s;
-      console.log(cv2);
-      document.getElementById("arucoTryIt").disabled = false;
-      document.getElementById("arucoTryIt2").disabled = false;
-    })
-  }
+    function onReady() {
+        cv.then((s) => {
+            cv2 = s;
+            // console.log(cv2);
+            document.getElementById("generate").disabled = false;
+            document.getElementById("download").disabled = false;
+        })
+    }
 </script>
 </body>
