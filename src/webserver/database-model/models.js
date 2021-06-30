@@ -296,7 +296,8 @@ async function getGroupID(thisModel) {
 		return {group: curGroup, id: freeId};
 	}
 
-	largestGroup = models.reduce((acc, m) => Math.max(acc, m.marker.group));
+	largestGroup = models.reduce((acc, m) => m.marker != null ?
+		(m.marker.group != null ? Math.max(acc, +m.marker.group) : acc) : acc, 0);
 
 	return {group: largestGroup + 1, id: 0};
 }
