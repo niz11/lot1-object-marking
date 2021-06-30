@@ -151,7 +151,6 @@ router.post('/add-hospot', async (req, res) => {
 		return res.status(404).json('Missing params: src, position, normal or text');
 	}
 	model = await Model.find({ src: req.body.src, user: req.body.userId });
-	console.log(model);
 	if (model.length === 1) {
 		const exist = model[0].hotspots.filter((hotspot) => {
 			return hotspot.text === req.body.text;
@@ -184,7 +183,6 @@ router.delete('/remove-hospot', async (req, res) => {
 		const exist = model[0].hotspots.filter((hotspot) => {
 			return hotspot.text === req.body.text;
 		});
-		console.log(exist);
 		if (exist.length === 0) {
 			res.status(404).json('No hotspot with input text exists');
 		} else {
@@ -211,7 +209,6 @@ router.post('/update-location', async (req, res) => {
 		model[0].location.latitude = req.body.latitude;
 		model[0].location.longitude = req.body.longitude;
 		let marker = await getGroupID(model[0]);
-		console.log()
 		model[0].marker.group = marker.group;
 		model[0].marker.markerId = marker.id;
 		model[0].save().then((model) => res.json(model));
@@ -247,7 +244,6 @@ async function getGroupID(thisModel) {
 
 	let undefinedMarkerModels = models.filter(model => model.marker == null);
 	for (let model of undefinedMarkerModels) {
-		console.log('Model has no marker');
 		model.marker = {
 			distance: '0',
 			rotation: '0',
@@ -262,8 +258,6 @@ async function getGroupID(thisModel) {
 
 	undefinedMarkerModels = models.filter(model => model.marker.group == null);
 	for (let model of undefinedMarkerModels) {
-		console.log('Model has no marker group');
-		console.log(model);
 		model.marker.group = '' + ++largestGroup;
 		model.marker.markerId = '0';
 
@@ -274,7 +268,6 @@ async function getGroupID(thisModel) {
 
 	undefinedMarkerModels = models.filter(model => model.marker.markerId == null);
 	for (let model of undefinedMarkerModels) {
-		console.log('Model has no marker id');
 		model.marker.markerId = '0';
 		await model.save();
 	}
@@ -285,7 +278,6 @@ async function getGroupID(thisModel) {
 		thisModel.location.latitude, thisModel.location.longitude) < 500));
 
 	let groups = Array.from(new Set(nearModels.map(m => m.marker.group)));
-	console.log(groups)
 	if (groups.length > 1) {
 		await merge(groups[0], groups[1]);
 		return await getGroupID(thisModel);
@@ -310,17 +302,12 @@ async function getGroupID(thisModel) {
 }
 
 async function merge(group1, group2){
-	console.log('Merging: ',group1, group2);
 	let models = await Model.find();
 
 	let modelsG1 = models.filter(m => m.marker.group === group1);
 	let modelsG2 = models.filter(m => m.marker.group === group2);
 
-	console.log(modelsG1.length)
-	console.log(modelsG2.length)
-
 	for (let m of modelsG2) {
-		console.log(m)
 		m.marker.group = '' + group1;
 		let freeId = -1;
 		for(let i = 0; i < 50; ++i) {
@@ -330,7 +317,6 @@ async function merge(group1, group2){
 			}
 		}
 		m.marker.markerId = '' + freeId;
-		console.log(m)
 		await m.save();
 		modelsG1.push(m);
 	}
