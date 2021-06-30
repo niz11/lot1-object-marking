@@ -239,12 +239,7 @@ router.post('/update-marker', async (req, res) => {
 
 
 async function getGroupID(thisModel) {
-	let models;
-	fetch(`/models`)
-		.then(response => response.json())
-		.then(data => {
-			models = data;
-		});
+	let models = await Model.find();
 
 	let nearModels = models.filter(model => (getDistance(model.location.latitude, model.location.longitude,
 		thisModel.location.latitude, thisModel.location.longitude) < 500));
@@ -275,12 +270,7 @@ async function getGroupID(thisModel) {
 }
 
 async function merge(group1, group2){
-	let models;
-	fetch(`/models`)
-		.then(response => response.json())
-		.then(data => {
-			models = data;
-		});
+	let models = await Model.find();
 
 	let modelsG1 = models.filter(m => m.marker.group === group1);
 	let modelsG2 = models.filter(m => m.marker.group === group2);
