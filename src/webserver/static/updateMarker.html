@@ -6,6 +6,7 @@
 </head>
 <body>
 <div id="displayblocks">
+    <div id="message" style="color: #ff0000"></div>
     <div id="formblock">
         <label for="modelSelection">Model: </label>
         <select id="modelSelection" onchange="getComboA(this)"></select><br><br>
@@ -29,12 +30,20 @@
     </div>
 </div>
 <script>
+    const params = new URLSearchParams(document.location.search);
+    const userId = params.get('userId');
+
+    if (userId == null) document.getElementById('message').innerHTML = 'Need to provide a User-ID: please login';
+
     let jsonData;
     let chosenModel;
     fetch(`/models`)
         .then(response => response.json())
         .then(data => {
             jsonData = data;
+
+            data = data.filter(model => model.user === userId);
+
             addModel(data[0])
             console.log(data)
             let select = document.getElementById("modelSelection");
@@ -76,6 +85,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     src: chosenModel.src,
+                    userId: userId,
                     distance: "" + document.getElementById("mdist").value,
                     rotation: "" + document.getElementById("mrot").value,
                     scaling: "" + document.getElementById("mscal").value
