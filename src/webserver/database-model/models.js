@@ -8,8 +8,8 @@ router.get('/test', (req, res) => {
 
 router.get('/', (req, res) => {
 	Model.find()
-		.then((models) => res.json(models))
-		.catch((err) => res.status(404).json({ noModels: 'No models found' }));
+		.then((models) => {for (let model of models){model.user = null;} res.json(models)})
+		.catch((err) => {console.log(err); res.status(404).json({ noModels: 'No models found' })});
 });
 
 router.post('/user', (req, res) => {
