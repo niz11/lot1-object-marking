@@ -45,7 +45,6 @@
   display: flex;
   flex-direction: column;
   width: 40vw;
-  height: 15rem;
   background-color: white;
   background-color: #f7f7f7;
 }
@@ -76,8 +75,33 @@
     border-bottom: 3px solid grey;
 }
 
+.errorInput{
+    outline: none !important;
+    box-shadow: 0 1rem 2rem rgba(red, .1) !important;
+    border-bottom: 3px solid red !important;
+}
 
-input[type=text], select, .info-text {
+#modelNameText:focus{
+    outline: none;
+    box-shadow: 0 1rem 2rem rgba(black, .1);
+    border-bottom: 3px solid grey;
+}
+
+#modelsLatitude:focus{
+    outline: none;
+    box-shadow: 0 1rem 2rem rgba(black, .1);
+    border-bottom: 3px solid grey;
+}
+
+#modelsLongitude:focus{
+    outline: none;
+    box-shadow: 0 1rem 2rem rgba(black, .1);
+    border-bottom: 3px solid grey;
+}
+
+
+
+input[type=text], input[type=number], select, .info-text {
   width: 80%;
   padding: 12px 20px;
   margin: 15px 10% 15px 10%;
@@ -88,6 +112,10 @@ input[type=text], select, .info-text {
 }
 
 .marginTop{
+  margin-top: 15px;
+}
+
+.marginBottom{
   margin-top: 15px;
 }
 
@@ -141,3 +169,10 @@ input[type=text], select, .info-text {
     animation: moveInBottom .5s ease-out 0.75s;
     /* Automaticlly apply the styles of the 0% in the keyframe before animation starts - hides the bottom when it waits with the delay property  */
     animation-fill-mode: backwards; }
+
+  .sectionName{
+    padding: 12px 20px;
+    margin-top: 0px;
+    margin-left: 15px;
+    margin-bottom: -10px;
+  }

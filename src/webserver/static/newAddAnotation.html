@@ -48,10 +48,24 @@
         </model-viewer>
         <div id="errorMessage" class="error" style="color: #ff0000"></div>
         <div id="formblock">
-            <select id="modelSelection" onchange="getComboA(this)">
+            <h3 class="center">Models data</h3>
+            <h5 class="sectionName">Selected model:</h5>
+            <select id="modelSelection" onchange="switchModel(this)">
             </select>
-            <form onSubmit="return false;">
-                <input type="text" id="hotspottext" name="hotspottext" placeholder="Input text for hotspot">
+            <div>
+                <h5 class="sectionName">Update models data:</h5>
+                <input type="text" id="modelNameText" name="modelNameText" placeholder="Insert new model name"> </input>
+                <input type="number" id="modelsLatitude" name="modelsLatitude" placeholder="Insert models latitude">
+                </input>
+                <input type="number" id="modelsLongitude" name="modelsLongitude" placeholder="Insert models longitude">
+                </input>
+                <div class="center marginTop"><button class="btn btn--azure" onclick="updadeModelData()">Update model
+                        data</button></div>
+            </div>
+            <form onSubmit="return false;" class="marginTop">
+                <h5 class="sectionName">Add annotation to model:</h5>
+                <input type="text" id="hotspottext" name="hotspottext"
+                    placeholder="Input text for hotspot then click where to place it on model">
             </form>
             <div class="center marginTop"><button class="btn btn--azure" onclick="removeHotspot()">Remove
                     Hotspot</button></div>
@@ -59,13 +73,14 @@
     </div>
     <script>
         let jsonData, src;
+        document.getElementById('errorMessage').style.display = 'none';
         const params = new URLSearchParams(document.location.search);
         const userId = params.get('userId')
         if (userId == null) {
             document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
+            document.getElementById('errorMessage').style.display = 'inline'
 
         } else {
-            document.getElementById('errorMessage').style.display = 'none';
             let noModels = false;
             fetch('/models/user', {
                 method: 'post',
@@ -76,27 +91,33 @@
             }).then(response => response.json())
                 .then(data => {
                     noModels = data.noModels ? true : false;
-                    jsonData = data;
-                    addModel(data[0])
-                    src = data[0].src;
-                    var select = document.getElementById("modelSelection");
+                    if (data.noModels) {
+                        document.getElementById('errorMessage').innerHTML = 'You have no models stored, please first upload a model to your account.';
+                        document.getElementById('errorMessage').style.display = 'inline'
+                    } else {
+                        document.getElementById('errorMessage').style.display = 'none';
+                        jsonData = data;
+                        addModel(data[0])
+                        src = data[0].src;
+                        var select = document.getElementById("modelSelection");
 
-                    for (const val of data) {
-                        let option = document.createElement("option");
-                        option.value = val.modelName;
-                        option.text = val.modelName;
-                        select.appendChild(option);
+                        for (const val of data) {
+                            let option = document.createElement("option");
+                            option.value = val.modelName;
+                            option.text = val.modelName;
+                            select.appendChild(option);
+                        }
                     }
+
                 }).catch(e => {
                     console.log(e);
                 })
         }
 
 
-
-
-        function getComboA(selectObject) {
-            var value = selectObject.value;
+        function switchModel(selectObject, modelName) {
+            let value = modelName ? modelName : selectObject.value;
+            console.log(value);
             // Need to fetch data again, incease hotspots were added
             fetch('/models/user', {
                 method: 'post',
@@ -107,12 +128,17 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    noModels = data.noModels ? true : false;
-                    jsonData = data;
-                    const model = jsonData.filter(model => model.modelName === value);
-                    if (model) removeAllHotspots();
-                    addModel(model[0]);
-                    src = model[0].src;
+                    if (data.noModels) {
+                        document.getElementById('errorMessage').innerHTML = 'You have no models stored, please first upload a model to your account';
+                        document.getElementById('errorMessage').style.display = 'inline'
+                    } else {
+                        document.getElementById('errorMessage').style.display = 'none';
+                        jsonData = data;
+                        const model = jsonData.filter(model => model.modelName === value);
+                        if (model) removeAllHotspots();
+                        addModel(model[0]);
+                        src = model[0].src;
+                    }
                 });
 
         }
@@ -209,6 +235,9 @@
         function addModel(model) {
             const viewer = document.querySelector('#modelblock');
             viewer.src = model.src;
+            document.querySelector('#modelNameText').value = model.modelName
+            document.querySelector('#modelsLatitude').value = model.location ? model.location.latitude ? model.location.latitude : null : null;
+            document.querySelector('#modelsLongitude').value = model.location ? model.location.longitude ? model.location.longitude : null : null;
             model.hotspots.map(ano => {
                 addHotspot(ano.position, ano.normal, ano.text)
             })
@@ -234,6 +263,52 @@
             if (el.length > 0) {
                 Array.from(el).map(hotspot => hotspot.remove())
             }
+        }
+    </script>
+    <script>
+        async function updadeModelData() {
+            const viewer = document.querySelector('#modelblock');
+            const src = viewer.src;
+            // Check input
+            const newModelName = document.querySelector('#modelNameText').value
+            if (newModelName.length === 0) {
+                document.querySelector('#modelNameText').className = "errorInput"
+                return
+            } else {
+                document.querySelector('#modelNameText').className = ""
+            }
+            const latitude = document.querySelector('#modelsLatitude').value
+            if (latitude.length === 0) {
+                document.querySelector('#modelsLatitude').className = "errorInput"
+                return
+            } else {
+                document.querySelector('#modelsLatitude').className = ""
+            }
+            const longitude = document.querySelector('#modelsLongitude').value
+            if (longitude.length === 0) {
+                document.querySelector('#modelsLongitude').className = "errorInput"
+                return
+            } else {
+                document.querySelector('#modelsLongitude').className = ""
+            }
+
+            let res = await fetch('/models/update-location', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    src: src,
+                    userId: userId,
+                    latitude: latitude,
+                    longitude: longitude,
+                    modelName: newModelName
+                })
+            }).catch(e => {
+                console.log(e);
+            })
+            const data = await res.json()
+            location.reload();
+            // console.log(data.modelName);
+            // switchModel({}, data.modelName)
         }
     </script>
 
