@@ -83,7 +83,7 @@
         </model-viewer>
     </div>
     <div class="noModelTextBox" id="noModelTextBox">
-        No Model
+        Model is out of radius
     </div>
     <i class="material-icons" id="fullScreenIcon" style="font-size:36px" onClick="toggleFullScreen()">
         fullscreen</i>
@@ -93,17 +93,22 @@
         const userId = params.get('userId')
         const modelName = params.get('modelName')
         let models, model;
-        fetch(`/models`)
-            .then(response => response.json())
-            .then(data => {
-                jsonData = data;
-                models = jsonData.filter(model => model.modelName === modelName);
-                // If there is a userId filter by it
-                models = userId ? models.filter(model => model.user === userId): models
-                model = models[0];
-                console.log(model);
-                if (model) removeAllHotspots();
-            });
+        if (!modelName) {
+            document.getElementById("noModelTextBox").textContent = "Please Provide Model Name"
+        } else {
+            fetch(`/models`)
+                .then(response => response.json())
+                .then(data => {
+                    jsonData = data;
+                    models = jsonData.filter(model => model.modelName === modelName);
+                    // If there is a userId filter by it
+                    models = userId ? models.filter(model => model.user === userId) : models
+                    model = models[0];
+                    console.log(model);
+                    if (model) removeAllHotspots();
+                });
+        }
+
         function addHotspot(position, normal, inputtext) {
             const viewer = document.querySelector('#modelblock');
             const hotspotCounter = document.getElementsByClassName("hotspot").length
@@ -157,24 +162,31 @@
     <script>
         let id;
         function success(pos) {
-            const objectLatitude = model ? model.location.latitude : 0;
-            const objectLongitude = model ? model.location.longitude : 0;
-            const usersLatitude = pos.coords.latitude;
-            const usersLongitude = pos.coords.longitude;
-            const radius = 30;
-            const d = getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude);
-            console.log("Distance from user to object: ", d);
-            const modelStatus = document.getElementById("body").className;
-            if (d < radius) {
-                navigator.geolocation.clearWatch(id);
-                if (modelStatus !== 'model') {
-                    addModel();
-                }
+            if (!model) {
+                document.getElementById("noModelTextBox").textContent = "Please Provide Model Name"
+            } else if (!model.location && !model.location.latitude && !model.location.longitude) {
+                document.getElementById("noModelTextBox").textContent = "Model is missing a location"
             } else {
-                if (modelStatus !== 'noModel') {
-                    removeModel()
+                const objectLatitude = model ? model.location.latitude : 0;
+                const objectLongitude = model ? model.location.longitude : 0;
+                const usersLatitude = pos.coords.latitude;
+                const usersLongitude = pos.coords.longitude;
+                const radius = 30;
+                const d = getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude);
+                console.log("Distance from user to object: ", d);
+                const modelStatus = document.getElementById("body").className;
+                if (d < radius) {
+                    navigator.geolocation.clearWatch(id);
+                    if (modelStatus !== 'model') {
+                        addModel();
+                    }
+                } else {
+                    if (modelStatus !== 'noModel') {
+                        removeModel()
+                    }
                 }
             }
+
         }
 
         function error(err) {
