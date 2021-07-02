@@ -29,22 +29,16 @@
 
 
   /* not important document styling */
-#displayblocks{
-  display: flex;
-  justify-content: center;
-}
 
-#modelblock{
+
+.modelblock{
   width: 80vw;
   height: 80vh;
   margin: 10vh 0px 0px 0px;
-
 }
-
-#formblock{
+.formblock{
   display: flex;
   flex-direction: column;
-  width: 40vw;
   background-color: white;
   background-color: #f7f7f7;
 }
@@ -69,7 +63,7 @@
   margin: 30px 10% 0px 10%;
 } */
 
-#hotspottext:focus{
+.hotspottext:focus{
     outline: none;
     box-shadow: 0 1rem 2rem rgba(black, .1);
     border-bottom: 3px solid grey;
@@ -81,19 +75,19 @@
     border-bottom: 3px solid red !important;
 }
 
-#modelNameText:focus{
+.modelNameText:focus{
     outline: none;
     box-shadow: 0 1rem 2rem rgba(black, .1);
     border-bottom: 3px solid grey;
 }
 
-#modelsLatitude:focus{
+.modelsLatitude:focus{
     outline: none;
     box-shadow: 0 1rem 2rem rgba(black, .1);
     border-bottom: 3px solid grey;
 }
 
-#modelsLongitude:focus{
+.modelsLongitude:focus{
     outline: none;
     box-shadow: 0 1rem 2rem rgba(black, .1);
     border-bottom: 3px solid grey;
