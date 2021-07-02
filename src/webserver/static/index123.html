@@ -15,19 +15,10 @@
   <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body id="page-top">
-<header class="masthead">
-  <div class="container">
-    <div class="intro-text">
-      <div class="intro-lead-in">Willkommen bei <b>LOT1</b>!</div>
-      <div class="intro-heading text-uppercase">N E W | A R T | A U C T I O N S</div>
-      <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="#services">Scan your Object!</a>
-    </div>
-  </div>
-</header>
-<div class="nav">
-</div>
+<header class="masthead"></header>
+<div class="nav"></div>
 </section>
-<section id="features"          class="section-features section-padding section-meta onepage-section">
+<section id="features" class="section-features section-padding section-meta onepage-section">
   <div class="container">
     <div class="section-title-area">
       <h2 class="section-title">WER UND WAS IST LOT1?</h2>                    </div>
@@ -60,7 +51,6 @@ Jungen und unbekannten Künstler*innen mangelt es an Aufmerksamkeit und Verkaufs
   </div>
 
 </section>
-
 <!-- About -->
 <section class="page-section" id="about">
   <div class="container">
@@ -204,6 +194,7 @@ Jungen und unbekannten Künstler*innen mangelt es an Aufmerksamkeit und Verkaufs
 </footer>
 <script type="text/javascript">
   $(function () {
+    $("header").load("public/header.html")
     $(".nav").load("public/nav.html")
     $("footer").load("public/footer.html")
   });
