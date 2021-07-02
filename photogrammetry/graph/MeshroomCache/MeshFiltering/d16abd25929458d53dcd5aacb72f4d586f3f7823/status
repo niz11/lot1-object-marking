@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "MeshFiltering_1",
+    "nodeType": "MeshFiltering",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_meshFiltering  --inputMesh \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/Meshing/80acd65f180bc35ed061ba5c7a1f22361876de75/mesh.obj\" --keepLargestMeshOnly False --smoothingSubset all --smoothingBoundariesNeighbours 0 --smoothingIterations 5 --smoothingLambda 1.0 --filteringSubset all --filteringIterations 1 --filterLargeTrianglesFactor 60.0 --filterTrianglesRatio 0.0 --verboseLevel info --outputMesh \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/MeshFiltering/d16abd25929458d53dcd5aacb72f4d586f3f7823/mesh.obj\"",
+    "env": null,
+    "startDateTime": "2021-06-30 17:14:37.678825",
+    "endDateTime": "2021-06-30 17:14:37.845654",
+    "elapsedTime": 0.16687488555908203,
+    "hostname": "anton-ubuntu",
+    "sessionUid": "52f13d98-d8d9-11eb-8fe4-3d4ed54c7ac4",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:00.166875"
+}

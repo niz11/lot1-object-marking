@@ -1,0 +1,18 @@
+Program called with the following parameters:
+ * featuresFolders =  = [/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/FeatureExtraction/0f3b43190cd115f6a5e586d1029bccc1405e9278]
+ * input = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/CameraInit/a636cb8054394660607914aaa1dae44de22f82be/cameraInit.sfm"
+ * matchingMode = "a/a" (default)
+ * maxDescriptors = 500
+ * method =  Unknown Type "20EImageMatchingMethod"
+ * minNbImages = 200
+ * nbMatches = 50
+ * nbNeighbors = 50 (default)
+ * output = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/ImageMatching/859e566c9a7682080699cc59f8b8ce48f5c7eebb/imageMatches.txt"
+ * outputCombinedSfM = "" (default)
+ * tree = "/home/anton/Meshroom-2021.1.0-av2.4.0-centos7-cuda10.2/aliceVision/share/aliceVision/vlfeat_K80L3.SIFT.tree"
+ * verboseLevel = "info"
+ * weights = ""
+
+[17:14:29.597511][info] Use EXHAUSTIVE method.
+[17:14:29.597975][info] Number of selected image pairs: 3
+[17:14:29.598590][info] pairList exported in: /home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/ImageMatching/859e566c9a7682080699cc59f8b8ce48f5c7eebb/imageMatches.txt

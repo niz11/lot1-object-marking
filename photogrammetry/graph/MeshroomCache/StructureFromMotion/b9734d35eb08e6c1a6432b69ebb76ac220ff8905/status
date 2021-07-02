@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "StructureFromMotion_1",
+    "nodeType": "StructureFromMotion",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_incrementalSfM  --input \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/CameraInit/a636cb8054394660607914aaa1dae44de22f82be/cameraInit.sfm\" --featuresFolders \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/FeatureExtraction/6af08ca7741782ee08d15e9b8883bdce88736d8b\" --matchesFolders \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/FeatureMatching/4266cb8ec6c9b5d8efa298f91f98e60b16633d5d\" --describerTypes sift --localizerEstimator acransac --observationConstraint Basic --localizerEstimatorMaxIterations 4096 --localizerEstimatorError 0.0 --lockScenePreviouslyReconstructed False --useLocalBA True --localBAGraphDistance 1 --maxNumberOfMatches 0 --minNumberOfMatches 0 --minInputTrackLength 2 --minNumberOfObservationsForTriangulation 2 --minAngleForTriangulation 3.0 --minAngleForLandmark 2.0 --maxReprojectionError 4.0 --minAngleInitialPair 5.0 --maxAngleInitialPair 40.0 --useOnlyMatchesFromInputFolder False --useRigConstraint True --lockAllIntrinsics False --filterTrackForks False --initialPairA \"\" --initialPairB \"\" --interFileExtension .abc --verboseLevel info --output \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/b9734d35eb08e6c1a6432b69ebb76ac220ff8905/sfm.abc\" --outputViewsAndPoses \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/b9734d35eb08e6c1a6432b69ebb76ac220ff8905/cameras.sfm\" --extraInfoFolder \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/b9734d35eb08e6c1a6432b69ebb76ac220ff8905\"",
+    "env": null,
+    "startDateTime": "2021-07-01 13:02:04.013086",
+    "endDateTime": "2021-07-01 13:02:10.598424",
+    "elapsedTime": 6.585308074951172,
+    "hostname": "anton-ubuntu",
+    "sessionUid": "2efdbe56-da51-11eb-ba90-eda820eba3c7",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:06.585308"
+}

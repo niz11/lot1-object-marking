@@ -1,0 +1,38 @@
+Program called with the following parameters:
+ * contrastFiltering =  Unknown Type "N11aliceVision7feature26EFeatureConstrastFilteringE"
+ * describerPreset =  Unknown Type "N11aliceVision7feature21EImageDescriberPresetE"
+ * describerQuality =  Unknown Type "N11aliceVision7feature15EFeatureQualityE"
+ * describerTypes = "sift"
+ * forceCpuExtraction = 1
+ * gridFiltering = 1
+ * input = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/CameraInit/a636cb8054394660607914aaa1dae44de22f82be/cameraInit.sfm"
+ * maxNbFeatures = 0 (default)
+ * maxThreads = 0
+ * output = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/FeatureExtraction/6af08ca7741782ee08d15e9b8883bdce88736d8b"
+ * rangeSize = 40
+ * rangeStart = 0
+ * relativePeakThreshold = 0.02 (default)
+ * verboseLevel =  Unknown Type "N11aliceVision6system13EVerboseLevelE"
+
+[13:00:12.249307][warning] Could not determine number of CUDA cards in this system
+[13:00:12.248806][warning] No CUDA-Enabled GPU.
+0
+[13:00:12.251893][error] cudaGetDeviceCount failed: CUDA driver version is insufficient for CUDA runtime version
+[13:00:12.251996][info] Can't find CUDA-Enabled GPU.
+[13:00:12.252505][info] Job max memory consumption for one image: 3745 MB
+[13:00:12.252548][info] Memory information: 
+	- Total RAM:     7.65903 GB
+	- Free RAM:      2.20004 GB
+	- Available RAM: 5.00338 GB
+	- Total swap:    2 GB
+	- Free swap:     2 GB
+
+[13:00:12.252594][info] Max number of threads regarding memory usage: 1
+[13:00:12.252617][info] # threads for extraction: 1
+[13:00:12.617944][info] Extracting sift features from view '/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1025.JPG' [cpu]
+[13:00:47.459085][info]       50000 sift features extracted from view '/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1025.JPG'
+[13:00:47.885327][info] Extracting sift features from view '/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1024.JPG' [cpu]
+[13:01:21.894936][info]       50000 sift features extracted from view '/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1024.JPG'
+[13:01:22.240632][info] Extracting sift features from view '/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1026.JPG' [cpu]
+[13:01:57.045483][info]       50000 sift features extracted from view '/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1026.JPG'
+[13:01:57.048532][info] Task done in (s): 104.796000

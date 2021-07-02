@@ -1,7 +1,7 @@
 #!/bin/bash
 # ------------------------------------------------------------------
 # [Author] Anton Horeis
-#          This script starts the photogrammetry pipeline inside the meshroom docker container
+#          This script starts the photogrammetry pipeline inside a meshroom docker container
 # ------------------------------------------------------------------
 
 VERSION=0.3
@@ -10,11 +10,11 @@ USAGE="Usage: photogrammetry [options] input_folder_name [meshroom_graph]"
 
 # --- Options processing -------------------------------------------
 if [ $# -le 1 ] ; then
-    echo "$USAGE"
+    printf "%s" "$USAGE"
     exit 1;
 fi
 
-while getopts ":i:vhu:" optname
+while getopts ":i:vhcu:" optname
   do
     case "$optname" in
       "v")
@@ -25,11 +25,14 @@ while getopts ":i:vhu:" optname
         echo "-i argument: $OPTARG"
         ;;
       "h")
-        echo $USAGE
+        printf "%s" "$USAGE"
         exit 0;
         ;;
       "u")
         u_id=$OPTARG
+      ;;
+      "c")
+        compression=1
       ;;
       "?")
         echo "Unknown option $OPTARG"
@@ -49,7 +52,7 @@ while getopts ":i:vhu:" optname
 shift $(($OPTIND - 1))
 
 input=$1
-graph=${2:-"default_graph.mg"}
+graph=${2:-"photogrammetry"}
 u_id=${u_id:-"default_user"}
 
 # --- Locks -------------------------------------------------------
@@ -64,24 +67,32 @@ touch $LOCK_FILE
 
 # --- Body --------------------------------------------------------
 #  SCRIPT LOGIC GOES HERE
-echo $input
-echo $graph
-#TODO add image compression
+# echo $input
+# echo $graph
 
-if [ ! -f /data/log/meshroom_output ]; then
-    touch /data/log/meshroom_output
+if [ ! -f /data/log/meshroom_log ]; then
+    touch /data/log/meshroom_log
 fi
 if [ ! -d /data/model/"$input" ]; then
-    mkdir -p /data/model/"$u_id"/"$input"
+    mkdir -p /data/model/"$u_id"/"$input"/preview
 fi
-if [ ! -f /data/log/obj2gltf_output ]; then
-    touch /data/log/obj2gltf_output
+if [ ! -f /data/log/obj2gltf_log ]; then
+    touch /data/log/obj2gltf_log
+fi
+if [ ! -f /data/log/magick_log ]; then
+    touch /data/log/magick_log
+fi
+
+#image compression
+if [ -z ${compression+x} ]; then
+  convert -strip -interlace Plane -gaussian-blur 0.05 -quality 85% /data/img_in/"$u_id"/"$input"/* /data/img_in/"$u_id"/"$input"/* >> /data/log/magick_log
 fi
 
 # Meshroom computation starts here
-/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$input"/ -p photogrammetry >> /data/log/meshroom_output
+/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$input"/ -p "$graph" >> /data/log/meshroom_output
 
-#TODO copy logfiles to log volume
+#copy logfiles to log volume
+
 
 if [ -f /data/model/"$input"/texturedMesh.obj ] ; then
   obj2gltf -b -i /data/model/"$u_id"/"$input"/texturedMesh.obj -o /data/model/"$u_id"/"$input"/model.glb >> obj2gltf_output

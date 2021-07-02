@@ -1,0 +1,52 @@
+Program called with the following parameters:
+ * filterLargeTrianglesFactor = 60
+ * filterTrianglesRatio = 0
+ * filteringIterations = 1
+ * filteringSubset = "all"
+ * inputMesh = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/Meshing/93ecaee8c9f12097ca90edfc997341f9370607f4/mesh.obj"
+ * keepLargestMeshOnly = 0
+ * outputMesh = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/MeshFiltering/1f85d61a7f3d3762b2358206fc534442730ac53d/mesh.obj"
+ * smoothingBoundariesNeighbours = 0
+ * smoothingIterations = 5
+ * smoothingLambda = 1
+ * smoothingSubset = "all"
+ * verboseLevel = "info"
+
+[13:02:13.415626][info] Loading mesh from obj file: /home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/Meshing/93ecaee8c9f12097ca90edfc997341f9370607f4/mesh.obj
+[13:02:13.417759][info] 	- # vertices: 4582
+	- # normals: 0
+	- # uv coordinates: 0
+	- # triangles: 8999
+[13:02:13.429827][info] Mesh loaded: 
+	- #points: 4582
+	- # triangles: 8999
+[13:02:13.429993][info] Mesh file: "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/Meshing/93ecaee8c9f12097ca90edfc997341f9370607f4/mesh.obj" loaded.
+[13:02:13.430012][info] Input mesh: 4582 vertices and 8999 facets.
+[13:02:13.430020][info] Start mesh filtering.
+[13:02:13.430026][info] Mesh filtering: iteration 0
+[13:02:13.430041][info] Filtering large triangles.
+[13:02:13.453238][info] Filtering large triangles, done.
+[13:02:13.453463][info] Mesh filtering done: 4582 vertices and 8999 facets.
+[13:02:13.453493][info] Start mesh smoothing.
+[13:02:13.486210][info] cleanMesh:
+	- # wrong points: 0
+	- # new points: 0
+[13:02:13.494395][info] Optimizing mesh smooth: 
+	- lamda: 1
+	- niters: 5
+
+[13:02:13.494491][info] Optimizing mesh smooth: iteration 0
+[13:02:13.496129][info] Optimizing mesh smooth: iteration 1
+[13:02:13.496470][info] Optimizing mesh smooth: iteration 2
+[13:02:13.496783][info] Optimizing mesh smooth: iteration 3
+[13:02:13.497118][info] Optimizing mesh smooth: iteration 4
+[13:02:13.497433][info] Mesh smoothing done: 4582 vertices and 8999 facets.
+[13:02:13.497444][info] remove free points from mesh.
+Output mesh: 4582 vertices and 8999 facets.
+[13:02:13.497771][info] Save mesh.
+[13:02:13.497779][info] Save mesh to obj: /home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/MeshFiltering/1f85d61a7f3d3762b2358206fc534442730ac53d/mesh.obj
+[13:02:13.497786][info] Nb points: 4582
+[13:02:13.497792][info] Nb triangles: 8999
+[13:02:13.506191][info] Save mesh to obj done.
+[13:02:13.506246][info] Mesh file: "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/MeshFiltering/1f85d61a7f3d3762b2358206fc534442730ac53d/mesh.obj" saved.
+[13:02:13.506258][info] Task done in (s): 0.091000

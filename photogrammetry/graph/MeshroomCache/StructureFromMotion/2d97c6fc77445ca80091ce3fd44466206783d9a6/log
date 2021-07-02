@@ -1,0 +1,205 @@
+Program called with the following parameters:
+ * describerTypes = "sift"
+ * extraInfoFolder = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/2d97c6fc77445ca80091ce3fd44466206783d9a6"
+ * featuresFolders =  = [/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/FeatureExtraction/0f3b43190cd115f6a5e586d1029bccc1405e9278]
+ * filterTrackForks = 0
+ * initialPairA = ""
+ * initialPairB = ""
+ * input = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/CameraInit/a636cb8054394660607914aaa1dae44de22f82be/cameraInit.sfm"
+ * interFileExtension = ".abc"
+ * localBAGraphDistance = 1
+ * localizerEstimator =  Unknown Type "N11aliceVision16robustEstimation16ERobustEstimatorE"
+ * localizerEstimatorError = 0
+ * localizerEstimatorMaxIterations = 4096
+ * lockAllIntrinsics = 0
+ * lockScenePreviouslyReconstructed = 0
+ * matchesFolders =  = [/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/FeatureMatching/d949b0dc2ba95c1ee6ffa23f16ed4b84d1fc8db8]
+ * maxAngleInitialPair = 40
+ * maxNumberOfMatches = 0
+ * maxReprojectionError = 4
+ * minAngleForLandmark = 2
+ * minAngleForTriangulation = 3
+ * minAngleInitialPair = 5
+ * minInputTrackLength = 2
+ * minNumberOfMatches = 0
+ * minNumberOfObservationsForTriangulation = 2
+ * observationConstraint =  Unknown Type "N11aliceVision3sfm18EFeatureConstraintE"
+ * output = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/2d97c6fc77445ca80091ce3fd44466206783d9a6/sfm.abc"
+ * outputViewsAndPoses = "/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/2d97c6fc77445ca80091ce3fd44466206783d9a6/cameras.sfm"
+ * randomSeed = 5489 (default)
+ * useLocalBA = 1
+ * useOnlyMatchesFromInputFolder = 0
+ * useRigConstraint = 1
+ * verboseLevel = "info"
+
+Loading features
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+[17:14:32.557743][error] cudaGetDeviceCount failed: CUDA driver version is insufficient for CUDA runtime version
+[17:14:32.557910][info] Can't find CUDA-Enabled GPU.
+***************************************************
+[17:14:32.688887][info] Fuse matches into tracks: 
+	- # tracks: 7492
+	- # images in tracks: 3
+[17:14:32.690040][info] TrackLength, Occurrence
+[17:14:32.694168][info] 	2	4856
+[17:14:32.695050][info] 	3	2636
+Automatic selection of an initial pair:
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+[17:14:33.195707][info] Initial pair is:
+	- [A] view id: 1461218130, filepath: /home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1024.JPG
+	- [B] view id: 2085958917, filepath: /home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/dataset_monstree-master/mini3/IMG_1026.JPG
+[17:14:33.198826][info] 3312 matches in the image pair for the initial pose estimation.
+[17:14:34.104890][info] Bundle adjustment start.
+[17:14:34.111623][info] Start bundle adjustment iteration: 0
+block_sparse_matrix.cc:80 Allocating values array with 953856 bytes.
+detect_structure.cc:113 Schur complement static structure <2,3,6>.
+detect_structure.cc:113 Schur complement static structure <2,3,6>.
+[17:14:34.200939][info] Bundle Adjustment Statistics:
+	- local strategy enabled: no
+	- adjustment duration: 0.0658619 s
+	- poses:
+	    - # refined:  2
+	    - # constant: 0
+	    - # ignored:  0
+	- landmarks:
+	    - # refined:  6624
+	    - # constant: 0
+	    - # ignored:  0
+	- intrinsics:
+	    - # refined:  0
+	    - # constant: 1
+	    - # ignored:  0
+	- # residual blocks: 13248
+	- # successful iterations: 3
+	- # unsuccessful iterations: 0
+	- initial RMSE: 0.377867
+	- final   RMSE: 0.356075
+[17:14:34.215988][info] Remove outliers: 
+	- # outliers residual error: 0
+	- # outliers angular error: 0
+[17:14:34.216310][info] Bundle adjustment iteration: 0 took 104 msec.
+[17:14:34.216355][info] Bundle adjustment with 1 iterations took 111 msec.
+[17:14:34.220527][info] Initial pair is: 1461218130, 2085958917
+[17:14:34.220581][info] Begin Incremental Reconstruction:
+	- mode: SfM augmentation
+	- # images in input: 3
+	- # images in resection: 1
+	- # landmarks in input: 3312
+	- # cameras already calibrated: 2
+[17:14:34.220596][info] Incremental Reconstruction start iteration 0:
+	- # number of resection groups: 0
+	- # number of poses: 2
+	- # number of landmarks: 3312
+	- # remaining images: 1
+[17:14:34.224790][info] Update Reconstruction:
+	- resection id: 0
+	- # images in the resection group: 1
+	- # images remaining: 1
+[17:14:34.231420][info] [3/3] Robust Resection of view: 988553086
+[17:14:34.713016][info] Robust Resection information:
+	- resection status: true
+	- threshold (error max): 4.03783
+	- # points used for resection: 2636
+	- # points validated by robust resection: 2605
+[17:14:34.771506][info] Bundle adjustment start.
+[17:14:34.779164][info] Start bundle adjustment iteration: 0
+block_sparse_matrix.cc:80 Allocating values array with 3638128 bytes.
+detect_structure.cc:95 Dynamic f block size because the block size changed from 6 to 4
+detect_structure.cc:113 Schur complement static structure <2,3,-1>.
+detect_structure.cc:95 Dynamic f block size because the block size changed from 6 to 4
+detect_structure.cc:113 Schur complement static structure <2,3,-1>.
+[17:14:35.556447][info] Bundle Adjustment Statistics:
+	- local strategy enabled: no
+	- adjustment duration: 0.726637 s
+	- poses:
+	    - # refined:  3
+	    - # constant: 0
+	    - # ignored:  0
+	- landmarks:
+	    - # refined:  17491
+	    - # constant: 0
+	    - # ignored:  0
+	- intrinsics:
+	    - # refined:  1
+	    - # constant: 0
+	    - # ignored:  0
+	- # residual blocks: 34982
+	- # successful iterations: 10
+	- # unsuccessful iterations: 0
+	- initial RMSE: 0.571169
+	- final   RMSE: 0.360382
+[17:14:35.564955][info] Remove outliers: 
+	- # outliers residual error: 0
+	- # outliers angular error: 0
+[17:14:35.565410][info] Bundle adjustment iteration: 0 took 784 msec.
+[17:14:35.565428][info] Bundle adjustment with 1 iterations took 791 msec.
+[17:14:35.591336][info] Incremental Reconstruction start iteration 1:
+	- # number of resection groups: 1
+	- # number of poses: 3
+	- # number of landmarks: 7429
+	- # remaining images: 0
+[17:14:35.591386][info] Incremental Reconstruction completed with 2 iterations:
+	- # number of resection groups: 1
+	- # number of poses: 3
+	- # number of landmarks: 7429
+	- # remaining images: 0
+[17:14:35.596917][info] Structure from Motion statistics:
+	- # input images: 3
+	- # cameras calibrated: 3
+	- # poses: 3
+	- # landmarks: 7429
+	- elapsed time: 1.37
+	- residual RMSE: 0.509658
+[17:14:35.597792][info]  - # sift: 7429
+[17:14:35.603225][info] Histogram of residuals:
+
+0	|	9.4e+03
+0.5	|	5.6e+03
+1	|	1.8e+03
+1.5	|	5.1e+02
+2	|	1.6e+02
+2.5	|	42
+3	|	10
+3.5	|	6
+4
+
+[17:14:35.603791][info] # landmarks: 7429
+[17:14:35.603808][info] # overall observations: 17491
+[17:14:35.603816][info] Landmarks observations length min: 2, mean: 2.35442, median: 2, max: 3
+[17:14:35.603826][info] Histogram of observations length:
+
+2	|	4796
+3	|	2633
+4
+
+[17:14:35.604149][info] Landmarks per view min: 0, mean: 0, median: 0, max: 0
+[17:14:35.604164][info] Histogram of nb landmarks per view:
+
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+0	|	0
+1
+
+
+Compute scene structure color
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+[17:14:36.128840][info] Structure from motion took (s): 3.490000
+[17:14:36.128946][info] Generating HTML report...
+[17:14:36.144520][info] Export SfMData to disk: /home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/StructureFromMotion/2d97c6fc77445ca80091ce3fd44466206783d9a6/sfm.abc
+[17:14:36.153138][info] Structure from Motion results:
+	- # input images: 3
+	- # cameras calibrated: 3
+	- # poses: 3
+	- # landmarks: 7429

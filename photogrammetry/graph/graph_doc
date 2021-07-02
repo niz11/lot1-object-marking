@@ -1,0 +1,2 @@
+no_gpu Meshroom graph generating a preview without using the GPU (no NVIDIA GPU needed)
+standard_preview Meshroom graph using the standard photogrammetry pipeline with mesh decimation and a fast preview

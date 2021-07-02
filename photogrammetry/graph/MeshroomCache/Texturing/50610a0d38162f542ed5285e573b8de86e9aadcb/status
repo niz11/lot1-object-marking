@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "Texturing_2",
+    "nodeType": "Texturing",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_texturing  --input \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/Meshing/93ecaee8c9f12097ca90edfc997341f9370607f4/densePointCloud.abc\" --imagesFolder \"\" --inputMesh \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/MeshFiltering/1f85d61a7f3d3762b2358206fc534442730ac53d/mesh.obj\" --textureSide 8192 --downscale 2 --outputTextureFileType png --unwrapMethod Basic --useUDIM True --fillHoles False --padding 5 --multiBandDownscale 4 --multiBandNbContrib 1 5 10 0 --useScore True --bestScoreThreshold 0.1 --angleHardThreshold 90.0 --processColorspace sRGB --correctEV False --forceVisibleByAllVertices False --flipNormals False --visibilityRemappingMethod PullPush --subdivisionTargetRatio 0.8 --verboseLevel info --output \"/home/anton/Dokumente/Projekte/lot1/lot1-object-marking/photogrammetry/graph/MeshroomCache/Texturing/50610a0d38162f542ed5285e573b8de86e9aadcb\"",
+    "env": null,
+    "startDateTime": "2021-07-01 13:02:13.514544",
+    "endDateTime": "2021-07-01 13:02:36.615828",
+    "elapsedTime": 23.101322889328003,
+    "hostname": "anton-ubuntu",
+    "sessionUid": "2efdbe56-da51-11eb-ba90-eda820eba3c7",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:23.101323"
+}
