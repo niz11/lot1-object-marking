@@ -53,7 +53,7 @@
         const userId = params.get('userId')
         const modelName = params.get('modelName')
 
-        const mymap = L.map('mapid').setView([51.505, -0.09], 13);
+        const mymap = L.map('mapid').setView([52.52, 13.405], 13);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             id: 'mapbox/streets-v11',
@@ -64,10 +64,10 @@
         var popup = L.popup();
 
         function onMapClick(e) {
-            popup
-                .setLatLng(e.latlng)
-                .setContent("You clicked the map at " + e.latlng.toString())
-                .openOn(mymap);
+            // popup
+            //     .setLatLng(e.latlng)
+            //     .setContent("You clicked the map at " + e.latlng.toString())
+            //     .openOn(mymap);
         }
 
         mymap.on('click', onMapClick);
@@ -80,48 +80,122 @@
                         <a href="/showModelBasedOnLocation.html?${userId ? userIdParam(userId) : ``}modelName=${name}">See model in AR Once inside radius</a>
                     </div>`
         }
-        fetch(`/models`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
-                    // Show one model on map if it's in URL parmas. Need to check also user id
-                    if (modelName && userId) {
-                        let model = data.filter(model => model.modelName === modelName && model.user === userId)
-                        model = userId ? models.filter(model => model.user === userId) : model
-                        model = model.length > 0 ? model[0] : model
-                        if (model && model.location && model.location.latitude && model.location.longitude) {
-                            L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                .bindPopup(popUp(model.modelName, model.user)).openPopup();
-                            L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
-
-                            // Comment out img for now
-                            // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
-                            const latLngs = [[model.location.latitude, model.location.longitude]];
-                            const markerBounds = L.latLngBounds(latLngs);
-                            mymap.fitBounds(markerBounds);
-                            map.setZoom(13);
-                        }
-                    }
-                    // Add all models to map
-                    data.map((model, index) => {
-                        if (model.location) {
-                            if (model.location.latitude && model.location.longitude) {
+        if (userId) {
+            fetch('/models/user', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: userId
+                })
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.length > 0) {
+                        // Show users model with given name
+                        if (modelName) {
+                            let models = data.filter(model => model.modelName === modelName)
+                            const model = models.length > 0 ? models[0] : models
+                            if (model && model.location && model.location.latitude && model.location.longitude) {
                                 L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
                                     .bindPopup(popUp(model.modelName, model.user)).openPopup();
                                 L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+
                                 // Comment out img for now
                                 // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
-                                if (index === model.length - 1) {
-                                    const latLngs = [[model.location.latitude, model.location.longitude]];
-                                    const markerBounds = L.latLngBounds(latLngs);
-                                    mymap.fitBounds(markerBounds);
-                                    map.setZoom(13);
-                                }
+                                const latLngs = [[model.location.latitude, model.location.longitude]];
+                                const markerBounds = L.latLngBounds(latLngs);
+                                mymap.fitBounds(markerBounds);
+                                mymap.setZoom(13);
+                            } else {
+                                L.marker([52.52, 13.405]).addTo(mymap)
+                                    .bindPopup('<div>User does not have a model with given model name</div>').openPopup();
                             }
+                        } else {
+                            // Add all users models to map
+                            data.map((model, index) => {
+                                if (model.location) {
+                                    if (model.location.latitude && model.location.longitude) {
+                                        L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                            .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                        L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+                                        // Comment out img for now
+                                        // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                                        if (index === model.length - 1) {
+                                            const latLngs = [[model.location.latitude, model.location.longitude]];
+                                            const markerBounds = L.latLngBounds(latLngs);
+                                            mymap.fitBounds(markerBounds);
+                                            mymap.setZoom(13);
+                                        }
+                                    }
+                                }
+                            })
                         }
-                    })
-                }
-            });
+                    } else {
+                        L.marker([52.52, 13.405]).addTo(mymap)
+                            .bindPopup('<div>Artist has no models to place on map</div>').openPopup();
+                    }
+                })
+            // No user Id in params
+        } else {
+            fetch(`/models`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.length > 0) {
+                        // Show only models with given param name
+                        if (modelName) {
+                            let models = data.filter(model => model.modelName === modelName)
+                            let index = 0;
+                            models.map(model => {
+                                if (model.location) {
+                                    if (model.location.latitude && model.location.longitude) {
+                                        index++;
+                                        L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                            .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                        L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+                                        // Comment out img for now
+                                        // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                                        if (index === model.length - 1) {
+                                            const latLngs = [[model.location.latitude, model.location.longitude]];
+                                            const markerBounds = L.latLngBounds(latLngs);
+                                            mymap.fitBounds(markerBounds);
+                                            mymap.setZoom(13);
+                                        }
+                                    }
+                                }
+
+                            })
+                            // User has no model with a location
+                            if (index === 0) {
+                                L.marker([52.52, 13.405]).addTo(mymap)
+                                    .bindPopup('<div>No Model Found To Place On Map</div>').openPopup();
+                            }
+                        } else {
+                            // Add all models to map
+                            data.map((model, index) => {
+                                if (model.location) {
+                                    if (model.location.latitude && model.location.longitude) {
+                                        L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
+                                            .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                        L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
+                                        // Comment out img for now
+                                        // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
+                                        if (index === model.length - 1) {
+                                            const latLngs = [[model.location.latitude, model.location.longitude]];
+                                            const markerBounds = L.latLngBounds(latLngs);
+                                            mymap.fitBounds(markerBounds);
+                                            mymap.setZoom(13);
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    } else {
+                        L.marker([52.52, 13.405]).addTo(mymap)
+                            .bindPopup('<div>No Model Found To Place On Map</div>').openPopup();
+                    }
+                });
+        }
         // placeholders for the L.marker and L.circle representing user's current position and accuracy    
         let current_position, current_accuracy;
 
