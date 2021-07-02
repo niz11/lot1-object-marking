@@ -3,18 +3,34 @@
 
 <head>
   <title>Test</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="public/stylesheets/homepage.style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
   <!-- <link href="style.css" rel="stylesheet"> -->
 </head>
 
-<body>
+<style>
+  .mapid {
+    margin-top: 100px;
+  }
+  body {
+    background-color: lightgray;
+  }
+</style>
 
+<body>
+<div class="mapid"></div>
+<div class="nav"></div>
   <div>
-    <h1 id="demo">Artworks Homepage</h1>
     <p id="demo1">Drag and drop your pictures here to create your very own 3D model!</p>
   </div>
   <!-- form tag will interfere with xmlhttprequest if action not exact url as from xmlhttp call-->
   <!-- <form class="box" method="post" action="https://localhost:8080/meshroom-pipeline" enctype="multipart/form-data"> -->
-  <div class="box__input">
+  <label class="box__input">
     <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected"
       multiple accept="image/png, image/jpeg />
       <label for=" file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
@@ -26,11 +42,15 @@
     <div class="box__success">Done!</div>
     <div class="box__error">Error! <span></span>.</div>
     <!-- </form> -->
-
     <div id="model_viewer_container"></div>
-
+<footer style="position: absolute; bottom: 0; width: 100%"></footer>
 </body>
-
+<script type="text/javascript">
+  $(function () {
+    $(".nav").load("public/nav.html")
+    $("footer").load("public/footer.html")
+  });
+</script>
 <script>
   const server = 'https://localhost:8080/'
   const message_body = document.getElementById("status_message");
