@@ -192,7 +192,9 @@
     <script>
         let id;
         function success(pos) {
-            if (model.length === 0) {
+            if (!model){
+
+            } else if (model.length === 0) {
                 // console.log
             } else if (!model.location) {
                 document.getElementById("noModelTextBox").textContent = "Model is missing a location"

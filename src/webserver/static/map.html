@@ -213,29 +213,37 @@
                 mymap.removeLayer(current_accuracy);
             }
 
-            let radius = e.accuracy / 2;
+            let radius = e.coords.accuracy / 2;
 
-            current_position = L.marker(e.latlng, { icon: blueDotIcon }).addTo(mymap)
+            const latlng = {
+                lat: e.coords.latitude,
+                lng: e.coords.longitude
+            };
+
+            current_position = L.marker(latlng, { icon: blueDotIcon }).addTo(mymap)
                 .bindPopup("You are within " + radius + " meters from this point");
 
-            current_accuracy = L.circle(e.latlng, radius).addTo(mymap);
+            current_accuracy = L.circle(latlng, radius).addTo(mymap);
         }
 
-        function onLocationError(e) {
-            console.log("Can't get location");
-            alert("Please reload if you want to update your location. Otherwise, close this message and continue tour");
+        function error(err) {
+            console.warn('ERROR(' + err.code + '): ' + err.message);
         }
 
-        mymap.on('locationfound', onLocationFound);
-        mymap.on('locationerror', onLocationError);
+        const options = {
+            enableHighAccuracy: false,
+            timeout: 7000,
+            maximumAge: 2000
+        };
 
-        // wrap mymap.locate in a function    
-        function locate() {
-            mymap.locate({ setView: false, maxZoom: 13 });
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(onLocationFound, error, options);
+        } else {
+            document.getElementById("noModelTextBox").textContent = "Please Enable Location"
         }
 
-        // call locate every 7 seconds.
-        setInterval(locate, 7000);
+        // // call locate every 7 seconds.
+        // setInterval(locate, 7000);
 
     </script>
 
