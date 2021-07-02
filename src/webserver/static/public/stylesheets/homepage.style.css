@@ -52,6 +52,14 @@ h6 {
     section {
         padding: 150px 0;
     }
+    #mainNav .navbar-nav .nav-item .navBlack {
+        font-size: 90%;
+        font-weight: 400;
+        padding: 0.75em 0;
+        letter-spacing: 1px;
+        color: white;
+        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
 }
 
 ::-moz-selection {
@@ -484,77 +492,12 @@ header.masthead .intro-text .intro-heading {
 }
 
 @media (min-width: 768px) {
-    .timeline:before {
-        left: 50%;
-    }
-    .timeline > li {
-        min-height: 100px;
-        margin-bottom: 100px;
-    }
-    .timeline > li .timeline-panel {
-        float: left;
-        width: 41%;
-        padding: 0 20px 20px 30px;
-        text-align: right;
-    }
-    .timeline > li .timeline-image {
-        left: 50%;
-        width: 100px;
-        height: 100px;
-        margin-left: -50px;
-    }
-    .timeline > li .timeline-image h4 {
-        font-size: 13px;
-        line-height: 18px;
-        margin-top: 16px;
-    }
-    .timeline > li.timeline-inverted > .timeline-panel {
-        float: right;
-        padding: 0 30px 20px 20px;
-        text-align: left;
-    }
 }
 
 @media (min-width: 992px) {
-    .timeline > li {
-        min-height: 150px;
-    }
-    .timeline > li .timeline-panel {
-        padding: 0 20px 20px;
-    }
-    .timeline > li .timeline-image {
-        width: 150px;
-        height: 150px;
-        margin-left: -75px;
-    }
-    .timeline > li .timeline-image h4 {
-        font-size: 18px;
-        line-height: 26px;
-        margin-top: 30px;
-    }
-    .timeline > li.timeline-inverted > .timeline-panel {
-        padding: 0 20px 20px;
-    }
 }
 
 @media (min-width: 1200px) {
-    .timeline > li {
-        min-height: 170px;
-    }
-    .timeline > li .timeline-panel {
-        padding: 0 20px 20px 100px;
-    }
-    .timeline > li .timeline-image {
-        width: 170px;
-        height: 170px;
-        margin-left: -85px;
-    }
-    .timeline > li .timeline-image h4 {
-        margin-top: 40px;
-    }
-    .timeline > li.timeline-inverted > .timeline-panel {
-        padding: 0 100px 20px 20px;
-    }
 }
 
 .team-member {
