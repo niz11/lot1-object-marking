@@ -96,17 +96,47 @@
         if (!modelName) {
             document.getElementById("noModelTextBox").textContent = "Please Provide Model Name"
         } else {
-            fetch(`/models`)
-                .then(response => response.json())
-                .then(data => {
-                    jsonData = data;
-                    models = jsonData.filter(model => model.modelName === modelName);
-                    // If there is a userId filter by it
-                    models = userId ? models.filter(model => model.user === userId) : models
-                    model = models[0];
-                    console.log(model);
-                    if (model) removeAllHotspots();
-                });
+            //User Id was given in params
+            if (userId) {
+                fetch('/models/user', {
+                    method: 'post',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userId
+                    })
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.noModels && data.noModels === "No models found") {
+                            document.getElementById("noModelTextBox").textContent = "Artist doesn't have any models"
+                        } else {
+                            jsonData = data;
+                            models = jsonData.filter(model => model.modelName === modelName);
+                            model = models.length > 0 ? models[0] : models;
+                            console.log(model);
+                            if (models.length > 0) {
+                                removeAllHotspots();
+                            } else {
+                                document.getElementById("noModelTextBox").textContent = "Artist doesn't have a model with given model name"
+                            }
+                        }
+                    })
+            } else {
+                fetch(`/models`)
+                    .then(response => response.json())
+                    .then(data => {
+                        jsonData = data;
+                        models = jsonData.filter(model => model.modelName === modelName);
+                        // Take first result for now.
+                        // Todo: add dropdown
+                        model = models.length > 0 ? models[0] : models;
+                        console.log(model);
+                        if (models.length > 0) {
+                            removeAllHotspots();
+                        } else {
+                            document.getElementById("noModelTextBox").textContent = "No model with given model name was found"
+                        }
+                    });
+            }
         }
 
         function addHotspot(position, normal, inputtext) {
@@ -162,11 +192,14 @@
     <script>
         let id;
         function success(pos) {
-            if (!model) {
-                document.getElementById("noModelTextBox").textContent = "Please Provide Model Name"
-            } else if (!model.location && !model.location.latitude && !model.location.longitude) {
+            if (model.length === 0) {
+                // console.log
+            } else if (!model.location) {
                 document.getElementById("noModelTextBox").textContent = "Model is missing a location"
-            } else {
+            } else if (!model.location.latitude && !model.location.longitude) {
+                document.getElementById("noModelTextBox").textContent = "Model is missing a latitude or longitude"
+            }
+            else {
                 const objectLatitude = model ? model.location.latitude : 0;
                 const objectLongitude = model ? model.location.longitude : 0;
                 const usersLatitude = pos.coords.latitude;
