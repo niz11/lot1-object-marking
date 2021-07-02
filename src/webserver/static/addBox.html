@@ -13,53 +13,138 @@
         </div>
         <div style="display: table-row; padding: 1em;">
             <div style="display: table-cell; padding: 1em;">Width (in m):</div>
-            <div style="display: table-cell; padding: 1em;"><input type="number" id="width" value="1.0"></div>
+            <div style="display: table-cell; padding: 1em;"><input type="number" id="width" value="0.5" step="0.01" onchange="modifyBox()"></div>
         </div>
         <div style="display: table-row; padding: 1em;">
             <div style="display: table-cell; padding: 1em;">Height (in m):</div>
-            <div style="display: table-cell; padding: 1em;"><input type="number" id="height" value="1.0"></div>
+            <div style="display: table-cell; padding: 1em;"><input type="number" id="height" value="1.0" step="0.01" onchange="modifyBox()"></div>
         </div>
         <div style="display: table-row; padding: 1em;">
             <div style="display: table-cell; padding: 1em;">Depth (in m):</div>
-            <div style="display: table-cell; padding: 1em;"><input type="number" id="depth" value="1.0"></div>
-        </div>
-        <div style="display: table-row; padding: 1em;">
-            <div style="display: table-cell; padding: 1em;">Distance (in m):</div>
-            <div style="display: table-cell; padding: 1em;"><input type="number" id="mdist" value="0.0"></div>
-        </div>
-        <div style="display: table-row; padding: 1em;">
-            <div style="display: table-cell; padding: 1em;">relative rotation (in deg):</div>
-            <div style="display: table-cell; padding: 1em;"><input type="number" id="mrot" value="0.0"></div>
-        </div>
-        <div style="display: table-row; padding: 1em;">
-            <div style="display: table-cell; padding: 1em;">Scaling:</div>
-            <div style="display: table-cell; padding: 1em;"><input type="number" id="mscal" value="1.0"></div>
+            <div style="display: table-cell; padding: 1em;"><input type="number" id="depth" value="0.05" step="0.01" onchange="modifyBox()"></div>
         </div>
         <div style="display: flex; justify-content: center; padding: 1em;">
+            <div style="display: table-cell; padding: 1em;">Painting:</div>
+            <div style="display: table-cell; padding: 1em;"><input type="file" id="file" onchange="createTexture() " accept="image/png, image/jpeg"></div>
+        </div>
+        <div id="message" style="color: #ff0000"></div>
+        <div style="display: flex; justify-content: center; padding: 1em;">
             <div style="display: table-cell; padding: 1em;"></div>
-            <button onclick="createBox()">Create Box</button>
+            <button id="create" disabled onclick="createBox()">Create Box</button>
         </div>
     </div>
 </div>
-
 <script type="module">
     import * as THREE from './new/three.module.js'
     import {GLTFExporter} from "./new/GLTFExporter.js";
+    import {OrbitControls} from "./new/OrbitControls.js";
+
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000 );
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth / 2, window.innerHeight );
+    window.addEventListener('resize', () => {renderer.setSize( window.innerWidth / 2, window.innerHeight );})
+    document.body.appendChild( renderer.domElement );
+
+    const material = new THREE.MeshPhongMaterial( { color: 0xdddddd, emissive: 0x000000, side: THREE.DoubleSide, flatShading: true } );
+    const cube = new THREE.Mesh( new THREE.BoxGeometry(), material );
+
+    const cubeChild = new THREE.Mesh( new THREE.BoxGeometry(), new THREE.MeshStandardMaterial({
+        color: 0xcccccc
+    }) );
+
+    cube.add(cubeChild);
+
+    cubeChild.translateZ(-0.005);
+
+    scene.add( cube );
+
+    let light = new THREE.PointLight( 0xffffff, 1, 0 );
+    light.position.set(-1, 0, 10);
+    scene.add(light);
+
+
+    light = new THREE.PointLight( 0xffffff, 1, 0 );
+    light.position.set(-10, 50, 0);
+    scene.add(light);
+
+    light = new THREE.PointLight( 0xffffff, 1, 0 );
+    light.position.set(10, -50, 0);
+    scene.add(light);
+
+    scene.background = new THREE.Color( 0x444444 );
+
+
+    light = new THREE.PointLight( 0xffffff, 1, 0 );
+    light.position.set(1, 0, -10);
+    scene.add(light);
+
+
+    camera.position.z = 3;
+
+
+    const params = new URLSearchParams(document.location.search);
+    const userId = params.get('userId');
+
+    if (userId == null) document.getElementById('message').innerHTML = 'Need to provide a User-ID: please login';
+    else document.getElementById('create').disabled = false;
 
     const link = document.createElement('a');
     link.style.display = 'none';
     document.body.appendChild(link);
+    const orbit = new OrbitControls( camera, renderer.domElement );
+
+    window.modifyBox = function modifyBox() {
+        let width = +document.getElementById("width").value;
+        let height = +document.getElementById("height").value;
+        let depth = +document.getElementById("depth").value;
+        cube.geometry.dispose();
+        cube.geometry = new THREE.BoxGeometry(width, height, depth);
+        cubeChild.geometry.dispose();
+        cubeChild.geometry = new THREE.BoxGeometry(width + 0.01, height + 0.01, depth);
+
+        //TODO: Geometry might need to be rotated for AR-Use
+    }
+
+    window.modifyBox();
+
+    function readImage() {
+        let file = document.getElementById("file").files[0];
+        if (!file) return;
+
+        const fileReader = new FileReader();
+        fileReader.onload = (evt) => {
+            const img = new Image();
+            img.onload = () => {
+
+                let texture = new THREE.Texture(img);
+                texture.needsUpdate = true;
+
+                texture.wrapS = THREE.MirroredRepeatWrapping;
+                texture.wrapT = THREE.MirroredRepeatWrapping;
+                texture.repeat.set( 1, 1 );
+
+                cube.material.dispose();
+                cube.material = new THREE.MeshStandardMaterial({
+                    map: texture,
+                    });
+            };
+            img.src = evt.target.result;
+        };
+        fileReader.readAsDataURL(file);
+    }
+
+    window.createTexture = function createTexture() {
+        readImage();
+    }
 
     window.createBox = function createBox() {
         let name = document.getElementById("name").value;
         let width = +document.getElementById("width").value;
         let height = +document.getElementById("height").value;
         let depth = +document.getElementById("depth").value;
-        let dist = +document.getElementById("mdist").value;
-        let rot = +document.getElementById("mrot").value;
-        let scal = +document.getElementById("mscal").value;
-
-        rot = rot / 180 * Math.PI;
 
         let mesh = new THREE.Mesh(
             new THREE.BoxGeometry(width, height, depth),
@@ -98,9 +183,6 @@
                         alt: name,
                         longitude: '' + 0,
                         latitude: '' + 0,
-                        distance: '' + dist,
-                        rotation: '' + rot,
-                        scaling: '' + scal,
                     })
                 }
             ).catch(e => {
@@ -108,6 +190,12 @@
             })
         }
     }
+
+    function animate() {
+        requestAnimationFrame( animate );
+        renderer.render( scene, camera );
+    }
+    animate();
 </script>
 </body>
 </html>

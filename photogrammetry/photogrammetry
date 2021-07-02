@@ -4,17 +4,17 @@
 #          This script starts the photogrammetry pipeline inside the meshroom docker container
 # ------------------------------------------------------------------
 
-VERSION=0.2
+VERSION=0.3
 SUBJECT=some-unique-id
-USAGE="Usage: photogrammetry input_folder_name"
+USAGE="Usage: photogrammetry [options] input_folder_name [meshroom_graph]"
 
 # --- Options processing -------------------------------------------
-if [ $# != 1 ] ; then
-    echo $USAGE
+if [ $# -le 1 ] ; then
+    echo "$USAGE"
     exit 1;
 fi
 
-while getopts ":i:vh" optname
+while getopts ":i:vhu:" optname
   do
     case "$optname" in
       "v")
@@ -28,6 +28,9 @@ while getopts ":i:vh" optname
         echo $USAGE
         exit 0;
         ;;
+      "u")
+        u_id=$OPTARG
+      ;;
       "?")
         echo "Unknown option $OPTARG"
         exit 0;
@@ -45,8 +48,9 @@ while getopts ":i:vh" optname
 
 shift $(($OPTIND - 1))
 
-param1=$1
-param2=$2
+input=$1
+graph=${2:-"default_graph.mg"}
+u_id=${u_id:-"default_user"}
 
 # --- Locks -------------------------------------------------------
 LOCK_FILE=/tmp/$SUBJECT.lock
@@ -60,26 +64,27 @@ touch $LOCK_FILE
 
 # --- Body --------------------------------------------------------
 #  SCRIPT LOGIC GOES HERE
-echo $param1
-echo $param2
+echo $input
+echo $graph
 #TODO add image compression
-#TODO use custom graph file
+
 if [ ! -f /data/log/meshroom_output ]; then
     touch /data/log/meshroom_output
 fi
-if [ ! -d /data/model/"$param1" ]; then
-    mkdir /data/model/"$param1"
+if [ ! -d /data/model/"$input" ]; then
+    mkdir -p /data/model/"$u_id"/"$input"
 fi
 if [ ! -f /data/log/obj2gltf_output ]; then
     touch /data/log/obj2gltf_output
 fi
-/opt/Meshroom/meshroom_batch --input /data/img_in/"$param1" --output /data/model/"$param1"/ -p photogrammetry >> /data/log/meshroom_output
-#BACK_PID=$!
-#wait $BACK_PID
+
+# Meshroom computation starts here
+/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$input"/ -p photogrammetry >> /data/log/meshroom_output
+
 #TODO copy logfiles to log volume
 
-if [ -f /data/model/"$param1"/texturedMesh.obj ] ; then
-  obj2gltf -b -i /data/model/"$param1"/texturedMesh.obj -o /data/model/"$param1"/model.glb >> obj2gltf_output
+if [ -f /data/model/"$input"/texturedMesh.obj ] ; then
+  obj2gltf -b -i /data/model/"$u_id"/"$input"/texturedMesh.obj -o /data/model/"$u_id"/"$input"/model.glb >> obj2gltf_output
 else
   >&2 echo "Error: Couldn't find 3D Model. Probably, Meshroom failed while calculating the model. Check if enough ressources are available. Check Meshroom log."
 fi

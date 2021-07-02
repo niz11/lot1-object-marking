@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<head>
+</head>
+<body>
+
+<div id="displayblocks">
+    <div id="formblock">
+        <label for="modelSelection">Model: </label>
+        <select id="modelSelection" onchange="load(this)"></select><br><br>
+
+        <label for="alt">Alternative Name:</label>
+        <input type="text" id="alt" name="alt" disabled><br><br>
+    </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div>
+    <button id="generate" disabled onclick="createMarker()">Generate</button><br>
+    <div id="message" style="color: #ff0000; "></div><br>
+    <button id="download" disabled onclick="download()">Download</button><br>
+</div>
+
+<script async src="opencv/xtrWasm/bin/opencv.js" onload="onReady()"></script>
+<script>
+    const params = new URLSearchParams(document.location.search);
+    const userId = params.get('userId');
+
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
+    let markerId = 0;
+
+    let cv2;
+    let canvas = document.getElementById("canvas");
+    let context = canvas.getContext("2d");
+
+
+    let jsonData;
+    let chosenModel;
+    fetch(`/models`)
+        .then(response => response.json())
+        .then(data => {
+            jsonData = data;
+            addModel(data[0])
+            console.log(data)
+            let select = document.getElementById("modelSelection");
+
+            for (const val of data) {
+                let option = document.createElement("option");
+                option.value = val.modelName;
+                option.text = val.modelName;
+                select.appendChild(option);
+            }
+        });
+    function load(selectObject) {
+        let value = selectObject.value;
+
+        fetch(`/models`)
+            .then(response => response.json())
+            .then(data => {
+                jsonData = data;
+                const model = jsonData.filter(model => model.modelName === value);
+                addModel(model[0]);
+            });
+    }
+
+    function addModel(model) {
+        chosenModel = model;
+        document.getElementById("alt").value = model.alt;
+        if (model.marker) {
+            markerId = +model.marker.id;
+        }
+
+    }
+
+    async function createMarker(){
+        let messageDiv = document.getElementById('message');
+        messageDiv.innerHTML = '';
+        if (markerId == null || markerId < 0 || markerId >= 50) {
+            messageDiv.innerHTML = 'Error: No valid marker could be generated - too many artworks, too close';
+
+            if (userId){
+                let res = await fetch('/models/update-location', {
+                    method: 'post',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        src: chosenModel.src,
+                        userId: userId,
+                        longitude: chosenModel.location.longitude,
+                        latitude: chosenModel.location.latitude
+                    })
+                }).catch(e => {
+                    console.log(e);
+
+                })
+                if (!res.ok) {
+                    messageDiv.innerHTML = 'Error: No valid marker could be generated: Not authorized to generate a new one';
+                }
+            }
+
+
+            return;
+        }
+
+        let markerImage = new cv2.Mat();
+        let dictionary = new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
+        console.log(dictionary);
+        dictionary.drawMarker(markerId, 200, markerImage, 1);
+        cv2.imshow("canvas", markerImage);
+        markerImage.delete(); dictionary.delete();
+        let image = context.getImageData(0, 0, 200, 200);
+        redraw(image);
+    }
+
+    function redraw(image){
+        let width = image.width;
+        let height = image.height;
+
+        let pixels = 6; // 4 dict size + 2 * 1 border size
+        let padding = 2; // 2 pixels between marker and new border 1 pixel for new border
+        let cornerLength = 3;
+        let px = width / pixels; // pixel sizes
+        let py = height / pixels;
+
+        let borderScale = 0.5; // half a pixel for border size
+        let bx = px * borderScale;
+        let by = py * borderScale;
+
+        canvas.width = 2 * padding * px + width;
+        canvas.height = 2 * padding * py + height;
+
+        // clear background
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // draw corners
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, bx, by * cornerLength);
+        context.fillRect(0, 0, cornerLength * bx, by);
+        context.fillRect(canvas.width - bx, canvas.height - by * cornerLength, bx, by * cornerLength);
+        context.fillRect(canvas.width - cornerLength * bx, canvas.height - by, cornerLength * bx, by);
+        context.fillRect(canvas.width - bx, 0, bx, by * cornerLength);
+        context.fillRect(canvas.width - cornerLength * bx, 0, bx * cornerLength, by);
+        context.fillRect(0, canvas.height - by * cornerLength, bx, by * cornerLength);
+        context.fillRect(0, canvas.height - by, cornerLength * bx, by);
+
+        // draw image
+        context.putImageData(image, padding * px, padding * py);
+    }
+
+    function download() {
+        link.href = canvas.toDataURL();
+        link.download = 'marker' + '.png';
+        link.click();
+    }
+
+    function onReady() {
+        cv.then((s) => {
+            cv2 = s;
+            // console.log(cv2);
+            document.getElementById("generate").disabled = false;
+            document.getElementById("download").disabled = false;
+        })
+    }
+</script>
+</body>

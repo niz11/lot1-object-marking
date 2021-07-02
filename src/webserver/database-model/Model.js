@@ -46,6 +46,12 @@ const ModelSchema = new Schema({
 		},
 		scaling: {
 			type: Number
+		},
+		group: {
+			type: Number
+		},
+		markerId: {
+			type: Number
 		}
 	},
 	user: {
