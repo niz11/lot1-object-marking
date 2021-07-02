@@ -69,11 +69,14 @@
             </form>
             <div class="center marginTop"><button class="btn btn--azure" onclick="removeHotspot()">Remove
                     Hotspot</button></div>
+            <div class="center marginTop" id="hotspotNotSelected"> First selct hotstop to Remove</div>
         </div>
     </div>
     <script>
         let jsonData, src;
         document.getElementById('errorMessage').style.display = 'none';
+        document.querySelector('#hotspotNotSelected').style.display = "none"
+
         const params = new URLSearchParams(document.location.search);
         const userId = params.get('userId')
         if (userId == null) {
@@ -149,6 +152,7 @@
             var hotspots = header.getElementsByClassName("hotspot");
             for (var i = 0; i < hotspots.length; i++) {
                 hotspots[i].addEventListener("click", function (event) {
+                    document.querySelector('#hotspotNotSelected').style.display = "none"
                     selectedHotSpot = this;
                     currentHotspot = document.getElementsByClassName("selected");
                     if (currentHotspot.length > 0) {
@@ -164,11 +168,13 @@
         //Also saved the hotspot on the database
         async function addHotspotOnClick(MouseEvent) {
             const hotspotCounter = document.getElementsByClassName("hotspot").length
-            var inputtext = document.querySelector('input').value;
+            var inputtext = document.querySelector('#hotspottext').value;
             // if input = nothing then alert error if it isnt then add the hotspot
             if (inputtext == "") {
-                document.getElementById("ErrorActive").style.display = 'block';
+                document.querySelector('#hotspottext').className = "errorInput"
+                return
             } else {
+                document.querySelector('#hotspottext').className = ""
                 const viewer = document.querySelector('#modelblock');
                 const rect = viewer.getBoundingClientRect();
                 const x = event.clientX - rect.left;
@@ -195,7 +201,7 @@
                 element.classList.add('annotation');
                 element.appendChild(document.createTextNode(inputtext));
                 document.getElementById(`hotspot-${hotspotCounter}`).appendChild(element);
-                document.querySelector('input').value = "";
+                document.querySelector('#hotspottext').value = "";
                 fetch('/models/add-hospot', {
                     method: 'post',
                     headers: { 'Content-Type': 'application/json' },
@@ -245,18 +251,26 @@
     </script>
     <script>
         function removeHotspot() {
-            selectedHotSpot.remove()
-            fetch('/models/remove-hospot', {
-                method: 'delete',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    src: src,
-                    text: selectedHotSpot.textContent,
-                    userId: userId
+            if (!selectedHotSpot) {
+                document.querySelector('#hotspotNotSelected').style.display = "inline"
+                document.querySelector('#hotspotNotSelected').className = "center marginTop hotspotNotSelected"
+            }
+            else {
+                document.querySelector('#hotspotNotSelected').className = ""
+                document.querySelector('#hotspotNotSelected').style.display = "none"
+                selectedHotSpot.remove()
+                fetch('/models/remove-hospot', {
+                    method: 'delete',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        src: src,
+                        text: selectedHotSpot.textContent,
+                        userId: userId
+                    })
+                }).catch(e => {
+                    console.log(e);
                 })
-            }).catch(e => {
-                console.log(e);
-            })
+            }
         }
         function removeAllHotspots() {
             var el = document.getElementsByClassName("hotspot");

@@ -99,6 +99,17 @@
     border-bottom: 3px solid grey;
 }
 
+.hotspotNotSelected{
+    border: 1px solid;
+    margin: 10px 0px;
+    padding: 15px 10px 15px 50px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: #D8000C;
+    background-color: #FFBABA;
+}
 
 
 input[type=text], input[type=number], select, .info-text {
