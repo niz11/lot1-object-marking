@@ -9,6 +9,14 @@
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="public/stylesheets/homepage.style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    
+
     <link rel="stylesheet" href="/css/addAno.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- 3d model viewer links -->
@@ -77,6 +85,7 @@
 </style>
 
 <body class="noModel" id="body">
+<div class="nav"></div>
     <div id="displayblocks">
         <model-viewer ar id="modelblock" src="" class="" ar auto-rotate camera-controls shadow-intensity="1" alt="" ar
             ar-modes="webxr scene-viewer quick-look">
@@ -88,6 +97,12 @@
     <i class="material-icons" id="fullScreenIcon" style="font-size:36px" onClick="toggleFullScreen()">
         fullscreen</i>
     <div id="distance"></div>
+    <script type="text/javascript">
+        $(function () {
+            $(".nav").load("public/nav.html")
+            $("footer").load("public/footer.html")
+        });
+    </script>
     <script>
         const params = new URLSearchParams(document.location.search);
         const userId = params.get('userId')
