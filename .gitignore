@@ -13,3 +13,4 @@ server.key
 /.vscode/
 .DS_Store
 .env
+/photogr-server/Meshroom-AliceVision/
