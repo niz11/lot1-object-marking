@@ -1,0 +1,52 @@
+<html><head>
+<link rel="stylesheet" type="text/css" href="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
+<link rel="stylesheet" type="text/css" href="http://imagine.enpc.fr/~moulonp/style.css" /><script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.93/jsxgraphcore.js"></script>
+<title>[log] Sequential SfM reconstruction</title>
+</head>
+<h1>[log] Sequential SfM reconstruction</h1>
+<hr>Dataset info:Views count: 3<br><h3>Essential Matrix.</h3>
+
+<b>Robust Essential matrix:</b><br>-> View I:<br>id: 266155506<br>image path: /home/anton/photogrammetry/photogrammetry/dataset_monstree-master/mini3/IMG_1026.JPG<br>-> View J:<br>id: 2064518414<br>image path: /home/anton/photogrammetry/photogrammetry/dataset_monstree-master/mini3/IMG_1024.JPG<br><br>- Threshold: 10.7839<br>- Resection status: OK<br>- # points used for robust Essential matrix estimation: 6308<br>- # points validated by robust estimation: 6308<br>- % points validated: 1<br><h3>Initial triangulation - Residual of the robust estimation.<br>Thresholded at: 10.7839</h3>
+<h3>Histogram of residuals</h3>
+
+<div id="InitialPairTriangulationKeptInfo" class="jxgbox" style="width:600px; height:300px;"></div>
+<script type="text/javascript">
+var board = JXG.JSXGraph.initBoard('InitialPairTriangulationKeptInfo', {boundingbox: [-10, 10, 10, -10], axis:true,showCopyright:false});
+board.suspendUpdate();
+var data0= [0.00000,0.60000,1.20000,1.80000,2.40000,3.00000,];
+var data1= [8402.00000,3154.00000,774.00000,219.00000,50.00000,17.00000,];
+board.createElement('chart', [ data0,data1], {chartStyle:'line,point',labels:[ data0,data1],strokeColor:'#0000ff',highlightStrokeColor:'#0000ff'});
+var p2 = board.create('point',[10.78393,0.00000], {fixed:true});
+var p3 = board.create('point',[10.78393,8402.00000], {fixed:true});
+var li = board.create('line',[p2,p3], {strokeColor:'00ff00',strokeWidth:2});
+board.unsuspendUpdate();
+board.setBoundingBox([-0.60000,10079.00000,3.60000,-1660.00000]);
+</script>
+<hr><h4>Robust resection of view 1565343736: <br></h4>
+
+- Image path: /home/anton/photogrammetry/photogrammetry/dataset_monstree-master/mini3/IMG_1025.JPG<br>- Threshold (error max): 4.02577<br>- Resection status: OK<br>- # points used for Resection: 4328<br>- # points validated by robust estimation: 4264<br>- % points validated: 0.985213<br><hr><h3>Structure from Motion process finished.</h3>
+Structure from Motion statistics:<br>- # input images: 3<br>- # camera calibrated: 3<br>- # poses: 3
+<br>- # landmarks: 14063<br>- elapsed time: 1.568<br>- residual RMSE: 0.455386<h2>Histogram of reprojection-residuals</h2>
+
+<div id="3DtoImageResiduals" class="jxgbox" style="width:600px; height:300px;"></div>
+<script type="text/javascript">
+var board = JXG.JSXGraph.initBoard('3DtoImageResiduals', {boundingbox: [-10, 10, 10, -10], axis:true,showCopyright:false});
+board.suspendUpdate();
+var data0= [0.00000,0.57143,1.14286,1.71429,2.28571,2.85714,3.42857,4.00000,];
+var data1= [19195.00000,9718.00000,2645.00000,675.00000,174.00000,36.00000,8.00000,0.00000,];
+board.createElement('chart', [ data0,data1], {chartStyle:'line,point',labels:[ data0,data1],strokeColor:'#0000ff',highlightStrokeColor:'#0000ff'});
+board.unsuspendUpdate();
+board.setBoundingBox([-0.80000,23034.00000,4.80000,-3839.00000]);
+</script>
+
+<div id="3DtoTracksSize" class="jxgbox" style="width:600px; height:300px;"></div>
+<script type="text/javascript">
+var board = JXG.JSXGraph.initBoard('3DtoTracksSize', {boundingbox: [-10, 10, 10, -10], axis:true,showCopyright:false});
+board.suspendUpdate();
+var data0= [2.00000,4.00000,];
+var data1= [9738.00000,4325.00000,];
+board.createElement('chart', [ data0,data1], {chartStyle:'line,point',labels:[ data0,data1],strokeColor:'#0000ff',highlightStrokeColor:'#0000ff'});
+board.unsuspendUpdate();
+board.setBoundingBox([1.60000,10820.60000,4.40000,3242.40000]);
+</script>
+</html>

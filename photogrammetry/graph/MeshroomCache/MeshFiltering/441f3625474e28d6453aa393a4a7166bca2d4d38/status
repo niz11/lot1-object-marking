@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "MeshFiltering_2",
+    "nodeType": "MeshFiltering",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_meshFiltering  --inputMesh \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Meshing/6e511bfdb79f4a03186c1f87c76e2e1981e06741/mesh.obj\" --keepLargestMeshOnly False --smoothingSubset all --smoothingBoundariesNeighbours 0 --smoothingIterations 5 --smoothingLambda 1.0 --filteringSubset all --filteringIterations 1 --filterLargeTrianglesFactor 60.0 --filterTrianglesRatio 0.0 --verboseLevel info --outputMesh \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshFiltering/441f3625474e28d6453aa393a4a7166bca2d4d38/mesh.obj\"",
+    "env": null,
+    "startDateTime": "2021-07-04 22:24:17.750821",
+    "endDateTime": "2021-07-04 22:24:17.833855",
+    "elapsedTime": 0.08311152458190918,
+    "hostname": "debian-desktop",
+    "sessionUid": "6a90b968-dcff-11eb-a8f6-74d435895566",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:00.083112"
+}

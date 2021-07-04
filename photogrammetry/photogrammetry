@@ -6,10 +6,16 @@
 
 VERSION=0.3
 SUBJECT=some-unique-id
-USAGE="Usage: photogrammetry [options] input_folder_name [meshroom_graph]"
+USAGE="Usage: photogrammetry [options] input_folder_name [meshroom_graph]
+      OPTIONS:
+        v - show version
+        h - show help
+        u - set user id
+        c - use image compression
+"
 
 # --- Options processing -------------------------------------------
-if [ $# -le 1 ] ; then
+if [ $# -lt 1 ] ; then
     printf "%s" "$USAGE"
     exit 1;
 fi
@@ -73,7 +79,7 @@ touch $LOCK_FILE
 if [ ! -f /data/log/meshroom_log ]; then
     touch /data/log/meshroom_log
 fi
-if [ ! -d /data/model/"$input" ]; then
+if [ ! -d /data/model/"$u_id"/"$input" ]; then
     mkdir -p /data/model/"$u_id"/"$input"/preview
 fi
 if [ ! -f /data/log/obj2gltf_log ]; then
@@ -85,17 +91,15 @@ fi
 
 #image compression
 if [ -z ${compression+x} ]; then
-  convert -strip -interlace Plane -gaussian-blur 0.05 -quality 85% /data/img_in/"$u_id"/"$input"/* /data/img_in/"$u_id"/"$input"/* >> /data/log/magick_log
+  convert -strip -interlace Plane -gaussian-blur 0.05 -quality 85% /data/img_in/"$u_id"/"$input"/* /data/img_in/"$u_id"/"$input"/* | tee -a /data/log/magick_log
 fi
 
 # Meshroom computation starts here
-/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$input"/ -p "$graph" >> /data/log/meshroom_output
-
-#copy logfiles to log volume
+/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$input"/ -p /data/graph/"$graph" | tee -a /data/log/meshroom_output
 
 
 if [ -f /data/model/"$input"/texturedMesh.obj ] ; then
-  obj2gltf -b -i /data/model/"$u_id"/"$input"/texturedMesh.obj -o /data/model/"$u_id"/"$input"/model.glb >> obj2gltf_output
+  obj2gltf -b -i /data/model/"$u_id"/"$input"/texturedMesh.obj -o /data/model/"$u_id"/"$input"/model.glb | tee -a obj2gltf_output
 else
   >&2 echo "Error: Couldn't find 3D Model. Probably, Meshroom failed while calculating the model. Check if enough ressources are available. Check Meshroom log."
 fi

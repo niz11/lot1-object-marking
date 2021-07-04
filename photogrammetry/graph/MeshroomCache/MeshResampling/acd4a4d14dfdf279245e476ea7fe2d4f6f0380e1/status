@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "MeshResampling_1",
+    "nodeType": "MeshResampling",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_meshResampling  --input \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshDecimate/1203e8b0d3b20104608a92c5c1d4898f3f65782f/mesh.obj\" --simplificationFactor 0.5 --nbVertices 0 --minVertices 0 --maxVertices 0 --nbLloydIter 40 --flipNormals False --verboseLevel info --output \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshResampling/acd4a4d14dfdf279245e476ea7fe2d4f6f0380e1/mesh.obj\"",
+    "env": null,
+    "startDateTime": "2021-07-04 22:24:29.552311",
+    "endDateTime": "2021-07-04 22:24:30.553812",
+    "elapsedTime": 1.0015232563018799,
+    "hostname": "debian-desktop",
+    "sessionUid": "6a90b968-dcff-11eb-a8f6-74d435895566",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:01.001523"
+}

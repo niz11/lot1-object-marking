@@ -1,0 +1,29 @@
+Program called with the following parameters:
+ * flipNormals = 0
+ * input = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshDecimate/1203e8b0d3b20104608a92c5c1d4898f3f65782f/mesh.obj"
+ * maxVertices = 0
+ * minVertices = 0
+ * nbLloydIter =  Unknown Type "j"
+ * nbVertices = 0
+ * output = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshResampling/acd4a4d14dfdf279245e476ea7fe2d4f6f0380e1/mesh.obj"
+ * simplificationFactor = 0.5
+ * verboseLevel = "info"
+
+[22:24:29.590344][info] Geogram initialized.
+[22:24:29.613726][info] Mesh file: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshDecimate/1203e8b0d3b20104608a92c5c1d4898f3f65782f/mesh.obj" loaded.
+[22:24:29.613760][info] Input mesh: 18214 vertices and 36152 facets.
+[22:24:29.613771][info] Target output mesh: 9107 vertices.
+[22:24:29.613901][info] Start mesh resampling.
+[22:24:30.499924][info] Mesh resampling done.
+[22:24:30.499960][info] Output mesh: 9095 vertices and 17604 facets.
+[22:24:30.499975][info] Save mesh.
+[22:24:30.550028][info] Mesh file: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshResampling/acd4a4d14dfdf279245e476ea7fe2d4f6f0380e1/mesh.obj" saved.
+[22:24:30.550052][info] Task done in (s): 0.960000
+o-[RVD         ] Computing initial sampling on surface, using dimension=3
+o-[Lloyd       ] Elapsed time: 0.77s
+o-[Remesh      ] Computing RVD...
+o-[Validate    ] Detected 3 duplicate and 0 degenerate facets
+                 (FP64) nb_v:9095 nb_e:0 nb_f:17604 nb_b:584 tri:1 dim:3
+                 Attributes on vertices: point[3]
+o-[Remesh      ] Elapsed time: 0.88 s
+o-[I/O         ] Saving file /home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshResampling/acd4a4d14dfdf279245e476ea7fe2d4f6f0380e1/mesh.obj...

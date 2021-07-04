@@ -1,0 +1,106 @@
+Program called with the following parameters:
+ * angleHardThreshold = 90
+ * bestScoreThreshold = 0.1
+ * correctEV = 0
+ * downscale =  Unknown Type "j"
+ * fillHoles = 0
+ * flipNormals = 0
+ * forceVisibleByAllVertices = 0
+ * imagesFolder = ""
+ * input = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Meshing/6e511bfdb79f4a03186c1f87c76e2e1981e06741/densePointCloud.abc"
+ * inputMesh = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshFiltering/441f3625474e28d6453aa393a4a7166bca2d4d38/mesh.obj"
+ * multiBandDownscale =  Unknown Type "j"
+ * multiBandNbContrib =  Unknown Type "St6vectorIiSaIiEE"
+ * output = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/20ad6f4c3a67464922e33adf374b34d60948ea42"
+ * outputTextureFileType = "png"
+ * padding =  Unknown Type "j"
+ * processColorspace = "sRGB"
+ * subdivisionTargetRatio = 0.8
+ * textureSide =  Unknown Type "j"
+ * unwrapMethod = "Basic"
+ * useScore = 1
+ * useUDIM = 1
+ * verboseLevel = "info"
+ * visibilityRemappingMethod = "PullPush"
+
+[22:24:17.894499][info] Load dense point cloud.
+[22:24:17.896104][warning] Alembic LOAD: NO OBSERVATIONS_WITH_FEATURES: , mvg_visibilityFeatId: 0, mvg_visibilityFeatPos: 0, OBSERVATIONS_WITH_FEATURES flag: false
+[22:24:17.897174][info] Found 1 image dimension(s): 
+[22:24:17.897197][info] 	- [4032x3024]
+[22:24:17.899645][info] Overall maximum dimension: [4032x3024]
+[22:24:17.899673][info] Load input mesh.
+[22:24:17.899686][info] Loading mesh from obj file: /home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshFiltering/441f3625474e28d6453aa393a4a7166bca2d4d38/mesh.obj
+[22:24:17.901267][info] 	- # vertices: 4248
+	- # normals: 0
+	- # uv coordinates: 0
+	- # triangles: 8295
+[22:24:17.907777][info] Mesh loaded: 
+	- #points: 4248
+	- # triangles: 8295
+[22:24:17.907848][info] Convert dense point cloud into ref mesh
+[22:24:17.909549][info] remapMeshVisibility based on triangles start.
+[22:24:17.917880][info] remapMeshVisibility done.
+[22:24:17.918169][info] Input mesh has no UV coordinates, start unwrapping (Basic)
+[22:24:17.918262][info] Generating UVs (textureSide: 8192; padding: 5).
+[22:24:17.918325][info] Creating texture charts.
+[22:24:17.924053][info] Packing texture charts (8295 charts).
+[22:24:17.932296][info] Finalize packed charts (35 charts).
+[22:24:17.933179][info] Creating texture atlases.
+[22:24:17.933195][info] 	- texture atlas 1
+[22:24:17.933240][info] Filled with 35 charts.
+[22:24:17.935724][info] Unwrapping done.
+[22:24:17.935740][info] Writing obj and mtl file.
+[22:24:17.943972][info] Writing done: 
+	- obj file: /home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/20ad6f4c3a67464922e33adf374b34d60948ea42/texturedMesh.obj
+	- mtl file: /home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/20ad6f4c3a67464922e33adf374b34d60948ea42/texturedMesh.mtl
+[22:24:17.943999][info] Subdivide mesh.
+[22:24:17.944006][info] nb pts init: 4248
+[22:24:17.944012][info] nb tris init: 8295
+[22:24:17.944017][info] nb points in refMesh: 4248
+[22:24:17.944023][info] targetNbPts: 3398
+[22:24:17.944487][info] No subdivision needed.
+[22:24:17.944498][info] Number of triangle subdivisions: 0
+[22:24:17.944505][info] updateAtlases
+[22:24:17.945596][info] remapMeshVisibility based on triangles start.
+[22:24:17.952773][info] remapMeshVisibility done.
+[22:24:17.952818][info] Generate textures.
+[22:24:17.952829][info] Texturing: Use multiband blending with the following contributions per band:
+[22:24:17.952835][info]   - 1
+[22:24:17.952841][info]   - 5
+[22:24:17.952847][info]   - 10
+[22:24:17.952852][info] Texturing in sRGB colorspace.
+[22:24:17.952875][info] Images loaded from cache with: no exposure correction
+[22:24:17.952963][info] nbAtlas: 1
+[22:24:17.952972][info] availableRam: 5834
+[22:24:17.952977][info] availableMem: 4722
+[22:24:17.952982][info] memoryPerAtlas: 3628
+[22:24:17.952993][info] nbAtlasMax (after rounding): 1
+[22:24:17.952999][info] Total amount of available RAM: 5834 MB.
+[22:24:17.953004][info] Total amount of memory remaining for the computation: 4722 MB.
+[22:24:17.953010][info] Total amount of an image in memory: 139 MB.
+[22:24:17.953023][info] Total amount of an atlas pyramid in memory: 3072 MB.
+[22:24:17.953029][info] Processing 1 atlases by chunks of 1
+[22:24:17.953039][info] Generating texture for atlases 1 to 1
+[22:24:17.953046][info] Generating texture for atlas 1/1 (8291 triangles).
+[22:24:17.966678][info] Reading pixel color.
+[22:24:18.756712][info] - camera 266155506 (1/3) with contributions to 1 texture files:
+[22:24:19.601890][info]   - Texture file: 1
+[22:24:19.601937][info]       - band 1: 869 triangles.
+[22:24:19.642091][info]       - band 2: 7241 triangles.
+[22:24:19.877240][info]       - band 3: 0 triangles.
+[22:24:19.882066][info] - camera 1565343736 (2/3) with contributions to 1 texture files:
+[22:24:20.747443][info]   - Texture file: 1
+[22:24:20.747493][info]       - band 1: 1991 triangles.
+[22:24:20.819468][info]       - band 2: 6117 triangles.
+[22:24:21.017282][info]       - band 3: 0 triangles.
+[22:24:21.022157][info] - camera 2064518414 (3/3) with contributions to 1 texture files:
+[22:24:21.823617][info]   - Texture file: 1
+[22:24:21.823663][info]       - band 1: 5273 triangles.
+[22:24:22.049839][info]       - band 2: 2789 triangles.
+[22:24:22.138690][info]       - band 3: 0 triangles.
+[22:24:22.143563][info] Create texture 1
+[22:24:22.143596][info]   - Computing final (average) color.
+[22:24:22.543448][info]   - Edge padding (15 pixels).
+[22:24:22.807845][info]   - Downscaling texture (2x).
+[22:24:27.570374][info]   - Writing texture file: /home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/20ad6f4c3a67464922e33adf374b34d60948ea42/texture_1001.png
+[22:24:28.595040][info] Task done in (s): 10.701000

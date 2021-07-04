@@ -40,7 +40,7 @@ docker-compose up -d
 1. clone this repository and navigate into the directory with the dockerfile
 2. run:
 ```bash
-docker build -t ahoreis/photogrammetry .
+docker build -t ahoreis/photogrammetry .  # note the "."
 docker-compose up -d
 ```
 

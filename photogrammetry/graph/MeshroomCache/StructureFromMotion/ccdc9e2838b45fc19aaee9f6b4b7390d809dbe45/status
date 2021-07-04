@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "StructureFromMotion_1",
+    "nodeType": "StructureFromMotion",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_incrementalSfM  --input \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/CameraInit/11ee372aafe92c833a3aba411d7993d95969c160/cameraInit.sfm\" --featuresFolders \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/FeatureExtraction/90bbb34ede89a58fb3e7376137f9ba4c89ca85da\" --matchesFolders \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/FeatureMatching/87f831ca2080be7c5978569761764a7b0cf843c9\" --describerTypes sift --localizerEstimator acransac --observationConstraint Basic --localizerEstimatorMaxIterations 4096 --localizerEstimatorError 0.0 --lockScenePreviouslyReconstructed False --useLocalBA True --localBAGraphDistance 1 --maxNumberOfMatches 0 --minNumberOfMatches 0 --minInputTrackLength 2 --minNumberOfObservationsForTriangulation 2 --minAngleForTriangulation 3.0 --minAngleForLandmark 2.0 --maxReprojectionError 4.0 --minAngleInitialPair 5.0 --maxAngleInitialPair 40.0 --useOnlyMatchesFromInputFolder False --useRigConstraint True --lockAllIntrinsics False --filterTrackForks False --initialPairA \"\" --initialPairB \"\" --interFileExtension .abc --verboseLevel info --output \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/StructureFromMotion/ccdc9e2838b45fc19aaee9f6b4b7390d809dbe45/sfm.abc\" --outputViewsAndPoses \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/StructureFromMotion/ccdc9e2838b45fc19aaee9f6b4b7390d809dbe45/cameras.sfm\" --extraInfoFolder \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/StructureFromMotion/ccdc9e2838b45fc19aaee9f6b4b7390d809dbe45\"",
+    "env": null,
+    "startDateTime": "2021-07-04 22:23:10.629535",
+    "endDateTime": "2021-07-04 22:23:14.891939",
+    "elapsedTime": 4.262443780899048,
+    "hostname": "debian-desktop",
+    "sessionUid": "6a90b968-dcff-11eb-a8f6-74d435895566",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:04.262444"
+}

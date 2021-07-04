@@ -4,19 +4,20 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "MeshFiltering": "3.0",
-            "ImageMatching": "2.0",
-            "DepthMap": "2.0",
-            "DepthMapFilter": "3.0",
-            "PrepareDenseScene": "3.0",
-            "MeshResampling": "1.0",
-            "FeatureMatching": "2.0",
-            "Meshing": "7.0",
-            "StructureFromMotion": "2.0",
             "MeshDecimate": "1.0",
             "FeatureExtraction": "1.1",
+            "Texturing": "5.0",
+            "ImageMatching": "2.0",
             "CameraInit": "4.0",
-            "Texturing": "5.0"
+            "MeshFiltering": "3.0",
+            "DepthMapFilter": "3.0",
+            "MeshResampling": "1.0",
+            "Publish": "1.2",
+            "Meshing": "7.0",
+            "DepthMap": "2.0",
+            "FeatureMatching": "2.0",
+            "PrepareDenseScene": "3.0",
+            "StructureFromMotion": "2.0"
         }
     },
     "graph": {
@@ -38,7 +39,7 @@
             "inputs": {
                 "viewpoints": [],
                 "intrinsics": [],
-                "sensorDatabase": "/home/anton/Meshroom-2021.1.0-av2.4.0-centos7-cuda10.2/aliceVision/share/aliceVision/cameraSensors.db",
+                "sensorDatabase": "/opt/Meshroom/aliceVision/share/aliceVision/cameraSensors.db",
                 "defaultFieldOfView": 45.0,
                 "groupCameraFallback": "folder",
                 "allowedCameraModels": [
@@ -513,6 +514,35 @@
                 "output": "{cache}/{nodeType}/{uid0}/mesh.obj"
             }
         },
+        "MeshResampling_1": {
+            "nodeType": "MeshResampling",
+            "position": [
+                2525,
+                24
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "85e6832e20636d072910aba63b1b35d2746be497"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{MeshDecimate_1.output}",
+                "simplificationFactor": 0.5,
+                "nbVertices": 0,
+                "minVertices": 0,
+                "maxVertices": 0,
+                "nbLloydIter": 40,
+                "flipNormals": false,
+                "verboseLevel": "info"
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/mesh.obj"
+            }
+        },
         "Meshing_2": {
             "nodeType": "Meshing",
             "position": [
@@ -678,34 +708,34 @@
                 "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.obj"
             }
         },
-        "MeshResampling_1": {
-            "nodeType": "MeshResampling",
+        "Publish_1": {
+            "nodeType": "Publish",
             "position": [
-                2525,
-                24
+                2850,
+                136
             ],
             "parallelization": {
                 "blockSize": 0,
-                "size": 1,
+                "size": 6,
                 "split": 1
             },
             "uids": {
-                "0": "85e6832e20636d072910aba63b1b35d2746be497"
+                "0": "111e6a623d0184f733eb6273cac6d990d536218d"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{MeshDecimate_1.output}",
-                "simplificationFactor": 0.5,
-                "nbVertices": 0,
-                "minVertices": 0,
-                "maxVertices": 0,
-                "nbLloydIter": 40,
-                "flipNormals": false,
+                "inputFiles": [
+                    "{MeshResampling_1.output}",
+                    "{Texturing_2.outputMesh}",
+                    "{Texturing_2.outputMaterial}",
+                    "{Texturing_2.outputTextures}",
+                    "{Texturing_1.outputMaterial}",
+                    "{Texturing_1.outputTextures}"
+                ],
+                "output": "",
                 "verboseLevel": "info"
             },
-            "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/mesh.obj"
-            }
+            "outputs": {}
         }
     }
 }

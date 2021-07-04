@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "CameraInit_1",
+    "nodeType": "CameraInit",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_cameraInit  --sensorDatabase \"/home/anton/Downloads/Meshroom-2021.1.0-av2.4.0-centos7-cuda10.2/aliceVision/share/aliceVision/cameraSensors.db\" --defaultFieldOfView 45.0 --groupCameraFallback folder --allowedCameraModels pinhole,radial1,radial3,brown,fisheye4,fisheye1 --useInternalWhiteBalance True --viewIdMethod metadata --verboseLevel info --output \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/CameraInit/11ee372aafe92c833a3aba411d7993d95969c160/cameraInit.sfm\" --allowSingleView 1 --input \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/CameraInit/11ee372aafe92c833a3aba411d7993d95969c160//viewpoints.sfm\"",
+    "env": null,
+    "startDateTime": "2021-07-04 22:22:12.136790",
+    "endDateTime": "2021-07-04 22:22:12.189840",
+    "elapsedTime": 0.05291318893432617,
+    "hostname": "debian-desktop",
+    "sessionUid": "6a90b968-dcff-11eb-a8f6-74d435895566",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:00.052913"
+}

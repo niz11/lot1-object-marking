@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "ImageMatching_1",
+    "nodeType": "ImageMatching",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_imageMatching  --input \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/CameraInit/11ee372aafe92c833a3aba411d7993d95969c160/cameraInit.sfm\" --featuresFolders \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/FeatureExtraction/90bbb34ede89a58fb3e7376137f9ba4c89ca85da\" --method VocabularyTree --tree \"/home/anton/Meshroom-2021.1.0-av2.4.0-centos7-cuda10.2/aliceVision/share/aliceVision/vlfeat_K80L3.SIFT.tree\" --weights \"\" --minNbImages 200 --maxDescriptors 500 --nbMatches 50 --verboseLevel info --output \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/ImageMatching/e01861ca0d2879b75015a0eecb910615c95a4d8d/imageMatches.txt\"",
+    "env": null,
+    "startDateTime": "2021-07-04 22:23:06.962702",
+    "endDateTime": "2021-07-04 22:23:07.017465",
+    "elapsedTime": 0.05478692054748535,
+    "hostname": "debian-desktop",
+    "sessionUid": "6a90b968-dcff-11eb-a8f6-74d435895566",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:00.054787"
+}

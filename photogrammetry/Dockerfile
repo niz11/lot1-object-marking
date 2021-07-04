@@ -21,6 +21,7 @@ RUN chmod +x /bin/photogrammetry
 # 		make strip && \
 # 		make install
 # RUN rm /opt/jpegoptim-*.tar.gz
+RUN apt update > /dev/null
 RUN apt install -y imagemagick
 
 # copy custom meshroom graphs into meshroom image
@@ -41,8 +42,6 @@ RUN echo "root:meshroom" | chpasswd
 # install obj2gltf converter
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && apt-get install -y nodejs > /dev/null
 RUN npm install -g obj2gltf > /dev/null
-
-RUN mkdir /data/cache
 
 WORKDIR /data
 

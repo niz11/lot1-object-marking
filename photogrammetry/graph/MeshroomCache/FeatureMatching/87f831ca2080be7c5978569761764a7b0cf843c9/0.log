@@ -1,0 +1,65 @@
+Program called with the following parameters:
+ * crossMatching = 0
+ * describerTypes = "sift"
+ * distanceRatio = 0.8
+ * exportDebugFiles = 0
+ * featuresFolders =  = [/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/FeatureExtraction/90bbb34ede89a58fb3e7376137f9ba4c89ca85da]
+ * geometricError = 0
+ * geometricEstimator =  Unknown Type "N11aliceVision16robustEstimation16ERobustEstimatorE"
+ * geometricFilterType = "fundamental_matrix"
+ * guidedMatching = 0
+ * imagePairsList =  = [/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/ImageMatching/e01861ca0d2879b75015a0eecb910615c95a4d8d/imageMatches.txt]
+ * input = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/CameraInit/11ee372aafe92c833a3aba411d7993d95969c160/cameraInit.sfm"
+ * knownPosesGeometricErrorMax = 5
+ * matchFilePerImage = 0 (default)
+ * matchFromKnownCameraPoses = 0
+ * maxIteration = 2048
+ * maxMatches = 0
+ * output = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/FeatureMatching/87f831ca2080be7c5978569761764a7b0cf843c9"
+ * photometricMatchingMethod = "ANN_L2"
+ * randomSeed = 5489 (default)
+ * rangeSize = 20
+ * rangeStart = 0
+ * savePutativeMatches = 0
+ * useGridSort = 1 (default)
+ * verboseLevel = "info"
+
+[22:23:07.116314][info] Load pair list from file: /home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/ImageMatching/e01861ca0d2879b75015a0eecb910615c95a4d8d/imageMatches.txt
+[22:23:07.116491][info] loadPairs: image pair (266155506, 1565343736) added. File: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/ImageMatching/e01861ca0d2879b75015a0eecb910615c95a4d8d/imageMatches.txt".
+[22:23:07.116518][info] loadPairs: image pair (266155506, 2064518414) added. File: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/ImageMatching/e01861ca0d2879b75015a0eecb910615c95a4d8d/imageMatches.txt".
+[22:23:07.116532][info] loadPairs: image pair (1565343736, 2064518414) added. File: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/ImageMatching/e01861ca0d2879b75015a0eecb910615c95a4d8d/imageMatches.txt".
+[22:23:07.116550][info] Number of pairs: 3
+[22:23:07.116597][info] There are 3 views and 3 image pairs.
+[22:23:07.116605][info] Load features and descriptors
+Loading regions
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+[22:23:07.127463][info] Supported CUDA-Enabled GPU detected.
+***************************************************
+[22:23:07.185870][info] Putative matches (unknown poses): 3 image pairs.
+[22:23:07.185896][info] sift Regions Matching
+
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+[22:23:10.067639][info] 3 putative image pair matches
+[22:23:10.067674][info] 	- image pair (266155506, 1565343736) contains 7677 putative matches.
+[22:23:10.067709][info] 	- image pair (266155506, 2064518414) contains 5477 putative matches.
+[22:23:10.067718][info] 	- image pair (1565343736, 2064518414) contains 9109 putative matches.
+[22:23:10.067734][info] Task (Regions Matching) done in (s): 2.881000
+[22:23:10.068508][info] Geometric filtering: using fundamental_matrix
+Robust Model Estimation
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+[22:23:10.567712][info] 3 geometric image pair matches:
+[22:23:10.567796][info] 	- image pair (266155506, 1565343736) contains 7115 geometric matches.
+[22:23:10.567855][info] 	- image pair (266155506, 2064518414) contains 5097 geometric matches.
+[22:23:10.567911][info] 	- image pair (1565343736, 2064518414) contains 8548 geometric matches.
+[22:23:10.567965][info] Grid filtering
+[22:23:10.570683][info] After grid filtering:
+[22:23:10.570703][info] 	- image pair (266155506, 1565343736) contains 7115 geometric matches.
+[22:23:10.570713][info] 	- image pair (266155506, 2064518414) contains 5097 geometric matches.
+[22:23:10.570719][info] 	- image pair (1565343736, 2064518414) contains 8548 geometric matches.
+[22:23:10.570735][info] Save geometric matches.
+[22:23:10.573000][info] Task done in (s): 0.504000

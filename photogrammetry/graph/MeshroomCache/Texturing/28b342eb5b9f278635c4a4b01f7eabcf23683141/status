@@ -1,0 +1,18 @@
+{
+    "status": "SUCCESS",
+    "execMode": "LOCAL",
+    "nodeName": "Texturing_1",
+    "nodeType": "Texturing",
+    "packageName": "aliceVision",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "aliceVision_texturing  --input \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Meshing/8291151edd7778723ad1fefeb28d5268a1737ee2/densePointCloud.abc\" --imagesFolder \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/PrepareDenseScene/89f1f67d652b974779bcf56c6d33197ba091108d\" --inputMesh \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshFiltering/18fb97fb680da4a73c387653c60cbc16f02ef717/mesh.obj\" --textureSide 8192 --downscale 2 --outputTextureFileType png --unwrapMethod Basic --useUDIM True --fillHoles False --padding 5 --multiBandDownscale 4 --multiBandNbContrib 1 5 10 0 --useScore True --bestScoreThreshold 0.1 --angleHardThreshold 90.0 --processColorspace sRGB --correctEV False --forceVisibleByAllVertices False --flipNormals False --visibilityRemappingMethod PullPush --subdivisionTargetRatio 0.8 --verboseLevel info --output \"/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/28b342eb5b9f278635c4a4b01f7eabcf23683141\"",
+    "env": null,
+    "startDateTime": "2021-07-04 22:24:02.351160",
+    "endDateTime": "2021-07-04 22:24:16.292350",
+    "elapsedTime": 13.941216945648193,
+    "hostname": "debian-desktop",
+    "sessionUid": "6a90b968-dcff-11eb-a8f6-74d435895566",
+    "returnCode": 0,
+    "elapsedTimeStr": "0:00:13.941217"
+}

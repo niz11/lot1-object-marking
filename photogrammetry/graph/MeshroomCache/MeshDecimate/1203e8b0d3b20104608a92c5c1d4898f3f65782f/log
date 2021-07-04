@@ -1,0 +1,19 @@
+Program called with the following parameters:
+ * flipNormals = 0
+ * input = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/28b342eb5b9f278635c4a4b01f7eabcf23683141/texturedMesh.obj"
+ * maxVertices = 0
+ * minVertices = 0
+ * nbVertices = 0
+ * output = "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshDecimate/1203e8b0d3b20104608a92c5c1d4898f3f65782f/mesh.obj"
+ * simplificationFactor = 0.5
+ * verboseLevel = "info"
+
+[22:24:28.899939][info] Mesh file: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/Texturing/28b342eb5b9f278635c4a4b01f7eabcf23683141/texturedMesh.obj" loaded.
+[22:24:28.900069][info] Input mesh: 36429 vertices and 72570 facets.
+[22:24:28.900081][info] Target output mesh: 18214 vertices.
+Quadric
+[22:24:29.517533][info] Output mesh: 18214 vertices and 36152 facets.
+[22:24:29.517573][info] Save mesh.
+[OBJWriter] : write file
+[22:24:29.547529][info] Mesh file: "/home/anton/photogrammetry/photogrammetry/graph/MeshroomCache/MeshDecimate/1203e8b0d3b20104608a92c5c1d4898f3f65782f/mesh.obj" saved.
+[22:24:29.547552][info] Task done in (s): 0.910000
