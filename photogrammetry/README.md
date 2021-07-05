@@ -114,6 +114,7 @@ docker exec photogrammetry photogrammetry -c -p -u test_user test_model standard
 - more testing
 - more presets for different image capturing conditions:
    - small / big datasets
+   - small model size / agressive mesh decimation
    - low / high end host machines
    - different lighting conditions
    - different artwork sizes and special artwork forms
