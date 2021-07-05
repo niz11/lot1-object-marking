@@ -4,7 +4,7 @@
 #          This script starts the photogrammetry pipeline inside a meshroom docker container
 # ------------------------------------------------------------------
 
-VERSION=0.3
+VERSION=0.4
 SUBJECT=some-unique-id
 USAGE="Usage: photogrammetry [options] input_folder_name [meshroom_graph]
       OPTIONS:
@@ -12,6 +12,7 @@ USAGE="Usage: photogrammetry [options] input_folder_name [meshroom_graph]
         h - show help
         u - set user id
         c - use image compression
+        p - generate preview
 "
 
 # --- Options processing -------------------------------------------
@@ -123,10 +124,10 @@ printf '%s \n %s\n' "$(date)" "starting meshroom computation" >> /data/log/meshr
 echo "FINISHED MESHROOM COMPUTATION________"
 
 # model conversion
-if [ -f /data/model/"$u_id"/"$model_name"/mesh.obj ] ; then
+if [ -f /data/model/"$u_id"/"$model_name"/texturedMesh.obj ] ; then
   echo "STARTING MODEL CONVERSION___________"
   printf '%s \n %s\n' "$(date)" "starting conversion" >> /data/log/obj2gltf_log
-  obj2gltf -b -i /data/model/"$u_id"/"$model_name"/mesh.obj -o /data/model/"$u_id"/"$model_name"/model.glb | tee -a obj2gltf_output
+  obj2gltf -b -i /data/model/"$u_id"/"$model_name"/texturedMesh.obj -o /data/model/"$u_id"/"$model_name"/model.glb | tee -a obj2gltf_output
   echo "FINISHED MODEL CONVERSION___________"
 else
   >&2 echo "Error: Couldn't find 3D Model. Probably, Meshroom failed while calculating the model. Check if enough ressources are available. Check Meshroom log."

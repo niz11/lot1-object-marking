@@ -4,20 +4,20 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "FeatureMatching": "2.0",
-            "StructureFromMotion": "2.0",
-            "PrepareDenseScene": "3.0",
-            "Texturing": "5.0",
-            "FeatureExtraction": "1.1",
-            "MeshDecimate": "1.0",
             "ImageMatching": "2.0",
             "CameraInit": "4.0",
-            "MeshFiltering": "3.0",
             "DepthMapFilter": "3.0",
+            "MeshFiltering": "3.0",
+            "DepthMap": "2.0",
+            "FeatureMatching": "2.0",
             "MeshResampling": "1.0",
-            "Publish": "1.2",
             "Meshing": "7.0",
-            "DepthMap": "2.0"
+            "StructureFromMotion": "2.0",
+            "Publish": "1.2",
+            "FeatureExtraction": "1.1",
+            "PrepareDenseScene": "3.0",
+            "MeshDecimate": "1.0",
+            "Texturing": "5.0"
         }
     },
     "graph": {
@@ -250,8 +250,8 @@
         "DepthMap_1": {
             "nodeType": "DepthMap",
             "position": [
-                1200,
-                0
+                1206,
+                32
             ],
             "parallelization": {
                 "blockSize": 3,
@@ -324,8 +324,8 @@
         "Meshing_1": {
             "nodeType": "Meshing",
             "position": [
-                1600,
-                0
+                1599,
+                -49
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -406,8 +406,8 @@
         "MeshFiltering_1": {
             "nodeType": "MeshFiltering",
             "position": [
-                1800,
-                0
+                1853,
+                -63
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -438,8 +438,8 @@
         "Texturing_1": {
             "nodeType": "Texturing",
             "position": [
-                2000,
-                0
+                2482,
+                104
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -447,13 +447,13 @@
                 "split": 1
             },
             "uids": {
-                "0": "c5194f7155e6886fda44a412a14a49a86e78eb0f"
+                "0": "54e1d97eec3dce45de6d579e3f26253e0b770df8"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "input": "{Meshing_1.output}",
                 "imagesFolder": "{DepthMap_1.imagesFolder}",
-                "inputMesh": "{MeshFiltering_1.outputMesh}",
+                "inputMesh": "{MeshResampling_1.output}",
                 "textureSide": 4096,
                 "downscale": 2,
                 "outputTextureFileType": "png",
@@ -489,8 +489,8 @@
         "MeshDecimate_1": {
             "nodeType": "MeshDecimate",
             "position": [
-                2265,
-                23
+                2062,
+                2
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -498,11 +498,11 @@
                 "split": 1
             },
             "uids": {
-                "0": "f5a0ffcdb3277565a5bde39b50f69a8cec0c2aac"
+                "0": "b407478d8bc95fbb177e48dc8665f16c79d576a2"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{Texturing_1.outputMesh}",
+                "input": "{MeshFiltering_1.outputMesh}",
                 "simplificationFactor": 0.8,
                 "nbVertices": 0,
                 "minVertices": 0,
@@ -517,8 +517,8 @@
         "MeshResampling_1": {
             "nodeType": "MeshResampling",
             "position": [
-                2525,
-                24
+                2288,
+                -4
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -526,7 +526,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "9fc74d4355bcbbaf2db813bd05d0f5eeab082e14"
+                "0": "59b1f1bb3bfee36d6d7921fba51b36e43040dfcb"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -546,8 +546,8 @@
         "Publish_1": {
             "nodeType": "Publish",
             "position": [
-                2827,
-                20
+                2703,
+                11
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -555,14 +555,14 @@
                 "split": 1
             },
             "uids": {
-                "0": "3a829d16f66bb24fa2485198460801f29d381c5b"
+                "0": "83ab547dab9d69d97d4e4f3fcf3a8727dec6acb2"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "inputFiles": [
-                    "{MeshResampling_1.output}",
                     "{Texturing_1.outputMaterial}",
-                    "{Texturing_1.outputTextures}"
+                    "{Texturing_1.outputTextures}",
+                    "{Texturing_1.outputMesh}"
                 ],
                 "output": "",
                 "verboseLevel": "info"
