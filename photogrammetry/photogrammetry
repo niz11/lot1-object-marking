@@ -106,7 +106,7 @@ fi
 # meshroom pipeline
 echo "STARTING MESHROOM COMPUTATION________"
 
-if [ "$preview" = "1"]; then
+if [ "$preview" = "1" ]; then
   printf '%s \n %s\n' "$(date)" "starting model preview computation" >> /data/log/meshroom_log
   if [ ! -d /data/model/"$u_id"/"$model_name"/preview ]; then
     mkdir /data/model/"$u_id"/"$model_name"/preview
