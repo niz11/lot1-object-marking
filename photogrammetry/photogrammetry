@@ -20,7 +20,7 @@ if [ $# -lt 1 ] ; then
     exit 1;
 fi
 
-while getopts ":i:vhcu:" optname
+while getopts ":i:vhcpu:" optname
   do
     case "$optname" in
       "v")
@@ -40,6 +40,9 @@ while getopts ":i:vhcu:" optname
       "c")
         compression=1
       ;;
+      "p")
+        preview=1
+      ;;
       "?")
         echo "Unknown option $OPTARG"
         exit 0;
@@ -58,7 +61,8 @@ while getopts ":i:vhcu:" optname
 shift $(($OPTIND - 1))
 
 input=$1
-graph=${2:-"photogrammetry"}
+model_name="$input"
+graph=${2:-"standard.mg"}
 u_id=${u_id:-"default_user"}
 
 # --- Locks -------------------------------------------------------
@@ -73,14 +77,12 @@ touch $LOCK_FILE
 
 # --- Body --------------------------------------------------------
 #  SCRIPT LOGIC GOES HERE
-# echo $input
-# echo $graph
 
 if [ ! -f /data/log/meshroom_log ]; then
     touch /data/log/meshroom_log
 fi
-if [ ! -d /data/model/"$u_id"/"$input" ]; then
-    mkdir -p /data/model/"$u_id"/"$input"/preview
+if [ ! -d /data/model/"$u_id"/"$model_name" ]; then
+    mkdir -p /data/model/"$u_id"/"$model_name"
 fi
 if [ ! -f /data/log/obj2gltf_log ]; then
     touch /data/log/obj2gltf_log
@@ -90,15 +92,36 @@ if [ ! -f /data/log/magick_log ]; then
 fi
 
 #image compression
-if [ -z ${compression+x} ]; then
-  convert -strip -interlace Plane -gaussian-blur 0.05 -quality 85% /data/img_in/"$u_id"/"$input"/* /data/img_in/"$u_id"/"$input"/* | tee -a /data/log/magick_log
+if [ "$compression" = "1" ]; then
+  echo "STARTING IMAGE COMPRESSION___________"
+  if [ ! -d /data/img_in/"$u_id"/"$input"/compressed ]; then
+    mkdir /data/img_in/"$u_id"/"$input"/compressed/
+  fi
+  printf '%s \n %s\n' "$(date)" "starting image compression" >> /data/log/img-compression_log
+  mogrify -path /data/img_in/"$u_id"/"$input"/compressed/ -strip -interlace Plane -gaussian-blur 0.05 -quality 85% /data/img_in/"$u_id"/"$input"/* | tee -a /data/log/img-compression_log
+  input="${input}/compressed"
+  echo "FINISHED IMAGE COMPRESSION___________"
 fi
 
-# Meshroom computation starts here
-/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$input"/ -p /data/graph/"$graph" | tee -a /data/log/meshroom_output
+# meshroom pipeline
+echo "STARTING MESHROOM COMPUTATION________"
 
+if [ "$preview" = "1"]; then
+  printf '%s \n %s\n' "$(date)" "starting model preview computation" >> /data/log/meshroom_log
+  if [ ! -d /data/model/"$u_id"/"$model_name"/preview ]; then
+    mkdir /data/model/"$u_id"/"$model_name"/preview
+fi
+  /opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$model_name"/preview -p /data/graph/preview.mg --cache /data/cache | tee -a /data/log/meshroom_log
+fi
 
+printf '%s \n %s\n' "$(date)" "starting meshroom computation" >> /data/log/meshroom_log
+/opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$model_name"/ -p /data/graph/"$graph" --cache /data/cache | tee -a /data/log/meshroom_log
+echo "FINISHED MESHROOM COMPUTATION________"
+
+# model conversion
 if [ -f /data/model/"$input"/texturedMesh.obj ] ; then
+  echo "STARTING MODEL CONVERSION___________"
+  printf '%s \n %s\n' "$(date)" "starting conversion" >> /data/log/obj2gltf_log
   obj2gltf -b -i /data/model/"$u_id"/"$input"/texturedMesh.obj -o /data/model/"$u_id"/"$input"/model.glb | tee -a obj2gltf_output
 else
   >&2 echo "Error: Couldn't find 3D Model. Probably, Meshroom failed while calculating the model. Check if enough ressources are available. Check Meshroom log."
