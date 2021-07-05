@@ -57,6 +57,7 @@ There are different ways to start the photogrammetry pipeline, depending on your
 <code>
 docker exec photogrammetry photogrammetry <i>[options] model_name [meshroom_graph]</i>
 </code>
+The first photogrammetry stands for the container name. The second for the photogrammetry script.
 
 Available graph files are saved in the graph folder. If you want to use your own graph files u need to place them there.
 For all available options, see the explanation below.
@@ -93,14 +94,16 @@ ssh -p 2222 root@[docker-host]
 ### Available options
 
   -h - show help
-  -u - set user id
-  -c - use image compression
-  -p - generate fast preview mesh
+  -u - set user id, if not specified it will be set to default_user
+  -c - use image compression (it is not used by default)
+  -p - generate fast preview mesh before computing the final model (will be saved under model/[user_id]/[model_name]/preview)
   
 ### Examples
 
-```
+The following example will start the meshroom container from the host system using image compression and generating a fast preview, that will be saved under /model/test_user/test_model/preview, before computing the real model with the standard meshroom graph file (it is not necessary to provide the standard graph file as it is the default, this is just for demonstration purposes).
 
+```
+docker exec photogrammetry photogrammetry -c -p -u test_user test_model standard.mg
 ```
 
 ## Todo
