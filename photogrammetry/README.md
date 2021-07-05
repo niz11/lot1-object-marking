@@ -46,20 +46,34 @@ docker-compose up -d
 
 ## Usage
 
-### start pipeline (local)
+#### start pipeline (local)
 
 1. create subdirectory in img_in and copy images in it
 <code>
 docker exec photogrammetry photogrammetry <i>subdirectory_name [meshroom graph]</i>
 </code>
 
-### start pipeline (remote / with docker API)
+#### start pipeline (remote / with docker API)
 
 NodeJS SDK: https://github.com/apocas/dockerode
 
 TODO
 
-### SSH
+#### start pipeline with nodejs
+
+https://stackoverflow.com/questions/44647778/how-to-run-shell-script-file-using-nodejs
+
+TODO
+
+#### start pipeline from other docker container
+
+https://stackoverflow.com/questions/59035543/how-to-execute-command-from-one-docker-container-to-another
+
+the easiest way is probably to login to the photogrammetry container via ssh and run the pipeline 
+
+TODO
+
+#### SSH
 
 If you want to access the docker container directly i.e. for getting access to the meshroom binaries.
 ssh has to be installed on your host.
@@ -73,6 +87,21 @@ ssh -p 2222 root@[docker-host]
 - finish README
 - scale model to a realistic size
 - optimize meshroom graph parameters
-- publish preview while calculating
-- add image compression tool to pipeline
-- presets for different image capturing conditions
+- more testing
+- more presets for different image capturing conditions:
+   - small / big datasets
+   - low / high end host machines
+   - different lighting conditions
+   - different artwork sizes and special artwork forms
+- more flexible logging options with verbose levels (ALL, INFO, WARNING, ERROR)
+- catch and handle common errors
+- implement automated iterative model improvement by using artist feedback
+
+## Bugs
+
+Sometimes the pipeline may fail when recreating an already calculated model. In this case ssh into the container and delete model files and cache files:
+[code]
+ssh -p 2222 root@[docker-host]
+rm -R /data/cache/*
+rm -R /data/model/[u_id]/[model-name]/*
+[/code]
