@@ -46,12 +46,20 @@ docker-compose up -d
 
 ## Usage
 
+### Starting the pipeline
+
+There are different ways to start the photogrammetry pipeline, depending on your use case. They all rely on the photogrammetry bash script provided in this repository. If you want to access meshroom directly, u have to execute the /opt/Meshroom/meshroom_batch script in the container.
+
 #### start pipeline (local)
 
-1. create subdirectory in img_in and copy images in it
+1. create a folder containing all images under the following path: ./img_in/[user_id]/[model_name]
+2. execute the following command:
 <code>
-docker exec photogrammetry photogrammetry <i>subdirectory_name [meshroom graph]</i>
+docker exec photogrammetry photogrammetry <i>[options] model_name [meshroom_graph]</i>
 </code>
+
+Available graph files are saved in the graph folder. If you want to use your own graph files u need to place them there.
+For all available options, see the explanation below.
 
 #### start pipeline (remote / with docker API)
 
@@ -78,9 +86,22 @@ TODO
 If you want to access the docker container directly i.e. for getting access to the meshroom binaries.
 ssh has to be installed on your host.
 
-[code]
+```
 ssh -p 2222 root@[docker-host]
-[/code]
+```
+
+### Available options
+
+  -h - show help
+  -u - set user id
+  -c - use image compression
+  -p - generate fast preview mesh
+  
+### Examples
+
+```
+
+```
 
 ## Todo
 
@@ -100,8 +121,8 @@ ssh -p 2222 root@[docker-host]
 ## Bugs
 
 Sometimes the pipeline may fail when recreating an already calculated model. In this case ssh into the container and delete model files and cache files:
-[code]
+```
 ssh -p 2222 root@[docker-host]
 rm -R /data/cache/*
 rm -R /data/model/[u_id]/[model-name]/*
-[/code]
+```
