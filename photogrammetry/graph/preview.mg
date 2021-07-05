@@ -4,14 +4,15 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "ImageMatching": "2.0",
-            "CameraInit": "4.0",
-            "MeshFiltering": "3.0",
-            "FeatureMatching": "2.0",
-            "Texturing": "5.0",
-            "Meshing": "7.0",
             "FeatureExtraction": "1.1",
-            "StructureFromMotion": "2.0"
+            "CameraInit": "4.0",
+            "StructureFromMotion": "2.0",
+            "Texturing": "5.0",
+            "ImageMatching": "2.0",
+            "MeshFiltering": "3.0",
+            "Publish": "1.2",
+            "Meshing": "7.0",
+            "FeatureMatching": "2.0"
         }
     },
     "graph": {
@@ -357,7 +358,7 @@
             "inputs": {
                 "viewpoints": [],
                 "intrinsics": [],
-                "sensorDatabase": "/home/anton/Downloads/Meshroom-2021.1.0-av2.4.0-centos7-cuda10.2/aliceVision/share/aliceVision/cameraSensors.db",
+                "sensorDatabase": "/opt/Meshroom/aliceVision/share/aliceVision/cameraSensors.db",
                 "defaultFieldOfView": 45.0,
                 "groupCameraFallback": "folder",
                 "allowedCameraModels": [
@@ -376,6 +377,32 @@
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/cameraInit.sfm"
             }
+        },
+        "Publish_1": {
+            "nodeType": "Publish",
+            "position": [
+                1636,
+                4
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 3,
+                "split": 1
+            },
+            "uids": {
+                "0": "1520c6e2c25913aaca608beb58d04a4b86a2c234"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputFiles": [
+                    "{Texturing_1.outputMesh}",
+                    "{Texturing_1.outputMaterial}",
+                    "{Texturing_1.outputTextures}"
+                ],
+                "output": "",
+                "verboseLevel": "info"
+            },
+            "outputs": {}
         }
     }
 }

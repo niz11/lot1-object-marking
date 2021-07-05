@@ -106,12 +106,16 @@ fi
 # meshroom pipeline
 echo "STARTING MESHROOM COMPUTATION________"
 
+# preview pipeline
 if [ "$preview" = "1" ]; then
+  echo "STARTING PREVIEW COMPUTATION_________"
   printf '%s \n %s\n' "$(date)" "starting model preview computation" >> /data/log/meshroom_log
   if [ ! -d /data/model/"$u_id"/"$model_name"/preview ]; then
     mkdir /data/model/"$u_id"/"$model_name"/preview
-fi
+  fi
   /opt/Meshroom/meshroom_batch --input /data/img_in/"$u_id"/"$input" --output /data/model/"$u_id"/"$model_name"/preview -p /data/graph/preview.mg --cache /data/cache | tee -a /data/log/meshroom_log
+  obj2gltf -b -i /data/model/"$u_id"/"$model_name"/preview/texturedMesh.obj -o /data/model/"$u_id"/"$model_name"/preview/model.glb | tee -a obj2gltf_output
+  echo "FINISHED PREVIEW COMPUTATION_________"
 fi
 
 printf '%s \n %s\n' "$(date)" "starting meshroom computation" >> /data/log/meshroom_log
@@ -119,10 +123,11 @@ printf '%s \n %s\n' "$(date)" "starting meshroom computation" >> /data/log/meshr
 echo "FINISHED MESHROOM COMPUTATION________"
 
 # model conversion
-if [ -f /data/model/"$input"/texturedMesh.obj ] ; then
+if [ -f /data/model/"$u_id"/"$model_name"/mesh.obj ] ; then
   echo "STARTING MODEL CONVERSION___________"
   printf '%s \n %s\n' "$(date)" "starting conversion" >> /data/log/obj2gltf_log
-  obj2gltf -b -i /data/model/"$u_id"/"$input"/texturedMesh.obj -o /data/model/"$u_id"/"$input"/model.glb | tee -a obj2gltf_output
+  obj2gltf -b -i /data/model/"$u_id"/"$model_name"/mesh.obj -o /data/model/"$u_id"/"$model_name"/model.glb | tee -a obj2gltf_output
+  echo "FINISHED MODEL CONVERSION___________"
 else
   >&2 echo "Error: Couldn't find 3D Model. Probably, Meshroom failed while calculating the model. Check if enough ressources are available. Check Meshroom log."
 fi

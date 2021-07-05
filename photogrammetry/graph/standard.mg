@@ -4,20 +4,20 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "DepthMap": "2.0",
             "FeatureMatching": "2.0",
-            "MeshResampling": "1.0",
-            "Meshing": "7.0",
-            "Publish": "1.2",
-            "FeatureExtraction": "1.1",
             "StructureFromMotion": "2.0",
             "PrepareDenseScene": "3.0",
-            "MeshDecimate": "1.0",
             "Texturing": "5.0",
+            "FeatureExtraction": "1.1",
+            "MeshDecimate": "1.0",
             "ImageMatching": "2.0",
             "CameraInit": "4.0",
+            "MeshFiltering": "3.0",
             "DepthMapFilter": "3.0",
-            "MeshFiltering": "3.0"
+            "MeshResampling": "1.0",
+            "Publish": "1.2",
+            "Meshing": "7.0",
+            "DepthMap": "2.0"
         }
     },
     "graph": {
@@ -333,7 +333,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "e94cc7cf628b755c085662be9ed8bc3ae255d545"
+                "0": "422b7727f2ce35c9fcb50816be657ee80f89840b"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -357,7 +357,7 @@
                         "z": 1.0
                     }
                 },
-                "estimateSpaceFromSfM": true,
+                "estimateSpaceFromSfM": false,
                 "estimateSpaceMinObservations": 3,
                 "estimateSpaceMinObservationAngle": 50.0,
                 "maxInputPoints": 50000000,
@@ -415,7 +415,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "3c37630f3bc30ad710982523b24407e9e1ef01c0"
+                "0": "02e6c538d3d6b75af2b57d93b24895a44afe6e5c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -447,7 +447,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "a2b7e6d27d7d6d03d16c70cf13c76218af1e03cd"
+                "0": "c5194f7155e6886fda44a412a14a49a86e78eb0f"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -498,7 +498,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "fd6a1b8604154445b38d892ac707e8c489cf04cc"
+                "0": "f5a0ffcdb3277565a5bde39b50f69a8cec0c2aac"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -526,7 +526,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "a86cc101e006138ff785c6fa0b0043e8c8297593"
+                "0": "9fc74d4355bcbbaf2db813bd05d0f5eeab082e14"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -546,24 +546,21 @@
         "Publish_1": {
             "nodeType": "Publish",
             "position": [
-                2798,
-                28
+                2827,
+                20
             ],
             "parallelization": {
                 "blockSize": 0,
-                "size": 6,
+                "size": 3,
                 "split": 1
             },
             "uids": {
-                "0": "c0aba3f9cbafc3fbef4c166d4f7317b7a995b24d"
+                "0": "3a829d16f66bb24fa2485198460801f29d381c5b"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "inputFiles": [
                     "{MeshResampling_1.output}",
-                    "",
-                    "",
-                    "",
                     "{Texturing_1.outputMaterial}",
                     "{Texturing_1.outputTextures}"
                 ],
