@@ -1,54 +1,35 @@
 # docker-compose.yml
-version: '3'
+version: "3"
 
 services:
   photogrammetry:
-    image: photogrammetry
+    image: ahoreis/photogrammetry
     container_name: photogrammetry
     runtime: nvidia
     ports:
-     - "2222:22"
+      - "2222:22"
     restart: always
     volumes:
-     - img_in:/data/img_in
-     - model:/data/model
-     - log:/data/log
+      - ./img_in:/data/img_in
+      - ./model:/data/model
+      - ./log:/data/log
+      - ./graph:/data/graph
+      - ./cache:/data/cache
     deploy:
       resources:
         reservations:
           devices:
-          - capabilities: [gpu]
+            - capabilities: [gpu]
 
   #node:
-    #image: "node:alpine"
-    #user: "node"
-    #working_dir: /home/node/app
-    #environment:
-      #- NODE_ENV=production
-    #volumes:
-      #- model:/home/node/app/model
-      #- log:/home/node/app/log
-    #expose:
-      #- "8888"
-    #command: "npm --version"
-
-volumes:
-  img_in:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./img_in
-  model:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ../src/webserver/static/saved-models
-  log:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./log
-
+  #image: "node:alpine"
+  #user: "node"
+  #working_dir: /home/node/app
+  #environment:
+  #- NODE_ENV=production
+  #volumes:
+  #- model:/home/node/app/model
+  #- log:/home/node/app/log
+  #expose:
+  #- "8888"
+  #command: "npm --version"

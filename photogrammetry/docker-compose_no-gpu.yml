@@ -1,0 +1,35 @@
+# docker-compose.yml
+version: "3"
+
+services:
+  photogrammetry:
+    image: ahoreis/photogrammetry
+    container_name: photogrammetry
+    #    runtime: nvidia
+    ports:
+      - "2222:22"
+    restart: always
+    volumes:
+      - ./img_in:/data/img_in
+      - ./model:/data/model
+      - ./log:/data/log
+      - ./graph:/data/graph
+
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #       - capabilities: [gpu]
+
+  #node:
+  #image: "node:alpine"
+  #user: "node"
+  #working_dir: /home/node/app
+  #environment:
+  #- NODE_ENV=production
+  #volumes:
+  #- model:/home/node/app/model
+  #- log:/home/node/app/log
+  #expose:
+  #- "8888"
+  #command: "npm --version"

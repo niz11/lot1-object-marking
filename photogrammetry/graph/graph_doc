@@ -1,0 +1,2 @@
+preview.mg Meshroom graph generating a preview without using the GPU (no NVIDIA GPU needed)
+standard.mg Meshroom graph using our standard photogrammetry pipeline with mesh decimation (smaller file size) and mesh resampling (evenly distributed mesh)

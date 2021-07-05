@@ -12,6 +12,22 @@ RUN curl -o /opt/Meshroom-${meshroom_version}.tar.gz ${meshroom_download_link} &
 COPY photogrammetry /bin/photogrammetry
 RUN chmod +x /bin/photogrammetry
 
+# install image compression tool
+# COPY ./jpegoptim-*.tar.gz /opt
+# RUN tar xzvf jpegoptim-*.tar.gz && \
+# 		cd jpegoptim-* && \
+# 		./configure && \
+# 		make && \
+# 		make strip && \
+# 		make install
+# RUN rm /opt/jpegoptim-*.tar.gz
+RUN apt update > /dev/null
+RUN apt install -y imagemagick
+
+# copy custom meshroom graphs into meshroom image
+# RUN mkdir /opt/Meshroom/graph
+# COPY ./graph/* /opt/Meshroom-${meshroom_version}/graph/
+
 # Enable SSH X11 forwarding, needed when the Docker image
 # is run on a remote machine
 
