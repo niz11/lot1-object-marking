@@ -44,6 +44,9 @@ docker build -t ahoreis/photogrammetry .  # note the "."
 docker-compose up -d
 ```
 
+NOTE: On Windows you may experience the error: /bin/bash^M bad interpreter. In this case you have to download the photogrammetry script directly from github to make it work:
+   docker exec photogrammetry curl -L https://raw.githubusercontent.com/niz11/lot1-object-marking/master/photogrammetry/photogrammetry > /bin/photogrammetry
+
 ## Usage
 
 ### Starting the pipeline
