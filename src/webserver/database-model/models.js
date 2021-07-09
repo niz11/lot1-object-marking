@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Model = require('./Model');
+const fs = require('fs-extra');
 
 router.get('/test', (req, res) => {
 	res.json({ msg: 'Users works' });
@@ -22,25 +23,26 @@ router.get('/', (req, res) => {
 
 router.post('/user', (req, res) => {
 	if (!req.body.userId) {
-		return res.status(404).json('Please first login and privide a userId');
+		return res.status(401).json('Please first login and privide a userId');
 	}
 	Model.find({ user: req.body.userId })
 		.then((models) => res.json(models))
 		.catch((err) => res.status(404).json({ noModels: 'No models found' }));
 });
 
+// for now, uploads all the meta-data of a new 3D-model, actual model/.glb-file is uploaded below
 router.post('/add-model', async (req, res) => {
 	if (!req.body.userId) {
-		return res.status(404).json('Please first login and privide a userId');
+		return res.status(401).json('Please first login and provide a userId');
 	}
 	if (!req.body.src || !req.body.modelName) {
-		return res.status(404).json('Missing params: src, model name');
+		return res.status(422).json('Missing params: src, model name');
 	}
 
 	modelCheck = await Model.find({ src: req.body.src, user: req.body.userId });
 	// Need also to add here the user. If the user has already a model with that name
 	if (modelCheck.modelName === req.body.modelName) {
-		return res.status(404).json('User already has a model with the input model name');
+		return res.status(409).json('User already has a model with the input model name');
 	}
 
 	if (modelCheck.length === 0) {
@@ -48,7 +50,7 @@ router.post('/add-model', async (req, res) => {
 		if (req.body.hotspots && Array.isArray(req.body.hotspots)) {
 			hotspots = req.body.hotspots.map((hotspot) => {
 				if (!hotspot.position || !hotspot.normal || !hotspot.text) {
-					return res.status(404).json('One of the Hotspots is missing a position, a normal or a text');
+					return res.status(422).json('One of the Hotspots is missing a position, a normal or a text');
 				}
 				return {
 					position: hotspot.position,
@@ -79,17 +81,61 @@ router.post('/add-model', async (req, res) => {
 		let marker = await getGroupID(newModel);
 		newModel.marker.group = marker.group;
 		newModel.marker.markerId = marker.id;
-
-		newModel.save().then((post) => res.json(post));
+		newModel.save().then((post) => res.status(201).json(post));
 	} else {
-		res.status(404).json('User already has a model with input src');
+		res.status(409).json('User already has a model with input src');
 	}
+});
+
+/* uploads the actual .glb-file of already registered models (POST: /add-model --> only meta-info) and 
+saves file in server directories*/
+router.post('/upload-model-file', async (req, res) => {
+	console.log('POST request to add a .glb file');
+	// let uploadPath = path.relative(__dirname, 'Meshroom-AliceVision/input/uploaded-images/images'); // Register the upload path
+	let uploadPath = '../lot1-object-marking/src/webserver/static/saved-models/user';
+	fs.ensureDir(uploadPath); // Make sure that he upload path exits
+
+	const userfolder = uploadPath + '/' + req.body.userId;
+	if (!fs.ensureDir(userfolder)) {
+		await fs.mkdir(userfolder);
+	}
+	const modelFolder = userfolder + '/' + req.body.modelName;
+	if (!fs.ensureDir(modelFolder)) {
+		await fs.mkdir(modelFolder);
+	}
+	
+	const model_output = modelFolder + '/' + req.body.modelName + '.glb'
+	fs.writeFile(model_output, req.files.model.data, function (err) {
+		if (err) return console.log(err);
+		console.log('Success: saving model '+ req.body.modelName + ' from user ' + req.body.userId);
+	  });
+
+	// currently not working: saves file-data directly to disk (in 2MB packages) inorder for RAM not to get overfilled when too many requests at once
+
+/* 	req.pipe(req.busboy); // Pipe it trough busboy
+	req.busboy.on('file', (fieldname, file, filename) => {
+		console.log(`Upload of '${filename}' started`);
+
+		// Create a write stream of the new file
+		const fstream = fs.createWriteStream(path.join(upload_folder, filename));
+		// Pipe it trough
+		file.pipe(fstream);
+		// On finish of the upload
+		fstream.on('close', async () => {
+			console.log(`Upload of '${filename}' finished`);
+			// response is send to tell frontend of successfull initiation of the 3D-modelling-pipeline
+			// waits until meshromm finished rendering 
+			let model_output = path.join(__dirname, 'Meshroom-AliceVision/output/output' + request_id);
+			fs.writeFileSync(model_output + '/model' + request_id + '.glb', glb);
+			console.log('Pipeline Callback finished! \n Ready to send 3D-model-file to requester with output_file_id: ' + request_id);
+		});
+	}); */
 });
 
 // Update model, need to send to rout the whle models data
 router.post('/update-model', async (req, res) => {
 	if (!req.body.userId) {
-		return res.status(404).json('Please first login and privide a userId');
+		return res.status(404).json('Please first login and provide a userId');
 	}
 	if (!req.body.src || !req.body.newSrc) {
 		return res.status(404).json('Missing params: src and model name');
