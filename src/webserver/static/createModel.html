@@ -194,7 +194,7 @@
         creation_ongoing = false;
         // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/pipeline/start/?id=' + model_id)
 
-        const model_src = 'https://localhost:3000/saved-models/' + userId + '/' + modelName + '/' + modelName + '.glb';
+        const model_src = 'https://localhost:3000/saved-models/user/' + userId + '/' + modelName + '/' + modelName + '.glb';
         document.getElementById("model_viewer_container").innerHTML =
           `<model-viewer src="` + model_src + `"    
               ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"

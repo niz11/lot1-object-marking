@@ -108,6 +108,7 @@ router.post('/upload-model-file', async (req, res) => {
 	fs.writeFile(model_output, req.files.model.data, function (err) {
 		if (err) return console.log(err);
 		console.log('Success: saving model '+ req.body.modelName + ' from user ' + req.body.userId);
+		res.status(201).json('Success: Model saved in local directory');
 	  });
 
 	// currently not working: saves file-data directly to disk (in 2MB packages) inorder for RAM not to get overfilled when too many requests at once

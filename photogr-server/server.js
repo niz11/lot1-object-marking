@@ -66,7 +66,7 @@ app.get('/pipeline/model-status', function (req, res) {
     try {
       let output_path;
       if (local_pipeline) /* output_path = path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb'); */
-        output_path = '../src/webserver/static/saved-models/' + userId + '/' + modelName + '/' + modelName + '.glb';
+        output_path = '../src/webserver/static/saved-models/user/' + userId + '/' + modelName + '/' + modelName + '.glb';
       else output_path = ''
       if (fs.existsSync(output_path)) {
         console.log("Requested model exists in directory.");
@@ -142,10 +142,10 @@ app.post('/pipeline/start', async function (req, res) {
             .then(async function (glb) {
               fs.writeFileSync(model_output + '/' + modelName + '.glb', glb);
               // after .glb file got written do disk, the model_id will be removed from the current_working_buffer 
-              current_modelling_processes.delete(request_id.toString());
+              // current_modelling_processes.delete(request_id.toString());
               console.log('Pipeline Callback finished! \n Ready to send 3D-model-file to requester with output_file_id: ' + request_id);
               // send model(.glb) with user/meta data to the main-webserver, where the .glb is stored locally in directory (temp solution)
-              sendModelFile(userId, modelName);
+              sendModelFile(userId, modelName, request_id);
             });
         } else {
           initiateDockerPipeline(userId, modelName, request_id);
@@ -157,7 +157,7 @@ app.post('/pipeline/start', async function (req, res) {
 });
 
 // sends .glb file to webserver, where the file is saved locally in directory
-function sendModelFile(userId, modelName) {
+function sendModelFile(userId, modelName, request_id) {
   process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0; // allows calls to self-certificated https servers
   console.log("Sending .glb file to main server");
 
@@ -171,7 +171,10 @@ function sendModelFile(userId, modelName) {
   fetch('https://localhost:3000/models/upload-model-file', { method: 'POST', body: form })
     .then(res => res.json())
     .then(json => console.log(json))
-    .then(() => process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 1);
+    .then(() => {
+      process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 1;
+      current_modelling_processes.delete(request_id.toString());
+    });
 }
 
 // start node-child-process to run the meshroom-pipeline asynchronously
