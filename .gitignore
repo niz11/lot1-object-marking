@@ -15,4 +15,3 @@ server.key
 .env
 /photogr-server/Meshroom-AliceVision/
 /photogr-server/node_modules/
-/src/webserver/static/saved-models/user
