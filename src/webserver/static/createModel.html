@@ -5,45 +5,56 @@
   <title>Test</title>
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="public/stylesheets/homepage.style.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/messages.css">
 
-  <!-- <link href="style.css" rel="stylesheet"> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
 </head>
 
 <style>
   .mapid {
     margin-top: 100px;
   }
+
   body {
     background-color: lightgray;
   }
 </style>
 
 <body>
-<div class="mapid"></div>
-<div class="nav"></div>
+  <div class="mapid"></div>
+  <div class="nav"></div>
+  <div id="status_message"></div>
   <div>
+    <div>Choose a name for your model:</div> <input type="text" id="model_name">
     <p id="demo1">Drag and drop your pictures here to create your very own 3D model!</p>
   </div>
   <!-- form tag will interfere with xmlhttprequest if action not exact url as from xmlhttp call-->
-  <!-- <form class="box" method="post" action="https://localhost:8080/meshroom-pipeline" enctype="multipart/form-data"> -->
+  <!-- <form class="box" method="post" action="https://localhost:8080/pipeline/start" enctype="multipart/form-data"> -->
   <label class="box__input">
-    <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected"
-      multiple accept="image/png, image/jpeg />
+    <input class="box__file btn btn--azure" type="file" name="files[]" id="file"
+      data-multiple-caption="{count} files selected" multiple accept="image/png, image/jpeg />
       <label for=" file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
-    <button class="box__button" id='upload_images' type="submit">Upload</button><span id="progress_container"><progress
-        id="progress" min="0" max="100" value="0">0</progress></span>
-    <div id="status_message"></div>
+  <button class="box__button btn btn--azure" id='upload_images' type="submit">Upload</button><span
+    id="progress_container"><progress id="progress" min="0" max="100" value="0">0</progress></span>
+  <div id="status_message"></div>
 
-    <div class="box__uploading">Uploading…</div>
-    <div class="box__success">Done!</div>
-    <div class="box__error">Error! <span></span>.</div>
-    <!-- </form> -->
-    <div id="model_viewer_container"></div>
-<footer style="position: absolute; bottom: 0; width: 100%"></footer>
+  <div id="errorMessage" class="error" style="color: #ff0000"></div>
+
+  <div class="box__uploading">Uploading…</div>
+  <div class="box__success">Done!</div>
+  <div class="box__error">Error! <span></span>.</div>
+  <!-- </form> -->
+  <div id="model_viewer_container"></div>
+  <footer style="position: absolute; bottom: 0; width: 100%"></footer>
 </body>
 <script type="text/javascript">
   $(function () {
@@ -55,9 +66,31 @@
   const server = 'https://localhost:8080/'
   const message_body = document.getElementById("status_message");
 
-  // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
-  function sendPhotos() {
+  document.getElementById('errorMessage').style.display = 'none';
 
+  const params = new URLSearchParams(document.location.search);
+  const userId = params.get('userId');
+  if (userId == null) {
+    document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
+    document.getElementById('errorMessage').style.display = 'inline'
+  }
+
+  let creation_ongoing;
+  // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
+  async function sendPhotos() {
+    const model_name = document.getElementById("model_name").value;
+    console.log(model_name);
+    if (!model_name) {
+      document.getElementById("status_message").innerText = "Please provide a name for the model.";
+      return;
+    } else if (creation_ongoing) {
+      document.getElementById("status_message").innerText = "3D creation already in progress. PLease wait till finished.";
+      return;
+    }
+    console.log(userId);
+    const response = await checkModelNameExists(model_name);
+    console.log(response + " after await");
+    creation_ongoing = true;
     let files = document.getElementById("file").files;
     let image_count = files.length;
     let formData = new FormData();
@@ -71,10 +104,11 @@
         console.log(xhr.responseText);
         const res = JSON.parse(xhr.response);
         message_body.innerText = res.response;
-        startLongPolling(res.request_id);
+        startLongPolling(userId, model_name);
       }
     };
-    xhr.open("POST", 'https://localhost:8080/meshroom-pipeline/?images=' + image_count);
+    xhr.open("POST", 'https://localhost:8080/pipeline/start/?images=' + image_count + '&userId=' + userId
+     + '&modelName=' + model_name);
     xhr.send(formData);
 
     xhr.upload.onprogress = function (event) {
@@ -90,12 +124,61 @@
     };
   }
 
+  function checkModelNameExists(model_name) {
+    return new Promise(function (resolve, reject) {
+      let xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 422) {
+          console.log(xhr.response);
+          message_body.innerText = xhr.responseText;
+          reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+          // user already has model with the input model name
+        } else if (this.readyState == 4 && this.status == 409) {
+          console.log(xhr.responseText);
+          message_body.innerText = xhr.responseText;
+          reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+        } else if (this.readyState == 4 && this.status == 201) {
+          console.log(xhr.responseText);
+          message_body.innerText = "Model was created successfully! Here is the result:";
+          resolve(xhr.response);
+        } 
+      };
+      xhr.open("POST", 'https://localhost:3000/models/add-model');
+      xhr.setRequestHeader("Content-type", "application/json");
+      const body = JSON.stringify({
+        userId: userId,
+        modelName: model_name,
+        src: 'https://localhost:3000/saved-models/'+ userId + '/' + model_name
+      });
+      xhr.send(body);
+    })
+
+    // fetch('/models/add-model', {
+    //   method: 'post',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     userId: userId
+    //   })
+    // }).then(response => response.json())
+    //   .then(data => {
+    //     console.log(data);
+
+    //   })
+
+  }
+
   document.getElementById('upload_images').addEventListener('click', () => {
     sendPhotos();
   });
 
   // continous to ask/poll for ready rendered 3D model with given id every 2 seconds if not finished yet
-  function startLongPolling(model_id) {
+  function startLongPolling(userId, modelName) {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 404) {
@@ -104,13 +187,14 @@
       } else if (this.readyState == 4 && this.status == 200) {
         console.log(xhr.responseText);
         message_body.innerText = xhr.responseText;
-        setTimeout(() => { startLongPolling(model_id) }, 2000);
+        setTimeout(() => { startLongPolling(userId, modelName) }, 2000);
       } else if (this.readyState == 4 && this.status == 201) {
         console.log(xhr.responseText);
         message_body.innerText = "Model was created successfully! Here is the result:";
-        // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/meshroom-pipeline/?id=' + model_id)
-        
-        const model_src = 'https://localhost:8080/meshroom-pipeline-model/?id=' + model_id;
+        creation_ongoing = false;
+        // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/pipeline/start/?id=' + model_id)
+
+        const model_src = 'https://localhost:3000/saved-models/' + userId + '/' + modelName + '/' + modelName + '.glb';
         document.getElementById("model_viewer_container").innerHTML =
           `<model-viewer src="` + model_src + `"    
               ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
@@ -122,7 +206,7 @@
         </model-viewer>`
       }
     };
-    xhr.open("GET", 'https://localhost:8080/meshroom-pipeline/?id=' + model_id);
+    xhr.open("GET", 'https://localhost:8080/pipeline/model-status/?userId=' + userId + '&modelName=' + modelName);
     xhr.send();
   }
 
@@ -158,6 +242,147 @@
 
   #status_message {
     padding: 10px;
+    color: #ff0000;
+  }
+
+  .annotation {
+    width: auto;
+    background-color: #888888;
+    position: absolute;
+    transform: translate(10px, 10px);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: left;
+  }
+
+  .modelblock {
+    width: 80vw;
+    height: 80vh;
+    margin: 10vh 0px 0px 0px;
+  }
+
+  .formblock {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    background-color: #f7f7f7;
+  }
+
+  .center {
+    display: flex;
+    justify-content: center;
+
+  }
+
+  .errorInput {
+    outline: none !important;
+    box-shadow: 0 1rem 2rem rgba(red, .1) !important;
+    border-bottom: 3px solid red !important;
+  }
+
+  .modelNameText:focus {
+    outline: none;
+    box-shadow: 0 1rem 2rem rgba(black, .1);
+    border-bottom: 3px solid grey;
+  }
+
+  input[type=text],
+  input[type=number],
+  select,
+  .info-text {
+    width: 80%;
+    padding: 12px 20px;
+    margin: 15px 10% 15px 10%;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  .marginTop {
+    margin-top: 15px;
+  }
+
+  .marginBottom {
+    margin-top: 15px;
+  }
+
+
+  .btn {
+    /* copy elemet and put is behind. after is treated as child of btn*/
+  }
+
+  .btn,
+  .btn:link,
+  .btn:visited {
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 1rem 1rem;
+    display: inline-block;
+    border-radius: 10rem;
+    /* All are able to be animetated as shorthand */
+    transition: all .2s;
+    position: relative;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    transform: translateY(-0.3rem);
+    /* Adding shadow x y blur */
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+    /* Adding styles to the after state on hover */
+  }
+
+  .btn:hover::after {
+    transform: scaleX(1.4) scaleY(1.6);
+    opacity: 0;
+  }
+
+  .btn:active,
+  .btn:focus {
+    outline: none;
+    transform: translateY(-0.1rem);
+    /* Active shadow: clicked by the user */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+  }
+
+  .btn--azure {
+    background-color: rgb(197 216 232);
+    color: rgb(97 93 93);
+  }
+
+  .btn--azure::after {
+    background-color: #a0cbed;
+  }
+
+  .btn::after {
+    /* Have to have content and display */
+    content: "";
+    display: inline-block;
+    /* Covering the whole parent element and behind it */
+    height: 100%;
+    width: 100%;
+    border-radius: 10rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    transition: all .4s;
+  }
+
+  .btn--animated {
+    /* Animation duration funciton delay */
+    animation: moveInBottom .5s ease-out 0.75s;
+    /* Automaticlly apply the styles of the 0% in the keyframe before animation starts - hides the bottom when it waits with the delay property  */
+    animation-fill-mode: backwards;
+  }
+
+  .sectionName {
+    padding: 12px 20px;
+    margin-top: 0px;
+    margin-left: 15px;
+    margin-bottom: -10px;
   }
 </style>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
