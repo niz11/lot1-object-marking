@@ -71,7 +71,7 @@
         chosenModel = model;
         document.getElementById("alt").value = model.alt;
         if (model.marker) {
-            markerId = +model.marker.id;
+            markerId = +model.marker.markerId;
         }
 
     }
@@ -107,7 +107,8 @@
 
         let markerImage = new cv2.Mat();
         let dictionary = new cv2.aruco_Dictionary(cv2.DICT_4X4_50);
-        console.log(dictionary);
+        console.log(chosenModel);
+        console.log(markerId);
         dictionary.drawMarker(markerId, 200, markerImage, 1);
         cv2.imshow("canvas", markerImage);
         markerImage.delete(); dictionary.delete();

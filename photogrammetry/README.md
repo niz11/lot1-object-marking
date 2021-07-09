@@ -16,7 +16,7 @@ Dockerized photogrammetry pipeline based on Meshroom (Version 2021.1.0): https:/
 - docker
 - docker-compose
 - official [NVIDIA drivers](https://www.nvidia.com/en-us/drivers/unix/) >= 361.93 (maybe older versions work as well)
-- ([NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)) <- not sure if it's really necessary
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) <- almost sure it's really necessary
 
    nvidia-smi must be available
  
@@ -42,6 +42,11 @@ docker-compose up -d
 ```bash
 docker build -t ahoreis/photogrammetry .  # note the "."
 docker-compose up -d
+```
+
+NOTE: On Windows you may experience the error: /bin/bash^M bad interpreter. In this case you have to download the photogrammetry script directly from github to make it work:
+```
+   docker exec photogrammetry curl -L https://raw.githubusercontent.com/niz11/lot1-object-marking/master/photogrammetry/photogrammetry > /bin/photogrammetry
 ```
 
 ## Usage
