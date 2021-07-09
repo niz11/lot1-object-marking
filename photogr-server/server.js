@@ -1,23 +1,23 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs-extra');
-const util = require('util');
+const util = require('util'); // promisifying functions
 const https = require('https');
-const cors = require('cors');
-const busboy = require('connect-busboy');  // Middleware to handle the file upload https://github.com/mscdex/connect-busboy
+// const cors = require('cors');
+const busboy = require('connect-busboy'); // Middleware to handle the image upload https://github.com/mscdex/connect-busboy
 const obj2gltf = require('obj2gltf'); // converting .obj to .gltf/.glb
+const shell = require('shelljs'); // to run commands on the shell for the meshroom-docker-container
+const fetch = require('node-fetch'); // library for http calls --> newer than 'require'-module
+const FormData = require('form-data');
+
 const app = express();
 const port = 8080;
 
-// skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
-const testing = false;
-
-// app.use(cors());
-// app.options('*', cors());
-// var session = require('express-session');
-
-// contains current 3D-model-creation-tasks in progress from meshroom
-let current_modelling_processes = new Map();
+const bodyParser = require('body-parser');
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/json
+app.use(bodyParser.json());
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -32,41 +32,51 @@ app.use(busboy({
   highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 })); // Insert the busboy middle-ware
 
-let uploadPath = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/images'); // Register the upload path
-fs.ensureDir(uploadPath); // Make sure that he upload path exits
-
-
-// REST interface
+// default path
 app.get('/', function (req, res) {
   console.log('GET request to the homepage');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-// path to request the finished 3D model with given id
-app.get('/meshroom-pipeline-model', function (req, res) {
-  const model_id = req.query.id;
-  console.log('GET request to the 3D object-model.glb with id: ' + model_id);
-  res.sendFile(path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb'));
-});
+
+
+// skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
+const testing = true;
+// true activates local 3D-modelling pipeline using a node-child-process and running meshroom.exe inside
+// false will connect with local docker-container that runs meshroom and has far more implemented configs
+const local_pipeline = true;
+
+// contains current 3D-model-creation-tasks in progress running through meshroom.exe
+let current_modelling_processes = new Map();
+
+let inputPath = '';
+if (local_pipeline) inputPath = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/user/'); // Register the upload path
+else inputPath = '../photogrammetry/img_in/user';
+fs.ensureDir(inputPath); // Make sure that he upload path exits
 
 // path to request whether a 3D model generation is already finished
-app.get('/meshroom-pipeline', function (req, res) {
-  const model_id = req.query.id;
-  console.log('GET request to the 3D object with id: ' + model_id);
-  if (current_modelling_processes.has(model_id.toString())) {
+app.get('/pipeline/model-status', function (req, res) {
+  const userId = req.query.userId;
+  const modelName = req.query.modelName;
+  const request_id = userId + '-' + modelName;
+  console.log('GET request to the 3D object with id: ' + request_id);
+  if (current_modelling_processes.has(request_id.toString())) {
     res.status(200);
     res.send("Modelling still in progress, this can take a few minutes.");
   } else {
     try {
-      const output_path = path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb');
+      let output_path;
+      if (local_pipeline) /* output_path = path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb'); */
+        output_path = '../src/webserver/static/saved-models/' + userId + '/' + modelName + '/' + modelName + '.glb';
+      else output_path = ''
       if (fs.existsSync(output_path)) {
-        console.log("Directory exists.");
+        console.log("Requested model exists in directory.");
         res.status(201);
-        // res.sendFile(output_path + "/texturedMesh.obj");
-        res.send("3D model created! Ready to be fetched under ID: " + model_id);
+        // res.sendFile(output_path + "/texturedMesh.obj"); // for now frontend requests webserver directory for model from model-viewer html-element
+        res.send("3D model created! Ready to be fetched under ID: " + request_id);
       } else {
-        console.log("Directory does not exist.");
+        console.log("Requested model does not exist in directory.");
         res.status(404);
-        res.send("Model with " + model_id + " not found. Please check model-ID.");
+        res.send("Model with " + request_id + " not found. Please check model-ID.");
       }
     } catch (e) {
       console.log("An error occurred.");
@@ -75,12 +85,19 @@ app.get('/meshroom-pipeline', function (req, res) {
 });
 
 // path to post the images and trigger the pipeline
-app.post('/meshroom-pipeline', async function (req, res) {
-  let image_count = req.query.images;
-  const request_id = Math.round(Math.random() * 10_000_000);
-  const upload_folder = uploadPath + request_id;
+app.post('/pipeline/start', async function (req, res) {
+  const image_count = req.query.images;
+  const userId = req.query.userId;
+  const modelName = req.query.modelName;
+  const request_id = userId + '-' + modelName;
+
+  const upload_folder_user = inputPath + userId;
+  const upload_folder_model = inputPath + userId + '/' + modelName + '/';
   console.log('POST request to the pipeline with ' + image_count + ' images');
-  await fs.mkdir(upload_folder);
+  if (!fs.ensureDir(upload_folder_user)) {
+    await fs.mkdir(upload_folder_user);
+  }
+  await fs.mkdir(upload_folder_model);
   console.log("New folder created!");
   let received_images = 0; // number of images fully received
 
@@ -89,7 +106,7 @@ app.post('/meshroom-pipeline', async function (req, res) {
     console.log(`Upload of '${filename}' started`);
 
     // Create a write stream of the new file
-    const fstream = fs.createWriteStream(path.join(upload_folder, filename));
+    const fstream = fs.createWriteStream(path.join(upload_folder_model, filename));
     // Pipe it trough
     file.pipe(fstream);
 
@@ -109,50 +126,79 @@ app.post('/meshroom-pipeline', async function (req, res) {
         }
         // response is send to tell frontend of successfull initiation of the 3D-modelling-pipeline
         res.json(response);
-        // waits until meshromm finished rendering 
-        await initiateMeshroomPipeline(request_id);
-        const options = {
-          binary: true
+        
+        if (local_pipeline) {
+          current_modelling_processes.set(request_id.toString(), true);
+          // waits until meshromm finished rendering 
+          await initiateMeshroomPipeline(userId, modelName, upload_folder_model);
+          const options = {
+            binary: true
+          }
+          let model_output = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId + '/' + modelName);
+          // let model_output = '../src/webserver/static/saved-models/' + req.query.userId + '/' + req.query.modelName;
+
+          // after rendering, convert .obj to .glb with node module (obj2gltf)
+          obj2gltf(model_output + '/texturedMesh.obj', options)
+            .then(async function (glb) {
+              fs.writeFileSync(model_output + '/' + modelName + '.glb', glb);
+              // after .glb file got written do disk, the model_id will be removed from the current_working_buffer 
+              current_modelling_processes.delete(request_id.toString());
+              console.log('Pipeline Callback finished! \n Ready to send 3D-model-file to requester with output_file_id: ' + request_id);
+              // send model(.glb) with user/meta data to the main-webserver, where the .glb is stored locally in directory (temp solution)
+              sendModelFile(userId, modelName);
+            });
+        } else {
+          initiateDockerPipeline(userId, modelName, request_id);
+          // sendModelFile(userId, modelName);
         }
-        let model_output = path.join(__dirname, 'Meshroom-AliceVision/output/output' + request_id);
-        // convert .obj to .glb with node module (obj2gltf)
-        obj2gltf(model_output + '/texturedMesh.obj', options)
-          .then(async function (glb) {
-            fs.writeFileSync(model_output + '/model' + request_id + '.glb', glb);
-            // after .glb file got written do disk, the model_id will be removed from the current_working_buffer 
-            current_modelling_processes.delete(request_id.toString());
-            console.log('Pipeline Callback finished! \n Ready to send 3D-model-file to requester with output_file_id: ' + request_id);
-          });
       }
     });
   });
 });
 
-app.post('/', function (req, res) {
-  console.log('POST request to the homepage');
-  res.send('POST request to the homepage');
-});
+// sends .glb file to webserver, where the file is saved locally in directory
+function sendModelFile(userId, modelName) {
+  process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0; // allows calls to self-certificated https servers
+  console.log("Sending .glb file to main server");
+
+  const input = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId + '/' + modelName + '/' + modelName + '.glb');
+
+  const form = new FormData();
+  form.append('userId', userId);
+  form.append('modelName', modelName);
+  form.append('model', fs.createReadStream(input));
+
+  fetch('https://localhost:3000/models/upload-model-file', { method: 'POST', body: form })
+    .then(res => res.json())
+    .then(json => console.log(json))
+    .then(() => process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 1);
+}
 
 // start node-child-process to run the meshroom-pipeline asynchronously
-async function initiateMeshroomPipeline(request_id) {
+async function initiateMeshroomPipeline(userId, modelName, upload_folder_model) {
   console.log('3D model computation in progress...');
-  const meshrom_exe_path = path.join(__dirname, 'Meshroom-AliceVision\\Pipeline_2021\\Meshroom-2021.1.0\\meshroom_batch.exe');
+  const meshrom_exe_path = path.join(__dirname, 'Meshroom-AliceVision/Pipeline_2021/Meshroom-2021.1.0/meshroom_batch.exe');
   let input_path;
-  // meshroom will scip building 3D model from scratch, because image-signatures already known --> safes time
+  // if testing, meshroom will scip building 3D model from scratch, because image-signatures already known --> safes time
   if (testing) {
     // input already known to meshromm-cache --> skipping rendering-time
-    input_path = path.join(__dirname, 'Meshroom-AliceVision\\input\\dataset_monstree-master\\mini3');
+    input_path = path.join(__dirname, 'Meshroom-AliceVision/input/dataset_monstree-master/mini3');
   } else {
     // real input path with freshly send images from frontend
-    input_path = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/images' + request_id);
+    input_path = upload_folder_model;
   }
-  // const output_path = path.join(__dirname, 'Meshroom-AliceVision\\output\\output' + (output_dir_length + 1));
-  const output_path = path.join(__dirname, 'Meshroom-AliceVision\\output\\output' + request_id);
+
+  const output_path_user = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId);
+  const output_path_model = output_path_user + '/' + modelName;
+  if (!fs.ensureDir(output_path_user)) {
+    await fs.mkdir(output_path_user);
+  }
+  await fs.mkdir(output_path_model);
 
   const execFile = util.promisify(require('child_process').execFile);
   async function startMeshroom() {
     try {
-      const { stdout, stderr } = await execFile(meshrom_exe_path, ['--input', input_path, '--output', output_path]);
+      const { stdout, stderr } = await execFile(meshrom_exe_path, ['--input', input_path, '--output', output_path_model]);
       console.log('stdout:', stdout);
       console.log('stderr:', stderr);
     } catch (err) {
@@ -160,6 +206,28 @@ async function initiateMeshroomPipeline(request_id) {
     }
   }
   return startMeshroom();
+}
+
+function initiateDockerPipeline(userId, modelName, request_id) {
+  // skips the steps that use GPU --> for preview option, or if GPU is not available/doesn't supported, skips last pipeline steps
+  const withoutGPU_default_command = 'docker exec photogrammetry photogrammetry -u ' + userId + ' ' + modelName + ' preview.mg' // use until nvidia gpu bug fixed
+  const withGPU_default_command = 'docker exec photogrammetry photogrammetry -u username mini3'
+  // -p is preview option --> saves prewiew in preview folder in user-folder next to the finished .glb-file which pipeline steps also get generated
+  const withoutGPU_full_command = 'docker exec photogrammetry photogrammetry -u username -p -c mini3' // fehler wegen nvidia gpu on windows
+  const working = 'docker exec photogrammetry photogrammetry mini3 preview.mg'
+  // -c --> compressed 
+  // extra pipeline mit graphen am ende um z.b. background-noise zu entfernen kommt noch --> am ende des command einfügen dann
+
+  console.log("Start docker-pipeline");
+  if (shell.exec(working).code !== 0) {
+    shell.echo('Error: Git commit failed');
+    shell.exit(1);
+  }
+  console.log("docker pipeline finished");
+  current_modelling_processes.delete(request_id.toString());
+  // console.log("sending files")
+  sendModelFile(userId, modelName);
+
 }
 
 // for https
