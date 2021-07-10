@@ -40,17 +40,17 @@ app.get('/', function (req, res) {
 
 
 // skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
-const testing = true;
+const testing = false;
 // true activates local 3D-modelling pipeline using a node-child-process and running meshroom.exe inside
 // false will connect with local docker-container that runs meshroom and has far more implemented configs
-const local_pipeline = true;
+const local_pipeline = false;
 
 // contains current 3D-model-creation-tasks in progress running through meshroom.exe
 let current_modelling_processes = new Map();
 
 let inputPath = '';
 if (local_pipeline) inputPath = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/user/'); // Register the upload path
-else inputPath = '../photogrammetry/img_in/user';
+else inputPath = '../photogrammetry/img_in/';
 fs.ensureDir(inputPath); // Make sure that he upload path exits
 
 // path to request whether a 3D model generation is already finished
@@ -67,12 +67,12 @@ app.get('/pipeline/model-status', function (req, res) {
       let output_path;
       if (local_pipeline) /* output_path = path.join(__dirname, 'Meshroom-AliceVision/output/output' + model_id + '/model' + model_id + '.glb'); */
         output_path = '../src/webserver/static/saved-models/user/' + userId + '/' + modelName + '/' + modelName + '.glb';
-      else output_path = ''
+      else output_path = '../photogrammetry/model/' + userId + '/' + modelName + '/model.glb';
       if (fs.existsSync(output_path)) {
         console.log("Requested model exists in directory.");
         res.status(201);
         // res.sendFile(output_path + "/texturedMesh.obj"); // for now frontend requests webserver directory for model from model-viewer html-element
-        res.send("3D model created! Ready to be fetched under ID: " + request_id);
+        res.send("3D model created and saved in database! Ready to be fetched under ID: " + request_id);
       } else {
         console.log("Requested model does not exist in directory.");
         res.status(404);
@@ -102,6 +102,9 @@ app.post('/pipeline/start', async function (req, res) {
   let received_images = 0; // number of images fully received
 
   req.pipe(req.busboy); // Pipe it trough busboy
+  req.busboy.on('field', function (fieldname, val) {
+    req.body[fieldname] = val;
+  });
   req.busboy.on('file', (fieldname, file, filename) => {
     console.log(`Upload of '${filename}' started`);
 
@@ -117,6 +120,9 @@ app.post('/pipeline/start', async function (req, res) {
       console.log(`Upload of '${filename}' finished`);
       // res.redirect('back');
       if (received_images == image_count) {
+        const compressed = JSON.parse(req.body.compressed);
+        const preview = JSON.parse(req.body.preview);
+
         console.log("All images received!");
         current_modelling_processes.set(request_id.toString(), true);
         const response = {
@@ -126,7 +132,7 @@ app.post('/pipeline/start', async function (req, res) {
         }
         // response is send to tell frontend of successfull initiation of the 3D-modelling-pipeline
         res.json(response);
-        
+
         if (local_pipeline) {
           current_modelling_processes.set(request_id.toString(), true);
           // waits until meshromm finished rendering 
@@ -148,7 +154,7 @@ app.post('/pipeline/start', async function (req, res) {
               sendModelFile(userId, modelName, request_id);
             });
         } else {
-          initiateDockerPipeline(userId, modelName, request_id);
+          initiateDockerPipeline(userId, modelName, request_id, compressed, preview);
           // sendModelFile(userId, modelName);
         }
       }
@@ -160,8 +166,14 @@ app.post('/pipeline/start', async function (req, res) {
 function sendModelFile(userId, modelName, request_id) {
   process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0; // allows calls to self-certificated https servers
   console.log("Sending .glb file to main server");
-
-  const input = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId + '/' + modelName + '/' + modelName + '.glb');
+  let input;
+  if (local_pipeline) {
+    input = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId + '/' + modelName + '/' + modelName + '.glb');
+  } else {
+    input = '../photogrammetry/model/' + userId + '/' + modelName + '/model.glb';
+  }
+  console.log(input)
+  // console.log(fs.ensureDirSync(input))
 
   const form = new FormData();
   form.append('userId', userId);
@@ -179,7 +191,8 @@ function sendModelFile(userId, modelName, request_id) {
 
 // start node-child-process to run the meshroom-pipeline asynchronously
 async function initiateMeshroomPipeline(userId, modelName, upload_folder_model) {
-  console.log('3D model computation in progress...');
+  console.log('Local 3D model computation in progress...');
+
   const meshrom_exe_path = path.join(__dirname, 'Meshroom-AliceVision/Pipeline_2021/Meshroom-2021.1.0/meshroom_batch.exe');
   let input_path;
   // if testing, meshroom will scip building 3D model from scratch, because image-signatures already known --> safes time
@@ -211,26 +224,29 @@ async function initiateMeshroomPipeline(userId, modelName, upload_folder_model) 
   return startMeshroom();
 }
 
-function initiateDockerPipeline(userId, modelName, request_id) {
+function initiateDockerPipeline(userId, modelName, request_id, compressed, preview) {
+  console.log('Docker 3D model computation in progress... Parameter: c=' + compressed + ', p=' + preview);
+
+  let options = ''
+  // -c --> compresses images before pipeline start
+  if (compressed) options += ' -c'
+  // -p is preview option --> saves preview in [user]/[modelname], also generates complete .glb-file which went through whole pipeline
+  if (preview) options += ' -p'
   // skips the steps that use GPU --> for preview option, or if GPU is not available/doesn't supported, skips last pipeline steps
-  const withoutGPU_default_command = 'docker exec photogrammetry photogrammetry -u ' + userId + ' ' + modelName + ' preview.mg' // use until nvidia gpu bug fixed
-  const withGPU_default_command = 'docker exec photogrammetry photogrammetry -u username mini3'
-  // -p is preview option --> saves prewiew in preview folder in user-folder next to the finished .glb-file which pipeline steps also get generated
-  const withoutGPU_full_command = 'docker exec photogrammetry photogrammetry -u username -p -c mini3' // fehler wegen nvidia gpu on windows
-  const working = 'docker exec photogrammetry photogrammetry mini3 preview.mg'
-  // -c --> compressed 
-  // extra pipeline mit graphen am ende um z.b. background-noise zu entfernen kommt noch --> am ende des command einfügen dann
+  // having -p option and preview.mg at the same time, doesn't make sense, because the fully generated model will be the same as the firstly generated preview-model
+  const command_withoutGPU = 'docker exec photogrammetry photogrammetry' + options + ' -u ' + userId + ' ' + modelName + ' preview.mg' // use until nvidia gpu bug fixed (fehler wegen nvidia gpu on windows)
+  const command_withGPU = 'docker exec photogrammetry photogrammetry -u ' + userId + ' ' + modelName;
+
+  // TODO: extra pipeline mit graphen am ende um z.b. background-noise zu entfernen kommt noch --> am ende des command einfügen dann
 
   console.log("Start docker-pipeline");
-  if (shell.exec(working).code !== 0) {
+  if (shell.exec(command_withoutGPU).code !== 0) {
     shell.echo('Error: Git commit failed');
     shell.exit(1);
   }
   console.log("docker pipeline finished");
-  current_modelling_processes.delete(request_id.toString());
   // console.log("sending files")
-  sendModelFile(userId, modelName);
-
+  sendModelFile(userId, modelName, request_id);
 }
 
 // for https

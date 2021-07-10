@@ -37,6 +37,14 @@
     <div>Choose a name for your model:</div> <input type="text" id="model_name">
     <p id="demo1">Drag and drop your pictures here to create your very own 3D model!</p>
   </div>
+
+  <form>
+    <div>Select optinal parameters for 3D-creation process</div>
+    <input type="checkbox" id="compressed" name="compressed">
+    <label for="compressed"> Compressed version of 3D-model</label><br>
+    <input type="checkbox" id="preview" name="preview">
+    <label for="preview"> Show a preview of the model to save time when recalculating is necessary</label><br>
+  </form>
   <!-- form tag will interfere with xmlhttprequest if action not exact url as from xmlhttp call-->
   <!-- <form class="box" method="post" action="https://localhost:8080/pipeline/start" enctype="multipart/form-data"> -->
   <label class="box__input">
@@ -78,8 +86,11 @@
   let creation_ongoing;
   // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
   async function sendPhotos() {
+    message_body.innerText = '';
+    const compressed = document.getElementById("compressed").checked;
+    const preview = document.getElementById("preview").checked;
     const model_name = document.getElementById("model_name").value;
-    console.log(model_name);
+
     if (!model_name) {
       document.getElementById("status_message").innerText = "Please provide a name for the model.";
       return;
@@ -87,13 +98,15 @@
       document.getElementById("status_message").innerText = "3D creation already in progress. PLease wait till finished.";
       return;
     }
-    console.log(userId);
+
     const response = await checkModelNameExists(model_name);
-    console.log(response + " after await");
     creation_ongoing = true;
     let files = document.getElementById("file").files;
     let image_count = files.length;
     let formData = new FormData();
+    formData.append('compressed', JSON.stringify(compressed));
+    formData.append('preview', JSON.stringify(preview));
+
     for (var i = 0; i < files.length; i++) {
       formData.append('files', files[i]);
     }
@@ -187,7 +200,7 @@
       } else if (this.readyState == 4 && this.status == 200) {
         console.log(xhr.responseText);
         message_body.innerText = xhr.responseText;
-        setTimeout(() => { startLongPolling(userId, modelName) }, 2000);
+        setTimeout(() => { startLongPolling(userId, modelName) }, 4000);
       } else if (this.readyState == 4 && this.status == 201) {
         console.log(xhr.responseText);
         message_body.innerText = "Model was created successfully! Here is the result:";
