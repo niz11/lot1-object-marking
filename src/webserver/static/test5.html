@@ -27,6 +27,21 @@
         position: fixed;
     }
 
+    button.newScan{
+        width: 80px;
+        height: 80px;
+        transform: translate(-40px, -40px);
+        border-radius: 40px;
+        background-color: #888888;
+        color: #000000;
+        font-weight: bold;
+        font-size: 20px;
+        visibility: hidden;
+        position: fixed;
+        left: 60px;
+        bottom: 60px;
+    }
+
     div.tb{
         border-radius: 5px;
         background: #00000000;
@@ -95,6 +110,8 @@
         <div id="rz">    2. Point the camera to the middle of the marker until the box is green </div>
     </div>
 
+    <button class="newScan" id="newScan" onclick="newScan()">X</button>
+
 </div>
 <button onclick="activateXR()" >Start Hello WebXR</button>
 <script type = module>
@@ -149,6 +166,7 @@
 
 
     let fCounter = 0;
+    let nfCounter = 0;
     let box = null;
 
     const arjsW = 360;
@@ -162,45 +180,114 @@
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
     directionalLight.position.set(10, 15, 10);
-    scene.add(directionalLight);
 
-    let dbModel;
-    fetch(`/models`)
-        .then(response => response.json())
-        .then(data => {
-            const model = data.filter(model => model.modelName === 'FishBox');
-            dbModel = model[0];
-            loadArModel();
-        });
+    const options = {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 0
+    };
+
+
+
+
+    let res = await fetch(`/models`);
+    let models = await res.json();
+
+
+    let groupModels = null;
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(onGetGeoPos, onErrorGeoPos, options);
+    } else {
+        document.getElementById("ax").innerHTML = "Please Enable Location";
+    }
+
+    function onGetGeoPos(pos){
+        const usersLatitude = pos.coords.latitude;
+        const usersLongitude = pos.coords.longitude;
+        const radius = 500;
+
+        let nearModels = models.filter(
+            (model) => model.location &&
+                getDistance(
+                    model.location.latitude,
+                    model.location.longitude,
+                    usersLatitude,
+                    usersLongitude
+                ) < radius
+        );
+
+        if (nearModels.length > 0) {
+            groupModels = models.filter( (model) => model.marker && model.marker.group === nearModels[0].marker.group);
+        }
+        else {
+            document.getElementById('ay').innerHTML = 'No models nearby';
+        }
+    }
+
+    function onErrorGeoPos(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+
+
+    function getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude) {
+        const dLat = (usersLatitude - objectLatitude) * Math.PI / 180;
+        const dLon = (usersLongitude - objectLongitude) * Math.PI / 180;
+        const a = 0.5 - Math.cos(dLat) / 2 + Math.cos(objectLatitude * Math.PI / 180) * Math.cos(usersLatitude * Math.PI / 180) * (1 - Math.cos(dLon)) / 2;
+        return Math.round(6371000 * 2 * Math.asin(Math.sqrt(a)));
+    }
+
+
 
     let arModel;
+    let arId;
+    let arFound = false;
 
     let perf = performance.now();
     let perf2 = performance.now();
 
-    function loadArModel() {
-        arModel = new ArModel(dbModel);
-        let arHs1 = new Hotspot();
-        arHs1.rPosition = new THREE.Vector3(-0.06, 0, 0);
-        arHs1.text = "Left"
-        arHs1.updateDOMElement();
+    function loadArModel(id, onSuccess) {
+        let dbModel = models.filter(m => m.marker.markerId === id)[0];
+        let arModelTemp = new ArModel(dbModel);
 
-        let arHs2 = new Hotspot();
-        arHs2.rPosition = new THREE.Vector3(+0.06, 0, 0);
-        arHs2.text = "Right"
-        arHs2.updateDOMElement();
-
-        let arHs3 = new Hotspot();
-        arHs3.rPosition = new THREE.Vector3(0, +0.09, 0);
-        arHs3.text = "Fish"
-        arHs3.updateDOMElement();
-
-        arModel.hotspots.push(arHs1, arHs2);
-
-        arModel.loadModelFromSource(scene, function () {
-            arModel.computeOffsetFromMesh();
+        arModelTemp.loadModelFromSource(scene, function () {
+            arModelTemp.computeOffsetFromMesh();
+            arModel = arModelTemp;
+            onSuccess();
         })
     }
+
+
+    function newScan(){
+        document.getElementById('newScan').style.visibility = 'hidden';
+        arId = -1;
+        arFound = false;
+
+        clearThree(scene);
+        arModel = null;
+        if(objAnchor) objAnchor.delete();
+        objAnchor = null;
+    }
+
+    function clearThree(obj){
+        while(obj.children.length > 0){
+            clearThree(obj.children[0]);
+            obj.remove(obj.children[0]);
+        }
+        if(obj.geometry) obj.geometry.dispose();
+
+        if(obj.material){
+            //in case of map, bumpMap, normalMap, envMap ...
+            Object.keys(obj.material).forEach(prop => {
+                if(!obj.material[prop])
+                    return;
+                if(obj.material[prop] !== null && typeof obj.material[prop].dispose === 'function')
+                    obj.material[prop].dispose();
+            })
+            obj.material.dispose();
+        }
+    }
+
 
 
     window.activateXR = async function activateXR() {
@@ -270,13 +357,13 @@
             space: viewerSpace,
             entityTypes : ["plane", "point"],
         });
-        const loader = new THREE.GLTFLoader();
-        let reticle;
-        loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
-            reticle = gltf.scene;
-            reticle.visible = false;
-            scene.add(reticle);
-        });
+        // const loader = new THREE.GLTFLoader();
+        // let reticle;
+        // loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+        //     reticle = gltf.scene;
+        //     reticle.visible = false;
+        //     scene.add(reticle);
+        // });
 
 
         let glBinding = new XRWebGLBinding(session, gl);
@@ -284,7 +371,6 @@
 
         let frameCounter = 0;
 
-        let arrow = null;
 
         worker = new Worker('new/offscreenworker2.js');
 
@@ -302,9 +388,22 @@
                 document.getElementById('bx').innerHTML = 'Markers: ' + markers.length;
                 if (!objAnchor && markers.length > 0) {
 
-                    //TODO: get closest marker
+                    function getXY(m) {
+                        let x = (m.c0.x + m.c1.x + m.c2.x + m.c3.x) / (2 * arjsW) - 1;
+                        let y = (m.c0.y + m.c1.y + m.c2.y + m.c3.y) / (2 * arjsH) - 1;
+                        return {x: x, y: y};
+                    }
+
+                    markers.sort((a, b) => {
+                        let axy = getXY(a);
+                        let bxy = getXY(b)
+                        return axy.x * axy.x + axy.y * axy.y - bxy.x * bxy.x + bxy.y * bxy.y;
+                    })
+
                     let m = markers[0];
 
+                    if (m.id === arId) arFound = true;
+                    arId = m.id;
 
                     document.getElementById('ay').innerHTML = 'c0y: ' + m.c0.y;
                     document.getElementById('az').innerHTML = 'FC: ' + frameCounter++;
@@ -414,13 +513,10 @@
                 camera.matrix.decompose(camPos, camQua, camSca);
 
 
-
-
-
                 renderer.render(arJSScene, arJSScamera);
 
                 const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
-                if (hitTestResults && hitTestResults.length > 0 && false) {
+                if (hitTestResults && hitTestResults.length > 0) {
                     // const hitPose = hitTestResults[0].getPose(referenceSpace);
                     // reticle.visible = false; //TODO: find a way to show that environment is recognized
                     // reticle.matrix.fromArray(hitPose.transform.matrix);
@@ -428,12 +524,15 @@
 
                     const maxCount = 11;
 
-                    if (offset < 0.004 && fCounter < maxCount) {
+                    if (arFound && offset < 0.004 && fCounter < maxCount) {
+                        arFound = false;
                         fCounter += 1;
+                        nfCounter = 0;
                         markerOrientationS.push({rotation: arJSSmesh.rotation, offset: offset});
                     }
-                    else {
+                    else if (!arFound || ++nfCounter > maxCount * 3){
                         fCounter = 0;
+                        nfCounter = 0;
                         markerOrientationS = [];
                     }
 
@@ -445,8 +544,11 @@
 
                         arModel.relativeRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
                         hitTestResults[0].createAnchor().then((anchor) => {
-                            document.getElementById("footer").style.visibility = 'hidden';
-                            objAnchor = anchor;
+                            loadArModel(arId, () => {
+                                document.getElementById("footer").style.visibility = 'hidden';
+                                objAnchor = anchor;
+                            });
+
                         }, (error) => {
                             console.error("Could not create anchor: " + error);
                         });
