@@ -9,7 +9,7 @@
         <div class="collapse navbar-collapse" id="navbar1">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="/">Home</a>
+                    <a class="nav-link" href="javascript:handleUrl('client/client_homepage')">Home</a>
                 </li>
                 <li class="nav-item active">
                     <div class="dropdown">
@@ -17,8 +17,15 @@
                             Services
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item" href="map.html">Map</a>
-                            <a class="dropdown-item" href="test5.html">Start Web XR</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('createModel')">Create Model</a>
+                            <a class="dropdown-item" href="#">Scan your Art work</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('map.html')">Map</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('newAddAnotation')">Add Annotation</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('showModelBasedOnLocation')">Show Model</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('addBox')">Add Box</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('test5')">Start Web XR</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('updateMarker')">Update marker</a>
+                            <a class="dropdown-item" href="javascript:handleUrl('createMarker')">Create marker</a>
                         </div>
                     </div>
                 </li>
@@ -33,9 +40,6 @@
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="#contact">Contact</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="sign_in.html">Login</a>
                 </li>
             </ul>
         </div>

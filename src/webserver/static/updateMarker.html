@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Update AR Marker</title>
+    <script src="public/javascripts/requestHandler.js"></script>
 </head>
 <body>
 <div id="displayblocks">
@@ -32,22 +33,17 @@
 <script>
     const params = new URLSearchParams(document.location.search);
     const userId = params.get('userId');
-
     if (userId == null) document.getElementById('message').innerHTML = 'Need to provide a User-ID: please login';
-
     let jsonData;
     let chosenModel;
     fetch(`/models`)
         .then(response => response.json())
         .then(data => {
             jsonData = data;
-
             data = data.filter(model => model.user === userId);
-
             addModel(data[0])
             console.log(data)
             let select = document.getElementById("modelSelection");
-
             for (const val of data) {
                 let option = document.createElement("option");
                 option.value = val.modelName;
@@ -77,7 +73,6 @@
         }
 
     }
-
     function updateMarker() {
         if (chosenModel) {
             fetch('/models/update-marker', {
