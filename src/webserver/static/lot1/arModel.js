@@ -20,9 +20,10 @@ class Hotspot {
         this.text = dbHotspot.text;
 
         let p = dbHotspot.position.split(" ");
-        this.position.x = +p[0];
-        this.position.y = +p[1];
-        this.position.z = +p[2];
+
+        this.rPosition.x = +p[0];
+        this.rPosition.y = +p[1];
+        this.rPosition.z = +p[2];
 
         let n = dbHotspot.normal.split(" ");
         this.normal.x = +n[0];
@@ -40,7 +41,7 @@ class Hotspot {
         if (!this.domTextBox) {
             this.domTextBox = document.createElement("div");
             this.domTextBox.className = 'tb';
-            this.domTextBox.innerHTML = this.text;
+            this.domTextBox.innerText = this.text;
             root.appendChild(this.domTextBox);
         }
     }
@@ -138,6 +139,7 @@ class ArModel {
         for (let h of databaseModel.hotspots) {
             let hs = new Hotspot();
             hs.fromDB(h);
+            hs.updateDOMElement();
             this.hotspots.push(hs);
         }
     }
@@ -147,14 +149,21 @@ class ArModel {
         let _this = this;
         loader.load(this.src, function (gltf) {
             _this.mesh = gltf.scene;
-            _this.mesh.visible = false;
+            _this.mesh.visible = true;
 
-            for (let c of _this.mesh.children) {
-                c.material.wireframe = true;
-            }
+            // for (let c of _this.mesh.children) {
+            //     c.material.wireframe = true;
+            // }
+
+            // const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+            // const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+            // const cube = new THREE.Mesh( geometry, material );
+
+            // _this.mesh = cube;
 
             scene.add(_this.mesh);
             onLoaded();
+            console.log('loaded gltf');
         });
     }
 

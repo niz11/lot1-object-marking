@@ -178,8 +178,9 @@
     const scene = new THREE.Scene();
     let camera;
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    directionalLight.position.set(10, 15, 10);
+    const directionalLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(directionalLight);
+
 
     const options = {
         enableHighAccuracy: false,
@@ -196,15 +197,15 @@
 
     let groupModels = null;
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(onGetGeoPos, onErrorGeoPos, options);
-    } else {
-        document.getElementById("ax").innerHTML = "Please Enable Location";
-    }
+
 
     function onGetGeoPos(pos){
         const usersLatitude = pos.coords.latitude;
         const usersLongitude = pos.coords.longitude;
+
+        console.log(pos.coords.latitude);
+        console.log(pos.coords.longitude);
+
         const radius = 500;
 
         let nearModels = models.filter(
@@ -242,27 +243,42 @@
     let arModel;
     let arId;
     let arFound = false;
+    let arClose = false;
+
+    let arLoading = false;
 
     let perf = performance.now();
     let perf2 = performance.now();
 
     function loadArModel(id, onSuccess) {
-        let dbModel = models.filter(m => m.marker.markerId === id)[0];
-        let arModelTemp = new ArModel(dbModel);
+        console.log('loadingArModel')
+        if(!groupModels) {
+            console.log("No model nearby");
+        }
+        let dbModel = groupModels.filter(m => m.marker.markerId === id)[0];
+        if (!dbModel) {
+            console.log("No model found with that id");
+            arLoading = false;
+            return;
+        }
+        arModel = new ArModel(dbModel);
 
-        arModelTemp.loadModelFromSource(scene, function () {
-            arModelTemp.computeOffsetFromMesh();
-            arModel = arModelTemp;
+        arModel.loadModelFromSource(scene, function () {
+            // arModel.computeOffsetFromMesh();
+            // arModel = arModelTemp;
             onSuccess();
+            document.getElementById('newScan').style.visibility = 'visible';
+            console.log(arModel);
         })
     }
 
 
-    function newScan(){
+    window.newScan = function newScan(){
         document.getElementById('newScan').style.visibility = 'hidden';
         arId = -1;
+        fCounter = 0;
         arFound = false;
-
+        arLoading = false;
         clearThree(scene);
         arModel = null;
         if(objAnchor) objAnchor.delete();
@@ -291,6 +307,11 @@
 
 
     window.activateXR = async function activateXR() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(onGetGeoPos, onErrorGeoPos, options);
+        } else {
+            document.getElementById("ax").innerHTML = "Please Enable Location";
+        }
         // Set up the WebGLRenderer, which handles rendering to the session's base layer.
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -320,7 +341,7 @@
 
         arJSScene = new THREE.Scene();
 
-        let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+        let ambientLight = new THREE.AmbientLight(0xcccccc, 0.9);
         arJSScene.add(ambientLight);
 
         // arJSScamera = new THREE.OrthographicCamera(-1.0, 1.0, -1.0, 1.0, -10.0, 10.0);
@@ -344,8 +365,19 @@
 
 
 
+        const loader = new THREE.GLTFLoader();
+        let reticle;
+        // loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
+        //     reticle = gltf.scene;
+        //     reticle.visible = true;
+        //     scene.add(reticle);
+        // });
 
-
+        loader.load("./ar/models/FishTest.gltf", function (gltf) {
+            reticle = gltf.scene;
+            reticle.visible = false;
+            scene.add(reticle);
+        });
 
 
 
@@ -405,7 +437,7 @@
                     if (m.id === arId) arFound = true;
                     arId = m.id;
 
-                    document.getElementById('ay').innerHTML = 'c0y: ' + m.c0.y;
+                    document.getElementById('ay').innerHTML = 'mId: ' + arId;
                     document.getElementById('az').innerHTML = 'FC: ' + frameCounter++;
 
                     let posC0 = new THREE.Vector2(arJSScamera.right * ((2 * m.c0.x) / (arjsW) - 1) ,
@@ -431,12 +463,18 @@
 
                     v.normalize();
 
-                    arJSSmesh.rotation.z = v.angle();
+                    arJSSmesh.rotation.z = v.angle() - Math.PI / 2;
 
                     const ratio = arjsW / arjsH;
                     let offset = arJSSmesh.position.x * arJSSmesh.position.x * ratio + arJSSmesh.position.y * arJSSmesh.position.y / ratio ;
-                    if (offset < 0.004)  arJSSmesh.material.color.setRGB(0.0, 1.0, 0.0);
-                    else arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
+                    if (offset < 0.004)  {
+                        arJSSmesh.material.color.setRGB(0.0, 1.0, 0.0);
+                        arClose = true;
+                    }
+                    else {
+                        arJSSmesh.material.color.setRGB(1.0, 0.0, 0.0);
+                        arClose = false;
+                    }
 
                     arJSSmesh.position.x = arJSSmesh.position.x * arJSScamera.right;
                     arJSSmesh.position.y = arJSSmesh.position.y * arJSScamera.bottom;
@@ -497,6 +535,7 @@
                     worker.postMessage({focL: arjsFol, w: arjsW, h: arjsH, imgData: arrBuffer}, [arrBuffer]);
                 }
 
+                renderer.resetState ();
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, session.renderState.baseLayer.framebuffer);
 
@@ -513,40 +552,48 @@
                 camera.matrix.decompose(camPos, camQua, camSca);
 
 
-                renderer.render(arJSScene, arJSScamera);
+                if (!arLoading) renderer.render(arJSScene, arJSScamera);
 
                 const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
-                if (hitTestResults && hitTestResults.length > 0) {
-                    // const hitPose = hitTestResults[0].getPose(referenceSpace);
+                if (hitTestResults && hitTestResults.length > 0 && !arLoading) {
+                    const hitPose = hitTestResults[0].getPose(referenceSpace);
                     // reticle.visible = false; //TODO: find a way to show that environment is recognized
-                    // reticle.matrix.fromArray(hitPose.transform.matrix);
-                    // reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
+                    reticle.matrix.fromArray(hitPose.transform.matrix);
+                    reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
 
                     const maxCount = 11;
 
-                    if (arFound && offset < 0.004 && fCounter < maxCount) {
+                    document.getElementById('bx').innerHTML = 'nf: ' + nfCounter;
+                    document.getElementById('by').innerHTML = 'aF: ' + arFound;
+                    document.getElementById('bz').innerHTML = 'fC: ' + fCounter;
+
+
+                    if (arFound && arClose && fCounter < maxCount) {
                         arFound = false;
                         fCounter += 1;
                         nfCounter = 0;
                         markerOrientationS.push({rotation: arJSSmesh.rotation, offset: offset});
                     }
-                    else if (!arFound || ++nfCounter > maxCount * 3){
+                    else if (!arFound && ++nfCounter > maxCount * 3){
                         fCounter = 0;
                         nfCounter = 0;
                         markerOrientationS = [];
                     }
 
                     if (fCounter >= maxCount) {
+                        arLoading = true;
                         //TODO: use Anchor at current viewing pose to calculate distance between hit test and marker center point
                         //      for better alignment between virtual and real geometry
                         markerOrientationS2 = markerOrientationS;
                         markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
 
-                        arModel.relativeRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
+                        let relRotation = -markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
+
                         hitTestResults[0].createAnchor().then((anchor) => {
                             loadArModel(arId, () => {
                                 document.getElementById("footer").style.visibility = 'hidden';
                                 objAnchor = anchor;
+                                arModel.relativeRotation = relRotation;
                             });
 
                         }, (error) => {
@@ -565,7 +612,7 @@
                     // Handle anchor tracking loss - `anchor` was present
                     // in the previous frame but is no longer tracked.
                     objAnchor = null;
-                    box.visible = false;
+                    newScan();
                     console.log("Lost anchor...")
                 }
 
@@ -573,8 +620,7 @@
 
                     // Query most recent pose of the anchor relative to some reference space:
                     const pose = frame.getPose(objAnchor.anchorSpace, referenceSpace);
-                    arModel.update(pose, camera, camPos);
-
+                    if (pose) arModel.update(pose, camera, camPos);
                 }
 
                 // Render the scene with THREE.WebGLRenderer.
