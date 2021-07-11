@@ -61,14 +61,18 @@
 							<p>Not registered? <a href="sign-up.html">Sign Up</a> | <a href="forgot.html">Forgot Password?</a></p>
 						</div>
 						<div class="form-group">
-							<input type="submit" value="Sign In" class="btn btn-primary" href="index.html">
+							<input type="submit" value="Sign In" class="btn btn-primary" href="/">
 						</div>
 					</form>
 					<!-- END Sign In Form -->
 				</div>
 			</div>
 			<div class="row" style="padding-top: 60px; clear: both;">
-				<div class="col-md-12 text-center"><p><small>&copy; All Rights Reserved.</div>
+				<div class="col-md-12 text-center">
+					<p>
+					<small>&copy; All Rights Reserved</small>
+					</p>
+				</div>
 			</div>
 		</div>
 	<!-- jQuery -->
@@ -94,7 +98,7 @@
 					displayResults(JSON.parse(xhr.responseText));
 				}
 			};
-			xhr.open("POST", "/users/login", true);
+			xhr.open("POST", "https://localhost:3000/users/login");
 			xhr.setRequestHeader("Content-type", "application/json; encoding=UTF-8");
 			xhr.send(JSON.stringify(request));
 			console.log(request);
