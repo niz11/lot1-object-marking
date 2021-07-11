@@ -37,12 +37,15 @@
 
     let jsonData;
     let chosenModel;
-    fetch(`/models`)
+    fetch('/models/user', {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId: userId
+        })})
         .then(response => response.json())
         .then(data => {
             jsonData = data;
-
-            data = data.filter(model => model.user === userId);
 
             addModel(data[0])
             console.log(data)
@@ -58,7 +61,12 @@
     function getComboA(selectObject) {
         var value = selectObject.value;
         // Need to fetch data again, incease hotspots were added
-        fetch(`/models`)
+        fetch('/models/user', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId
+            })})
             .then(response => response.json())
             .then(data => {
                 jsonData = data;
