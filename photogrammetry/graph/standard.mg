@@ -359,7 +359,7 @@
                 },
                 "estimateSpaceFromSfM": false,
                 "estimateSpaceMinObservations": 3,
-                "estimateSpaceMinObservationAngle": 50.0,
+                "estimateSpaceMinObservationAngle": 10.0,
                 "maxInputPoints": 50000000,
                 "maxPoints": 5000000,
                 "maxPointsPerVoxel": 1000000,
