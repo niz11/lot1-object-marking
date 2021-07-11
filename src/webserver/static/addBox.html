@@ -39,7 +39,6 @@
     import {GLTFExporter} from "./new/GLTFExporter.js";
     import {OrbitControls} from "./new/OrbitControls.js";
 
-
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000 );
 
@@ -169,9 +168,6 @@
                 alt: name,
                 longitude: 0,
                 latitude: 0,
-                distance: dist,
-                rotation: rot,
-                scaling: scal,
             }))
             fetch('/models/add-model',
                 {
@@ -183,6 +179,7 @@
                         alt: name,
                         longitude: '' + 0,
                         latitude: '' + 0,
+                        userId: userId
                     })
                 }
             ).catch(e => {
