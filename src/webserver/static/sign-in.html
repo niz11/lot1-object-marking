@@ -12,7 +12,6 @@
 	<meta name="description" content="Free HTML5 Template by FreeHTML5.co" />
 	<meta name="keywords" content="free html5, free template, free bootstrap, html5, css3, mobile first, responsive" />
 	<meta name="author" content="FreeHTML5.co" />
-
   	<!-- Facebook and Twitter integration -->
 	<meta property="og:title" content=""/>
 	<meta property="og:image" content=""/>
@@ -23,27 +22,20 @@
 	<meta name="twitter:image" content="" />
 	<meta name="twitter:url" content="" />
 	<meta name="twitter:card" content="" />
-
 	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 	<link rel="shortcut icon" href="favicon.ico">
-
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
-
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/animate.css">
 	<link rel="stylesheet" href="css/style.css">
-
-
 	<!-- Modernizr JS -->
 	<script src="js/modernizr-2.6.2.min.js"></script>
 	<!-- FOR IE9 below -->
 	<!--[if lt IE 9]>
 	<script src="js/respond.min.js"></script>
 	<![endif]-->
-
 	</head>
 	<body>
-
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12 text-center">
@@ -51,8 +43,6 @@
 			</div>
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4">
-
-
 					<!-- Start Sign In Form -->
 					<form action="#" class="fh5co-form animate-box" data-animate-effect="fadeIn">
 						<h2>Sign In</h2>
@@ -75,14 +65,16 @@
 						</div>
 					</form>
 					<!-- END Sign In Form -->
-
 				</div>
 			</div>
 			<div class="row" style="padding-top: 60px; clear: both;">
-				<div class="col-md-12 text-center"><p><small>&copy; All Rights Reserved.</div>
+				<div class="col-md-12 text-center">
+					<p>
+					<small>&copy; All Rights Reserved</small>
+					</p>
+				</div>
 			</div>
 		</div>
-
 	<!-- jQuery -->
 	<script src="js/jquery.min.js"></script>
 	<!-- Bootstrap -->
@@ -94,6 +86,26 @@
 	<!-- Main JS -->
 	<script src="js/main.js"></script>
 
-
+	<script>
+		document.querySelector("input[type='submit']").onclick = function() {
+			var request = {
+				email : document.querySelector("#username").value,
+				password: document.querySelector("#password").value
+			}
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					displayResults(JSON.parse(xhr.responseText));
+				}
+			};
+			xhr.open("POST", "https://localhost:3000/users/login");
+			xhr.setRequestHeader("Content-type", "application/json; encoding=UTF-8");
+			xhr.send(JSON.stringify(request));
+			console.log(request);
+		}
+		function displayResults(data) {
+			console.log(data)
+		}
+	</script>
 	</body>
 </html>

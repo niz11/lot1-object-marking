@@ -12,8 +12,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <link rel="stylesheet" type="text/css" href="public/stylesheets/homepage.style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-
-
+    <script src="public/javascripts/requestHandler.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
         crossorigin="" />
@@ -56,13 +55,14 @@
     </div>
     <script type="text/javascript">
         $(function () {
-            $(".nav").load("public/nav.html")
-            $("footer").load("public/footer.html")
+            $(".nav").load("client/nav.html")
+            $("footer").load("client/footer.html")
         });
     </script>
     <script>
         const params = new URLSearchParams(document.location.search);
-        const userId = params.get('userId')
+        let userId = params.get('userId')
+        userId = userId === 'null' ? undefined : userId;
         const modelName = params.get('modelName')
 
         const mymap = L.map('mapid').setView([52.52, 13.405], 13);
@@ -152,7 +152,6 @@
             fetch(`/models`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     if (data.length > 0) {
                         // Show only models with given param name
                         if (modelName) {

@@ -2,20 +2,34 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const fileUpload = require('express-fileupload');
+const morgan = require('morgan');
 const https = require('https');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const mongoose = require('mongoose');
+const busboy = require('connect-busboy');  // Middleware to handle the file upload https://github.com/mscdex/connect-busboy
 const models = require('./database-model/models');
 const users = require('./database-model/users');
 
-const bodyParser = require('body-parser');
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
+// enable files upload
+app.use(fileUpload({
+    createParentPath: true
+}));
 
+const bodyParser = require('body-parser');
+const { truncate } = require('fs/promises');
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000 }));
 // parse application/json
 app.use(bodyParser.json());
+
+app.use(morgan('dev'));
+// module to manage upload of images, max 2MiB buffer --> images are directly written to disk
+app.use(busboy({
+	highWaterMark: 2 * 1024 * 1024, // Set 50MiB buffer
+  }));
 
 const certOptions = {
 	key: fs.readFileSync(path.resolve('server.key')),

@@ -28,12 +28,24 @@
     <!-- </form> -->
 
     <div id="model_viewer_container"></div>
+    <div id="errorMessage" class="error" style="color: #ff0000"></div>
 
 </body>
 
 <script>
   const server = 'https://localhost:8080/'
   const message_body = document.getElementById("status_message");
+
+  document.getElementById('errorMessage').style.display = 'none';
+
+
+  const params = new URLSearchParams(document.location.search);
+  const userId = params.get('userId')
+  if (userId == null) {
+    document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
+    document.getElementById('errorMessage').style.display = 'inline'
+
+  }
 
   // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
   function sendPhotos() {
@@ -89,7 +101,7 @@
         console.log(xhr.responseText);
         message_body.innerText = "Model was created successfully! Here is the result:";
         // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/meshroom-pipeline/?id=' + model_id)
-        
+
         const model_src = 'https://localhost:8080/meshroom-pipeline-model/?id=' + model_id;
         document.getElementById("model_viewer_container").innerHTML =
           `<model-viewer src="` + model_src + `"    
