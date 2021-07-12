@@ -12,6 +12,11 @@ function register(e)
             if (this.readyState == 4 && this.status == 200) {
                 displayResults(xhr.responseText);
             }
+            else
+            {
+                document.querySelector("#error").innerHTML = xhr.responseText;
+
+            }
         };
         xhr.open("POST", "https://localhost:3000/users/register");
         xhr.setRequestHeader("Content-type", "application/json; encoding=UTF-8");
