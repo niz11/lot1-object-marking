@@ -32,7 +32,8 @@
 </div>
 <script>
     const params = new URLSearchParams(document.location.search);
-    const userId = params.get('userId');
+    let userId = params.get('userId');
+    if (userId && userId === 'null') userId = undefined;
 
     if (userId == null) document.getElementById('message').innerHTML = 'Need to provide a User-ID: please login';
 

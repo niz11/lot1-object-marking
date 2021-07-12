@@ -25,7 +25,8 @@
 <script async src="opencv/xtrWasm/bin/opencv.js" onload="onReady()"></script>
 <script>
     const params = new URLSearchParams(document.location.search);
-    const userId = params.get('userId');
+    let userId = params.get('userId');
+    if (userId && userId === 'null') userId = undefined;
 
     const link = document.createElement('a');
     link.style.display = 'none';
