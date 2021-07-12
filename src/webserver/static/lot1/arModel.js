@@ -151,16 +151,6 @@ class ArModel {
             _this.mesh = gltf.scene;
             _this.mesh.visible = true;
 
-            // for (let c of _this.mesh.children) {
-            //     c.material.wireframe = true;
-            // }
-
-            // const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-            // const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-            // const cube = new THREE.Mesh( geometry, material );
-
-            // _this.mesh = cube;
-
             scene.add(_this.mesh);
             onLoaded();
             console.log('loaded gltf');

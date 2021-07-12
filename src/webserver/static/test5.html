@@ -264,8 +264,7 @@
         arModel = new ArModel(dbModel);
 
         arModel.loadModelFromSource(scene, function () {
-            // arModel.computeOffsetFromMesh();
-            // arModel = arModelTemp;
+            arModel.computeOffsetFromMesh();
             onSuccess();
             document.getElementById('newScan').style.visibility = 'visible';
             console.log(arModel);
@@ -283,6 +282,17 @@
         arModel = null;
         if(objAnchor) objAnchor.delete();
         objAnchor = null;
+
+        let domElements = document.getElementsByClassName("p");
+
+        while (domElements[0]) {
+            domElements[0].remove();
+        }
+
+        domElements = document.getElementsByClassName("tb");
+        while (domElements[0]) {
+            domElements[0].remove();
+        }
     }
 
     function clearThree(obj){
@@ -293,13 +303,11 @@
         if(obj.geometry) obj.geometry.dispose();
 
         if(obj.material){
-            //in case of map, bumpMap, normalMap, envMap ...
             Object.keys(obj.material).forEach(prop => {
-                if(!obj.material[prop])
-                    return;
+                if(!obj.material[prop]) return;
                 if(obj.material[prop] !== null && typeof obj.material[prop].dispose === 'function')
                     obj.material[prop].dispose();
-            })
+            });
             obj.material.dispose();
         }
     }
@@ -365,19 +373,19 @@
 
 
 
-        const loader = new THREE.GLTFLoader();
-        let reticle;
+        // const loader = new THREE.GLTFLoader();
+        // let reticle;
         // loader.load("https://immersive-web.github.io/webxr-samples/media/gltf/reticle/reticle.gltf", function (gltf) {
         //     reticle = gltf.scene;
         //     reticle.visible = true;
         //     scene.add(reticle);
         // });
 
-        loader.load("./ar/models/FishTest.gltf", function (gltf) {
-            reticle = gltf.scene;
-            reticle.visible = false;
-            scene.add(reticle);
-        });
+        // loader.load("./ar/models/FishTest.gltf", function (gltf) {
+        //     reticle = gltf.scene;
+        //     reticle.visible = false;
+        //     scene.add(reticle);
+        // });
 
 
 
@@ -556,10 +564,10 @@
 
                 const hitTestResults = !objAnchor ? frame.getHitTestResults(hitTestSource) : null;
                 if (hitTestResults && hitTestResults.length > 0 && !arLoading) {
-                    const hitPose = hitTestResults[0].getPose(referenceSpace);
-                    // reticle.visible = false; //TODO: find a way to show that environment is recognized
-                    reticle.matrix.fromArray(hitPose.transform.matrix);
-                    reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
+                    // const hitPose = hitTestResults[0].getPose(referenceSpace);
+                    // reticle.visible = true; //TODO: find a way to show that environment is recognized
+                    // reticle.matrix.fromArray(hitPose.transform.matrix);
+                    // reticle.matrix.decompose(reticle.position, reticle.quaternion, reticle.scale);
 
                     const maxCount = 11;
 
@@ -568,11 +576,12 @@
                     document.getElementById('bz').innerHTML = 'fC: ' + fCounter;
 
 
-                    if (arFound && arClose && fCounter < maxCount) {
+                    if ( arClose && fCounter < maxCount) {
                         arFound = false;
                         fCounter += 1;
                         nfCounter = 0;
                         markerOrientationS.push({rotation: arJSSmesh.rotation, offset: offset});
+                        // reticle.rotation.y += arJSSmesh.rotation.z;
                     }
                     else if (!arFound && ++nfCounter > maxCount * 3){
                         fCounter = 0;
@@ -587,7 +596,7 @@
                         markerOrientationS2 = markerOrientationS;
                         markerOrientationS2.sort((a, b)=>{return a.rotation.z > b.rotation.z ? 1 : -1;});
 
-                        let relRotation = -markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
+                        let relRotation = markerOrientationS2[Math.floor(markerOrientationS2.length / 2)].rotation.z;
 
                         hitTestResults[0].createAnchor().then((anchor) => {
                             loadArModel(arId, () => {
