@@ -61,7 +61,8 @@
     </script>
     <script>
         const params = new URLSearchParams(document.location.search);
-        const userId = params.get('userId')
+        let userId = params.get('userId')
+        userId = userId === 'null' ? undefined : userId;
         const modelName = params.get('modelName')
 
         const mymap = L.map('mapid').setView([52.52, 13.405], 13);
@@ -151,7 +152,6 @@
             fetch(`/models`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     if (data.length > 0) {
                         // Show only models with given param name
                         if (modelName) {

@@ -94,7 +94,8 @@
         document.querySelector('#hotspotNotSelected').style.display = "none"
 
         const params = new URLSearchParams(document.location.search);
-        const userId = params.get('userId')
+        let userId = params.get('userId')
+        userId = userId === 'null' ? undefined : userId;
         if (userId == null) {
             document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
             document.getElementById('errorMessage').style.display = 'inline'
