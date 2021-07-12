@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/sign_in_style.css">
+    <script src="public/javascripts/requestHandler.js"></script>
+
+    <title>Form</title>
+</head>
+
+<body>
+<div class="container">
+    <div class="card card--white">
+        <form action="#" method="GET" class="form">
+            <section class="form__basic-detail">
+                <div class="form__text-box">
+                    <h1 class="heading-primary">Sign Up</h1>
+                    <p class="form__paragraph paragraph">Please fill some of the basic details to register to our platform.</p>
+                </div>
+                <div class="form__group form__group--cols" >
+                    <label for="name" class="form__input-container">
+                        <span class="form__label">Name</span>
+                        <input id="name" class="form__input" type="text"
+                               placeholder="eg. John" required>
+                    </label>
+                </div>
+                <div class="form__group form__group--cols" >
+                    <label for="email" class="form__input-container">
+                        <span class="form__label">Email</span>
+                        <input id="email" class="form__input" type="text"
+                               placeholder="eg. abc@gmail.com" required>
+                    </label>
+                </div>
+                <div class="form__group form__group--cols">
+                    <label for="password" class="form__input-container">
+                        <span class="form__label">Password</span>
+                        <input id="password" class="form__input" type="password" required>
+                    </label>
+                </div>
+            </section>
+            <button id="submit" class="button form__button" type="button" value="Submit" onclick="register()">Submit</button>
+        </form>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -1,6 +1,28 @@
+function register(e)
+{
+    const request = {
+        name: document.querySelector("#name").value,
+        email: document.querySelector("#email").value,
+        password: document.querySelector("#password").value
+    };
+    if(request.email && request.password && request.name)
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                displayResults(xhr.responseText);
+            }
+        };
+        xhr.open("POST", "https://localhost:3000/users/register");
+        xhr.setRequestHeader("Content-type", "application/json; encoding=UTF-8");
+        xhr.send(JSON.stringify(request));
+        console.log(request);
+    }
+    return false
+}
+
 function handleRequest(e)
 {
-    console.log(e);
     const request = {
         email: document.querySelector("#email").value,
         password: document.querySelector("#password").value
