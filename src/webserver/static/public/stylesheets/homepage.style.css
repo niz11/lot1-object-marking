@@ -1,3 +1,169 @@
+
+
+/* Section Stuffs
+------------------------------*/
+.section-padding {
+    padding: 70px 0px;
+    padding:  4.375rem 0px;
+}
+
+.section-padding-lg {
+    padding: 90px 0px;
+    padding:  5.625rem 0px;
+}
+
+.section-padding-larger {
+    padding: 140px 0px;
+    padding:  8.75rem 0px;
+}
+
+.section-meta {
+    background-color: #f8f9f9;
+}
+
+.onepage-section {
+    position: relative;
+    overflow: hidden;
+}
+.onepage-section:before {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    display: block;
+    content: " ";
+    z-index: 1;
+}
+.onepage-section .container-fluid,
+.onepage-section .container {
+    position: relative;
+    z-index: 5;
+}
+
+.section-inverse {
+    background: #222222;
+}
+.section-inverse .section-title-area .section-title {
+    color: rgba(255, 255, 255, 0.99);
+}
+.section-inverse .section-title-area .section-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+}
+.section-inverse .section-title-area .section-subtitle::after {
+    background: rgba(255, 255, 255, 0.8);
+}
+.section-inverse .pricing-table .pricing__item ul p {
+    color: #777777;
+}
+
+.section-inverse-extended {
+    background: #333333;
+}
+.section-inverse-extended .section-title-area .section-title {
+    color: rgba(255, 255, 255, 0.99);
+}
+.section-inverse-extended .section-title-area .section-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+}
+.section-inverse-extended .section-title-area .section-subtitle::after {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.section-inverse {
+    color: rgba(255, 255, 255, 0.5);
+}
+.section-inverse h1, .section-inverse h2, .section-inverse h3, .section-inverse h4, .section-inverse h5, .section-inverse h6 {
+    color: rgba(255, 255, 255, 0.9);
+}
+.section-inverse p {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.section-title-area {
+    margin-bottom: 60px;
+    text-align: center;
+}
+.section-title-area .section-title {
+    font-size: 30px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    position: relative;
+    margin-bottom: 0px;
+    text-transform: uppercase;
+}
+@media screen and (min-width: 940px) {
+    .section-title-area .section-title {
+        font-size: 40px;
+        letter-spacing: 3.5px;
+    }
+}
+.section-title-area .section-subtitle {
+    color: #aaaaaa;
+    font-size: 12px;
+    display: inline-block;
+    position: relative;
+    margin-bottom: 13px;
+    margin-bottom: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+@media screen and (min-width: 940px) {
+    .section-title-area .section-subtitle {
+        font-size: 14px;
+    }
+}
+
+.section-desc {
+    font-size: 20px;
+    font-size: 1.25rem;
+    margin-top: 40px;
+    margin-top: 2.5rem;
+}
+
+
+/* Section: Features
+------------------------------*/
+.icon-background-default {
+    color: #03c4eb;
+}
+
+
+.feature-item {
+    text-align: center;
+}
+.feature-item .feature-icon {
+    color: #fff;
+}
+.feature-item .fa-5x {
+    font-size: 4em;
+}
+.feature-item:hover .icon-background-default {
+    color: #333333;
+    -webkit-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    transform: scale(1.1);
+    -webkit-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    transform: scale(1.1);
+}
+@media screen and (min-width: 940px) {
+    .feature-item.col-lg-3:nth-child(4n+1), .feature-item.col-lg-4:nth-child(3n+1), .feature-item.col-lg-6:nth-child(2n+1) {
+        clear: left;
+    }
+}
+
+.feature-media {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.feature-item:hover .icon-background-default{color:#12387a}
+
+.section-title-area {
+    margin-bottom: 60px;
+    text-align: center;
+}
+
 body {
     overflow-x: hidden;
     font-family: 'Roboto Slab', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';

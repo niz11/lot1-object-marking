@@ -15,7 +15,6 @@ function register(e)
             else
             {
                 document.querySelector("#error").innerHTML = xhr.responseText;
-
             }
         };
         xhr.open("POST", "https://localhost:3000/users/register");
