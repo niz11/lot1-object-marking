@@ -149,7 +149,7 @@ class ArModel {
         let _this = this;
         loader.load(this.src, function (gltf) {
             _this.mesh = gltf.scene;
-            _this.mesh.visible = true;
+            _this.mesh.visible = false;
 
             scene.add(_this.mesh);
             onLoaded();
@@ -236,8 +236,8 @@ class ArModel {
         if (this.mesh) {
             console.log(this.mesh);
             let bbox = new THREE.Box3().setFromObject(this.mesh);
-            this.#cen = bbox.getCenter(new THREE.Vector3());
-            this.#cen.multiplyScalar(-1);
+            // this.#cen = bbox.getCenter(new THREE.Vector3());
+            // this.#cen.multiplyScalar(-1);
             let size = bbox.getSize(new THREE.Vector3());
             this.offset.y = size.y / 2;
             console.log(this.#cen);
