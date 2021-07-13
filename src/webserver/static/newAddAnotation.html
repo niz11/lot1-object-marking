@@ -16,14 +16,10 @@
     <!-- Loads <model-viewer> for modern browsers: -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
     </script>
+
     <!-- Loads <model-viewer> for old browsers like IE11: -->
-    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
-    <script src="public/javascripts/requestHandler.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="public/stylesheets/homepage.style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+    </script>
 
     <!-- The following libraries and polyfills are recommended to maximize browser support -->
     <!-- NOTE: you must adjust the paths as appropriate for your project -->
@@ -43,15 +39,9 @@
     <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
     <!--<script src="https://unpkg.com/@magicleap/prismatic@0.18.2/prismatic.min.js"></script>-->
 </head>
-<style>
-    #mapid {
-        margin-top: 80px;
-        background-color: black;
-    }
-</style>
+
 <body>
-<div class="nav"></div>
-    <div class="displayblocks">
+    <div id="displayblocks">
         <model-viewer ar ondblclick="addHotspotOnClick()" onclick="selected()" id="modelblock" src="" class="" ar
             auto-rotate camera-controls background-color="#254441" shadow-intensity="1" alt="A 3D model of a test cube"
             ar ar-modes="webxr scene-viewer quick-look">
@@ -82,12 +72,6 @@
             <div class="center marginTop" id="hotspotNotSelected"> First selct hotstop to Remove</div>
         </div>
     </div>
-    <script type="text/javascript">
-        $(function () {
-            $(".nav").load("client/nav.html")
-            $("footer").load("client/footer.html")
-        });
-    </script>
     <script>
         let jsonData, src;
         document.getElementById('errorMessage').style.display = 'none';
