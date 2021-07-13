@@ -43,7 +43,7 @@ app.get('/', function (req, res) {
 const testing = false;
 // true activates local 3D-modelling pipeline using a node-child-process and running meshroom.exe inside
 // false will connect with local docker-container that runs meshroom and has far more implemented configs
-const local_pipeline = false;
+const local_pipeline = true;
 
 // contains current 3D-model-creation-tasks in progress running through meshroom.exe
 let current_modelling_processes = new Map();
