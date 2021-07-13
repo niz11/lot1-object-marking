@@ -25,6 +25,14 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 10
 // parse application/json
 app.use(bodyParser.json());
 
+app.use(function (req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	// res.header("Content-Type", "text/html");
+	res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+  });
+
 app.use(morgan('dev'));
 // module to manage upload of images, max 2MiB buffer --> images are directly written to disk
 app.use(busboy({

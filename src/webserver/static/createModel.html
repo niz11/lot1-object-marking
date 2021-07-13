@@ -95,7 +95,9 @@
 </script>
 
 <script>
-  const server = 'https://localhost:8080/'
+  const deviceNbr = 107;
+  const pipeServer = 'https://192.168.2.' + deviceNbr + ':8080/'
+  const webServer = 'https://192.168.2.' + deviceNbr + ':3000/'
   const message_body = document.getElementById("status_message");
 
   document.getElementById('errorMessage').style.display = 'none';
@@ -106,7 +108,7 @@
     document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
     document.getElementById('errorMessage').style.display = 'inline'
   }
-  document.getElementById("href_addAnotationPage").href += ('?userId=' + userId);
+  document.getElementById("href_addAnotationPage").href = webServer + 'newAddAnotation.html?userId=' + userId;
 
   let creation_ongoing;
   // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
@@ -145,8 +147,9 @@
         startLongPolling(userId, model_name);
       }
     };
-    xhr.open("POST", 'https://localhost:8080/pipeline/start/?images=' + image_count + '&userId=' + userId
+    xhr.open("POST", pipeServer + 'pipeline/start/?images=' + image_count + '&userId=' + userId
       + '&modelName=' + model_name);
+    // xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
     xhr.send(formData);
 
     xhr.upload.onprogress = function (event) {
@@ -183,16 +186,16 @@
           });
         } else if (this.readyState == 4 && this.status == 201) {
           console.log(xhr.responseText);
-          message_body.innerText = "Model was created successfully! Here is the result:";
+          message_body.innerText = "Model-data was saved successfully! Waiting for creation...";
           resolve(xhr.response);
         }
       };
-      xhr.open("POST", 'https://localhost:3000/models/add-model');
+      xhr.open("POST", webServer + 'models/add-model');
       xhr.setRequestHeader("Content-type", "application/json");
       const body = JSON.stringify({
         userId: userId,
         modelName: model_name,
-        src: 'https://localhost:3000/saved-models/' + userId + '/' + model_name
+        src: webServer + 'saved-models/' + userId + '/' + model_name
       });
       xhr.send(body);
     })
@@ -232,7 +235,7 @@
         creation_ongoing = false;
         // document.getElementById("model_viewer").setAttribute("src", 'https://localhost:8080/pipeline/start/?id=' + model_id)
 
-        const model_src = 'https://localhost:3000/saved-models/user/' + userId + '/' + modelName + '/' + modelName + '.glb';
+        const model_src = webServer + 'saved-models/user/' + userId + '/' + modelName + '/' + modelName + '.glb';
         document.getElementById("model_viewer_container").innerHTML =
           `<model-viewer src="` + model_src + `"    
               ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
@@ -244,7 +247,8 @@
         </model-viewer>`
       }
     };
-    xhr.open("GET", 'https://localhost:8080/pipeline/model-status/?userId=' + userId + '&modelName=' + modelName);
+    xhr.open("GET", pipeServer + 'pipeline/model-status/?userId=' + userId + '&modelName=' + modelName);
+    // xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
     xhr.send();
   }
 
@@ -276,6 +280,9 @@
   model-viewer {
     width: 600px;
     height: 400px;
+    /* width: 100%;
+    height: 100%; */
+    margin: auto;
   }
 
   #status_message {
@@ -442,7 +449,7 @@
   }
 
   #model_name {
-    max-width: 30%;
+    /* max-width: 30%; */
   }
 
   .manual_steps {

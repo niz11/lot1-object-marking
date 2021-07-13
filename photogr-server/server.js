@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Content-Type", "text/html");
-  res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
+  res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST, OPTIONS');
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
@@ -31,6 +31,13 @@ app.use(function (req, res, next) {
 app.use(busboy({
   highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 })); // Insert the busboy middle-ware
+
+app.options("/*", function(req, res, next){
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.send(200);
+});
 
 // default path
 app.get('/', function (req, res) {
@@ -127,10 +134,10 @@ app.post('/pipeline/start', async function (req, res) {
         current_modelling_processes.set(request_id.toString(), true);
         const response = {
           request_id: request_id,
-          response: '3D creation in Progress! This can take from a few minutes to several hours. \n You can either wait on the website,' +
-            ' or come back later and request the 3D model with id: ' + request_id + '. In that case, please write it down to remember.'
+          response: 'All images reveived and 3D creation in Progress! This can take from a few minutes to several hours. \n You can either wait on the website,' +
+            ' or come back later and look up your models under add-Annotaion-page.'
         }
-        // response is send to tell frontend of successfull initiation of the 3D-modelling-pipeline
+        // response is send to tell frontend of successfull upload of all images and initiation of the 3D-modelling-pipeline
         res.json(response);
 
         if (local_pipeline) {
@@ -142,7 +149,11 @@ app.post('/pipeline/start', async function (req, res) {
           }
           let model_output = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId + '/' + modelName);
           // let model_output = '../src/webserver/static/saved-models/' + req.query.userId + '/' + req.query.modelName;
-
+          if(!fs.ensureDir(model_output + '/texturedMesh.obj')) {
+            console.log("Something went wrong during local-pipeline-computation!");
+            current_modelling_processes.delete(request_id.toString());
+            return;
+          }
           // after rendering, convert .obj to .glb with node module (obj2gltf)
           obj2gltf(model_output + '/texturedMesh.obj', options)
             .then(async function (glb) {
