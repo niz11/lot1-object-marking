@@ -1,7 +1,8 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8"/>
   <title>Test</title>
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -30,46 +31,69 @@
 </style>
 
 <body>
+  
   <div class="mapid"></div>
   <div class="nav"></div>
-  <div id="status_message"></div>
-  <div>
-    <div>Choose a name for your model:</div> <input type="text" id="model_name">
-    <p id="demo1">Drag and drop your pictures here to create your very own 3D model!</p>
+
+  <h2 id="heading">Create your very own 3D model!</h2>
+  <div id="page_container" class="card">
+    
+  <div id="steps_container">
+    <ul class="no-bullets">
+      <li>
+        <div class="manual_steps">1. Choose a name for your model: <input type="text" id="model_name"></div>
+      </li>
+      <li>
+        <div class="manual_steps">2. Select optional parameters for 3D-creation process</div>
+      </li>
+      <ul class="no-bullets">
+        <li><input type="checkbox" id="compressed" name="compressed">
+          <label for="compressed" class="tooltipS"> Compressed version of 3D-model<span class="tooltiptextS">less MB needed</span></label><br>
+        </li>
+        <li> <input type="checkbox" id="preview" name="preview">
+          <div class="tooltipS"><label for="preview"> Show a preview of the model </label><br><span class="tooltiptextS">Saves time when models have mistakes and recalculating is necessary</span></div>
+        </li>
+      </ul>
+
+      <!-- form tag will interfere with xmlhttprequest if action not exact url as from xmlhttp call-->
+      <!-- <form class="box" method="post" action="https://localhost:8080/pipeline/start" enctype="multipart/form-data"> -->
+      <li>
+        <div class="manual_steps">3. Drag and drop your pictures here:</div>
+      </li>
+      <label class="box__input">
+        <input class="box__file btn btn--azure" type="file" name="files[]" id="file"
+          data-multiple-caption="{count} files selected" multiple accept="image/png, image/jpeg />
+      <label for="file"><span class="box__dragndrop"> or drag it here</span></label>
+      <button class="box__button btn btn--azure" id='upload_images' type="submit">Upload</button><span
+        id="progress_container"><progress id="progress" min="0" max="100" value="0">0</progress></span>
+
+      <div id="errorMessage" class="error" style="color: #ff0000"></div>
+      <li>
+        <div class="manual_steps">4. View, annotate and edit your created models <a id='href_addAnotationPage'
+            href='https://localhost:3000/newAddAnotation.html'>here</a></div>
+      </li>
+      <div id="status_message"></div>
+      <div id="model_viewer_container"></div>
+    </ul>
   </div>
-
-  <form>
-    <div>Select optinal parameters for 3D-creation process</div>
-    <input type="checkbox" id="compressed" name="compressed">
-    <label for="compressed"> Compressed version of 3D-model</label><br>
-    <input type="checkbox" id="preview" name="preview">
-    <label for="preview"> Show a preview of the model to save time when recalculating is necessary</label><br>
-  </form>
-  <!-- form tag will interfere with xmlhttprequest if action not exact url as from xmlhttp call-->
-  <!-- <form class="box" method="post" action="https://localhost:8080/pipeline/start" enctype="multipart/form-data"> -->
-  <label class="box__input">
-    <input class="box__file btn btn--azure" type="file" name="files[]" id="file"
-      data-multiple-caption="{count} files selected" multiple accept="image/png, image/jpeg />
-      <label for=" file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
-  <button class="box__button btn btn--azure" id='upload_images' type="submit">Upload</button><span
-    id="progress_container"><progress id="progress" min="0" max="100" value="0">0</progress></span>
-  <div id="status_message"></div>
-
-  <div id="errorMessage" class="error" style="color: #ff0000"></div>
-
+  </div>
   <div class="box__uploading">Uploading…</div>
   <div class="box__success">Done!</div>
   <div class="box__error">Error! <span></span>.</div>
   <!-- </form> -->
-  <div id="model_viewer_container"></div>
+
   <footer style="position: absolute; bottom: 0; width: 100%"></footer>
 </body>
+
+
+
 <script type="text/javascript">
   $(function () {
     $(".nav").load("client/nav.html")
     $("footer").load("client/footer.html")
   });
 </script>
+
 <script>
   const server = 'https://localhost:8080/'
   const message_body = document.getElementById("status_message");
@@ -82,6 +106,7 @@
     document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
     document.getElementById('errorMessage').style.display = 'inline'
   }
+  document.getElementById("href_addAnotationPage").href += ('?userId=' + userId);
 
   let creation_ongoing;
   // press on "upload"-button triggers initial call that sends all the images to the webserver, initiating the pipeline
@@ -121,7 +146,7 @@
       }
     };
     xhr.open("POST", 'https://localhost:8080/pipeline/start/?images=' + image_count + '&userId=' + userId
-     + '&modelName=' + model_name);
+      + '&modelName=' + model_name);
     xhr.send(formData);
 
     xhr.upload.onprogress = function (event) {
@@ -145,29 +170,29 @@
           console.log(xhr.response);
           message_body.innerText = xhr.responseText;
           reject({
-                    status: this.status,
-                    statusText: xhr.statusText
-                });
+            status: this.status,
+            statusText: xhr.statusText
+          });
           // user already has model with the input model name
         } else if (this.readyState == 4 && this.status == 409) {
           console.log(xhr.responseText);
           message_body.innerText = xhr.responseText;
           reject({
-                    status: this.status,
-                    statusText: xhr.statusText
-                });
+            status: this.status,
+            statusText: xhr.statusText
+          });
         } else if (this.readyState == 4 && this.status == 201) {
           console.log(xhr.responseText);
           message_body.innerText = "Model was created successfully! Here is the result:";
           resolve(xhr.response);
-        } 
+        }
       };
       xhr.open("POST", 'https://localhost:3000/models/add-model');
       xhr.setRequestHeader("Content-type", "application/json");
       const body = JSON.stringify({
         userId: userId,
         modelName: model_name,
-        src: 'https://localhost:3000/saved-models/'+ userId + '/' + model_name
+        src: 'https://localhost:3000/saved-models/' + userId + '/' + model_name
       });
       xhr.send(body);
     })
@@ -249,12 +274,12 @@
   }
 
   model-viewer {
-    width: 800px;
-    height: 600px;
+    width: 600px;
+    height: 400px;
   }
 
   #status_message {
-    padding: 10px;
+    padding: 40px;
     color: #ff0000;
   }
 
@@ -304,8 +329,8 @@
   select,
   .info-text {
     width: 80%;
-    padding: 12px 20px;
-    margin: 15px 10% 15px 10%;
+    padding: 10px 20px;
+    margin: 15px 5px 15px 5px;
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -397,6 +422,76 @@
     margin-left: 15px;
     margin-bottom: -10px;
   }
+
+  #heading {
+    text-align: center;
+    padding-bottom: 10px;
+  }
+
+  #page_container {
+    /* text-align: center; */
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+  }
+
+  #steps_container {
+    margin: auto;
+    /* width: 50%; */
+    padding: 10px;
+  }
+
+  #model_name {
+    max-width: 30%;
+  }
+
+  .manual_steps {
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  ul.no-bullets {
+    list-style-type: none;
+  }
+
+  .card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.tooltipS {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipS .tooltiptextS {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  top: -5px;
+  left: 105%;
+}
+
+.tooltipS:hover .tooltiptextS {
+  visibility: visible;
+}
+
 </style>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
