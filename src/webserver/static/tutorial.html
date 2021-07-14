@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ARtworks- Meshroom 3D scan</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="public/stylesheets/homepage.style.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</head>
+
+<style>
+
+  body {
+    background-color: darkgray;
+  }
+  .tutorial {
+    margin-top: 100px;
+    margin-left: 20px;
+  }
+</style>
+<body>
+<div class="nav"></div>
+<div class="tutorial">
+  <h3>ARtworks - Meshroom 3D Scan</h3>
+  <h4>Things to know before Scanning:</h4>
+  <ul>
+    <li>not all objects can be scanned well</li>
+    <li>glass, mirror etc is difficult</li>
+    <li>object should be evenly illuminated</li>
+    <li>no hard shadows</li>
+    <li>take pictures from all perspectives if possible</li>
+    <li>use a background that has reference points. (not completely white, e.g. a newspaper)</li>
+  </ul>
+
+  <h4>Workflow:</h4>
+  <p>Upload the photos to the website and start the process of generating the object. Now it is possible to inspect the model and decide if it needs further postprocessing</p>
+
+  <h4>Postprocessing</h4>
+  <p>After finishing the scan, the model can now be downloaded and cleaned up. For the processing the open source program Blender is used.</p>
+  <p>To clean up an object follow these steps, which can also be seen in the Video Tutorial:</p>
+
+  <ol>
+    <li>Open Blender</li>
+    <li>Select the standard cube and press x and remove the object</li>
+    <li>Select camera and delete</li>
+    <li>Import model file >import > .obj or .glb (for .obj make sure the .mlt is in the same folder)</li>
+    <li>Right-click object and select set origin > geometry to origin now align in all 3 axis</li>
+    <li>On the left side select the rotate tool. Now on top right select one direction after another and reorient the object so that it faces to the x axis and is straight for all directions</li>
+    <li>Enter the modelling mode at the top and make sure that X-Ray is enabled</li>
+    <li>Click on the z-direction and select the object as good as you can either with the select box or the lasso. then press cmd + i to invert the selection and hit x to delete the unneeded vertices. Repeat for all 3 directions</li>
+    <li>Clean up the details with the lasso-tool. In texture mode you can take a look at the model to get a better impression.</li>
+    <li>Set origin again</li>
+    <li>Go to modeling and press a to select all. Then go to mesh > clean up > decimate geometry in the popup on the bottom left select a factor of 0.1 to minimise the points in the object and therefore minimise the file size. If it looks too bad at 0.1 revert and select a higher value</li>
+    <li>export> .glb, include selected objects</li>
+    <li>Upload new file to the website</li>
+  </ol>
+</div>
+
+
+<footer></footer>
+<script type="text/javascript">
+  $(function () {
+    $("header").load("public/header.html")
+    $(".nav").load("public/nav.html")
+    $("footer").load("public/footer.html")
+  });
+</script>
+
+</body>
+</html>
