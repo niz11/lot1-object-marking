@@ -136,7 +136,7 @@
       return;
     } else if (creation_ongoing) {
       document.getElementById("info_icon").style.display = 'inline';
-      document.getElementById("status_message").innerText = "3D creation already in progress. PLease wait till finished.";
+      document.getElementById("status_message").innerText = "3D creation already in progress. Please wait till finished.";
       return;
     }
 
@@ -185,6 +185,7 @@
       xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 422) {
           console.log(xhr.response);
+          document.getElementById("info_icon").style.display = 'inline';
           message_body.innerText = xhr.responseText;
           reject({
             status: this.status,
@@ -193,6 +194,7 @@
           // user already has model with the input model name
         } else if (this.readyState == 4 && this.status == 409) {
           console.log(xhr.responseText);
+          document.getElementById("info_icon").style.display = 'inline';
           message_body.innerText = xhr.responseText;
           reject({
             status: this.status,
@@ -200,6 +202,7 @@
           });
         } else if (this.readyState == 4 && this.status == 201) {
           console.log(xhr.responseText);
+          document.getElementById("info_icon").style.display = 'inline';
           message_body.innerText = "Model-data was saved successfully! Waiting for creation...";
           resolve(xhr.response);
         }
@@ -209,7 +212,7 @@
       const body = JSON.stringify({
         userId: userId,
         modelName: model_name,
-        src: webServer + 'saved-models/' + userId + '/' + model_name
+        src: webServer + 'saved-models/user/' + userId + '/' + model_name
       });
       xhr.send(body);
     })
