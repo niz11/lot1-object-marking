@@ -212,7 +212,7 @@
       const body = JSON.stringify({
         userId: userId,
         modelName: model_name,
-        src: webServer + 'saved-models/user/' + userId + '/' + model_name
+        src: webServer + 'saved-models/user/' + userId + '/' + model_name + '/' + model_name + '.glb'
       });
       xhr.send(body);
     })
