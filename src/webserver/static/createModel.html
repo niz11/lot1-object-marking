@@ -33,6 +33,7 @@
 <body>
 
   <div class="mapid"></div>
+  <div class="nav"></div>
   <h2 id="heading">Create your very own 3D model!</h2>
   <div id="page_container" class="card">
 
@@ -91,7 +92,18 @@
   <div class="box__error">Error! <span></span>.</div>
   <!-- </form> -->
 
+  <footer style="position: absolute; bottom: 0; width: 100%"></footer>
+
 </body>
+
+<script type="text/javascript">
+  $(function () {
+    $(".nav").load("client/nav.html")
+    $("footer").load("client/footer.html")
+  });
+  </script>
+
+
 <script>
   const deviceNbr = 107;
   const pipeServer = 'https://192.168.2.' + deviceNbr + ':8080/'
