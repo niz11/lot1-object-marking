@@ -161,7 +161,7 @@
                                     if (model.location.latitude && model.location.longitude) {
                                         index++;
                                         L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                            .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                            .bindPopup(popUp(model.modelName, model.user, model.src)).openPopup();
                                         L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
                                         // Comment out img for now
                                         // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
@@ -186,7 +186,7 @@
                                 if (model.location) {
                                     if (model.location.latitude && model.location.longitude) {
                                         L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                            .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                            .bindPopup(popUp(model.modelName, model.user, model.src)).openPopup();
                                         L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
                                         // Comment out img for now
                                         // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
