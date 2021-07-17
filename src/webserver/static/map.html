@@ -14,6 +14,14 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
+    <!-- 3d model viewer links -->
+    <!-- Loads <model-viewer> for modern browsers: -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
+    </script>
+
+    <!-- Loads <model-viewer> for old browsers like IE11: -->
+    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+    </script>
 
 </head>
 <style>
@@ -72,12 +80,15 @@
 
         mymap.on('click', onMapClick);
 
-        const popUp = (name, userId) => {
+        const popUp = (name, userId, src) => {
             const userIdParam = (userId) => `userId=${userId}&`;
             return `<div class="artWorkPopUp">
                         <b>${name}</b>
                         <br />
                         <a href="/showModelBasedOnLocation.html?${userId ? userIdParam(userId) : ``}modelName=${name}">See model in AR Once inside radius</a>
+                        <model-viewer id="modelblock" src="${src}"
+                            auto-rotate camera-controls background-color="#254441" shadow-intensity="1" alt="Preview of the model: ${name}">
+                         </model-viewer>
                     </div>`
         }
         if (userId) {
@@ -97,7 +108,7 @@
                             const model = models.length > 0 ? models[0] : models
                             if (model && model.location && model.location.latitude && model.location.longitude) {
                                 L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                    .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                    .bindPopup(popUp(model.modelName, model.user, model.src)).openPopup();
                                 L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
 
                                 // Comment out img for now
@@ -116,7 +127,7 @@
                                 if (model.location) {
                                     if (model.location.latitude && model.location.longitude) {
                                         L.marker([model.location.latitude, model.location.longitude]).addTo(mymap)
-                                            .bindPopup(popUp(model.modelName, model.user)).openPopup();
+                                            .bindPopup(popUp(model.modelName, model.user, model.src)).openPopup();
                                         L.circleMarker([model.location.latitude, model.location.longitude], { radius: 10 }).addTo(mymap)
                                         // Comment out img for now
                                         // .bindPopup(`<div class="artWorkPopUp"><b>${model.modelName}</b><br /><div class="img-wrap"><img src="/images/plant.png"></div></div>`).openPopup();
