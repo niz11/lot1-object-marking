@@ -5,7 +5,7 @@
   "compilerOptions": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/webserver/server.js",
+    "start": "nodemon src/webserver/server.js",
     "dev": "nodemon src/webserver/server.js",
     "ngstart": "node src/webserver/index.js",
     "ngdev": "nodemon src/webserver/index.js"

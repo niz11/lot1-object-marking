@@ -48,13 +48,39 @@ server {
     }
 }
 
+````
 
-<!-- Steps localhost + express -->
-The express server serve the index.html file on port 3000.
+## localhost + express
+The express server serves the index.html file on port 3000.
+To connect to the DB you need the .env file: Please contact one of the members to get a hold of it.
 
-1. Genereate SSL keys following this article: https://www.freecodecamp.org/news/how-to-get-https-working-on-your-local-development-environment-in-5-minutes-7af615770eec/.
-2. npm start
-3. In your computer to go network settings and check networks IP.
-4. In your phone open chrome and go the the path: https://{IP}:3000/
-5. Give localhost permissions and search for Cube in the room.
+Https steps:
+Generate SSL keys following this article: https://www.freecodecamp.org/news/how-to-get-https-working-on-your-local-development-environment-in-5-minutes-7af615770eec/.
+
+Install dependencies:
+````
+npm i
+
+````
+
+Run the project locally:
+
+````
+npm start
+
+````
+
+And Visit: https://localhost:3000/
+
+To see served files on your mobile phone:
+1. In your computer to go network settings and check networks IP.
+2. In your phone open chrome and go the the path: https://{IP}:3000/
+3. Give localhost permissions and use the website and the browser permissions to access your location.
+
+To see the Artist side of the website login with the credentials:
+
+````
+email: test@gmail
+password: 1234
+
 ````
