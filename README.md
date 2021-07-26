@@ -75,7 +75,9 @@ And Visit: https://localhost:3000/
 To see served files on your mobile phone:
 1. In your computer to go network settings and check networks IP.
 2. In your phone open chrome and go the the path: https://{IP}:3000/
-3. Give localhost permissions and use the website and the browser permissions to access your location.
+3. Give localhost permissions  and the browser permissions to access your location.
+4. Login.
+5. Under Services you could find the whole functionalities of the website.
 
 To see the Artist side of the website login with the credentials:
 
