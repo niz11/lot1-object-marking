@@ -11,48 +11,56 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
         crossorigin="" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
     <!-- 3d model viewer links -->
     <!-- Loads <model-viewer> for modern browsers: -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
-    </script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
+    <script src="public/javascripts/requestHandler.js"></script>
 
     <!-- Loads <model-viewer> for old browsers like IE11: -->
-    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
-    </script>
+    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        #mapid {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .img-wrap {
+            width: 200px;
+            height: 180px;
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        .img-wrap>img {
+            height: 100%;
+        }
+
+        .artWorkPopUp {
+            text-align: center;
+        }
+        nav {
+            background-color: black !important;
+        }
+    </style>
 
 </head>
-<style>
-    html,
-    body {
-        height: 100%;
-    }
-
-    #mapid {
-        width: 100vw;
-        height: 100vh;
-    }
-
-    .img-wrap {
-        width: 200px;
-        height: 180px;
-        display: inline-block;
-        overflow: hidden;
-    }
-
-    .img-wrap>img {
-        height: 100%;
-    }
-
-    .artWorkPopUp {
-        text-align: center;
-    }
-</style>
-
 <body>
     <div id="mapid"></div>
+    <div class="nav"></div>
     <div id="locateMe">
         Locate me
     </div>
@@ -206,7 +214,7 @@
                     }
                 });
         }
-        // placeholders for the L.marker and L.circle representing user's current position and accuracy    
+        // placeholders for the L.marker and L.circle representing user's current position and accuracy
         let current_position, current_accuracy;
 
         var blueDotIcon = L.icon({
@@ -256,6 +264,11 @@
         // setInterval(locate, 7000);
 
     </script>
+    <script type="text/javascript">
+        $(function () {
+            $(".nav").load("client/nav.html")
+            $("footer").load("client/footer.html")
+        });
+    </script>
 </body>
-
 </html>
