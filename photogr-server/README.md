@@ -15,11 +15,11 @@ Photogrammetry pipeline based on Meshroom (Version 2021.1.0): https://github.com
 
 ## Installation/config
 
-    Https steps:
+### Https steps:
  1. Generate SSL keys following this article: https://www.freecodecamp.org/news/how-to-get-https-working-on-your-local-development-environment-in-5-minutes-7af615770eec/.
  2. Put certificates into photogr-server/cert folder
     
-    Pipeline steps:
+### Pipeline steps:
  1. Download the repository and Meshroom(Version 2021.1.0) from above.
  2. unzip folder and place Meshroom-2021.1.0 inside "Meshroom-AliceVision\Pipeline_2021" folder.
  3. if node is not installed yet, download node.js
