@@ -244,7 +244,7 @@
       } else if (this.readyState == 4 && this.status == 200) {
         console.log(xhr.responseText);
         message_body.innerText = xhr.responseText;
-        setTimeout(() => { startLongPolling(userId, modelName) }, 4000);
+        setTimeout(() => { startLongPolling(userId, modelName) }, 8000);
       } else if (this.readyState == 4 && this.status == 201) {
         console.log(xhr.responseText);
         message_body.innerText = "Model was created successfully! Here is the result:";

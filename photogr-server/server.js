@@ -32,7 +32,7 @@ app.use(busboy({
   highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 })); // Insert the busboy middle-ware
 
-app.options("/*", function(req, res, next){
+app.options("/*", function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
@@ -50,7 +50,7 @@ app.get('/', function (req, res) {
 const testing = false;
 // true activates local 3D-modelling pipeline using a node-child-process and running meshroom.exe inside
 // false will connect with local docker-container that runs meshroom and has far more implemented configs
-const local_pipeline = true;
+const local_pipeline = false;
 
 // contains current 3D-model-creation-tasks in progress running through meshroom.exe
 let current_modelling_processes = new Map();
@@ -58,7 +58,7 @@ let current_modelling_processes = new Map();
 let inputPath = '';
 if (local_pipeline) inputPath = path.join(__dirname, 'Meshroom-AliceVision/input/uploaded-images/user/'); // Register the upload path
 else inputPath = '../photogrammetry/img_in/';
-fs.ensureDir(inputPath); // Make sure that he upload path exits
+fs.ensureDir(inputPath); // Make sure that the upload path exits
 
 // path to request whether a 3D model generation is already finished
 app.get('/pipeline/model-status', function (req, res) {
@@ -130,7 +130,7 @@ app.post('/pipeline/start', async function (req, res) {
         const compressed = JSON.parse(req.body.compressed);
         const preview = JSON.parse(req.body.preview);
 
-        console.log("All images received!");
+        console.log("All images received! \n");
         current_modelling_processes.set(request_id.toString(), true);
         const response = {
           request_id: request_id,
@@ -141,7 +141,6 @@ app.post('/pipeline/start', async function (req, res) {
         res.json(response);
 
         if (local_pipeline) {
-          current_modelling_processes.set(request_id.toString(), true);
           // waits until meshromm finished rendering 
           await initiateMeshroomPipeline(userId, modelName, upload_folder_model);
           const options = {
@@ -149,7 +148,7 @@ app.post('/pipeline/start', async function (req, res) {
           }
           let model_output = path.join(__dirname, 'Meshroom-AliceVision/output/user/' + userId + '/' + modelName);
           // let model_output = '../src/webserver/static/saved-models/' + req.query.userId + '/' + req.query.modelName;
-          if(!fs.ensureDir(model_output + '/texturedMesh.obj')) {
+          if (!fs.ensureDir(model_output + '/texturedMesh.obj')) {
             console.log("Something went wrong during local-pipeline-computation!");
             current_modelling_processes.delete(request_id.toString());
             return;
@@ -223,7 +222,7 @@ async function initiateMeshroomPipeline(userId, modelName, upload_folder_model) 
   await fs.mkdir(output_path_model);
 
   const execFile = util.promisify(require('child_process').execFile);
-  async function startMeshroom() {
+  async function startMeshroomProcess() {
     try {
       const { stdout, stderr } = await execFile(meshrom_exe_path, ['--input', input_path, '--output', output_path_model]);
       console.log('stdout:', stdout);
@@ -232,32 +231,46 @@ async function initiateMeshroomPipeline(userId, modelName, upload_folder_model) 
       console.error(err);
     }
   }
-  return startMeshroom();
+  return startMeshroomProcess();
 }
 
-function initiateDockerPipeline(userId, modelName, request_id, compressed, preview) {
+async function initiateDockerPipeline(userId, modelName, request_id, compressed, preview) {
   console.log('Docker 3D model computation in progress... Parameter: c=' + compressed + ', p=' + preview);
 
-  let options = ''
+  let options = '';
   // -c --> compresses images before pipeline start
-  if (compressed) options += ' -c'
+  if (compressed) options += ' -c';
   // -p is preview option --> saves preview in [user]/[modelname], also generates complete .glb-file which went through whole pipeline
-  if (preview) options += ' -p'
+  if (preview) options += ' -p';
   // skips the steps that use GPU --> for preview option, or if GPU is not available/doesn't supported, skips last pipeline steps
   // having -p option and preview.mg at the same time, doesn't make sense, because the fully generated model will be the same as the firstly generated preview-model
-  const command_withoutGPU = 'docker exec photogrammetry photogrammetry' + options + ' -u ' + userId + ' ' + modelName + ' preview.mg' // use until nvidia gpu bug fixed (fehler wegen nvidia gpu on windows)
-  const command_withGPU = 'docker exec photogrammetry photogrammetry -u ' + userId + ' ' + modelName;
+  const command_withoutGPU = 'docker exec photogrammetry photogrammetry' + options + ' -u ' + userId + ' ' + modelName + ' preview.mg'; // use until nvidia gpu bug fixed (fehler wegen nvidia gpu on windows)
+  const command_withGPU = 'docker exec photogrammetry photogrammetry' + options + ' -u ' + userId + ' ' + modelName;
 
   // TODO: extra pipeline mit graphen am ende um z.b. background-noise zu entfernen kommt noch --> am ende des command einfügen dann
 
-  console.log("Start docker-pipeline");
-  if (shell.exec(command_withoutGPU).code !== 0) {
-    shell.echo('Error: Git commit failed');
-    shell.exit(1);
+  console.log("Starting docker-pipeline...\n");
+  // if (shell.exec(command_withoutGPU).code !== 0) {
+  //   shell.echo('Error: Meshroom-pipeline failed');
+  //   shell.exit(1);
+  // }
+  const exec = util.promisify(require('child_process').exec);
+  const defaults = {
+    cwd: undefined,
+    env: process.env
+  };
+  async function startMeshroomContainer() {
+    try {
+      const { stdout, stderr } = await exec(command_withoutGPU);
+      console.log('stdout:', stdout);
+      console.log('stderr:', stderr);
+    } catch (err) {
+      console.error(err);
+    }
+    console.log("docker pipeline finished");
+    sendModelFile(userId, modelName, request_id);
   }
-  console.log("docker pipeline finished");
-  // console.log("sending files")
-  sendModelFile(userId, modelName, request_id);
+  return startMeshroomContainer();
 }
 
 // for https
