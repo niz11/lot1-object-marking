@@ -1,6 +1,6 @@
 /node_modules/
 /cert
-
+.env
 /Meshroom-AliceVision/
 
 
