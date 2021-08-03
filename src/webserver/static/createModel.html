@@ -106,8 +106,8 @@
 
 <script>
   const deviceNbr = 107;
-  const pipeServer = 'https://192.168.2.' + deviceNbr + ':8080/'
-  const webServer = 'https://192.168.2.' + deviceNbr + ':3000/'
+  const pipeServer = 'https://192.168.2.' + deviceNbr + ':8080/';
+  const webServer = 'https://192.168.2.' + deviceNbr + ':3000/';
   const message_body = document.getElementById("status_message");
 
   document.getElementById('errorMessage').style.display = 'none';
@@ -117,7 +117,7 @@
   const userId = params.get('userId');
   if (userId == null) {
     document.getElementById('errorMessage').innerHTML = 'Need to provide a User-ID: please login';
-    document.getElementById('errorMessage').style.display = 'inline'
+    document.getElementById('errorMessage').style.display = 'inline';
   }
   document.getElementById("href_addAnotationPage").href = webServer + 'newAddAnotation.html?userId=' + userId;
 

@@ -13,6 +13,4 @@ server.key
 /.vscode/
 .DS_Store
 .env
-/photogr-server/Meshroom-AliceVision/
-/photogr-server/node_modules/
 /src/webserver/static/saved-models/user

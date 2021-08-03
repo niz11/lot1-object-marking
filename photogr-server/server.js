@@ -1,3 +1,5 @@
+const dotenv = require('dotenv');
+const dotenvParseVariables = require('dotenv-parse-variables');
 const express = require('express');
 const path = require('path');
 const fs = require('fs-extra');
@@ -11,7 +13,9 @@ const fetch = require('node-fetch'); // library for http calls --> newer than 'r
 const FormData = require('form-data');
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
+const webserver_address = process.env.WEBSERVER_ADDRESS || 'https://localhost';
+const webserver_port = process.env.WEBSERVER_PORT || 3000;
 
 const bodyParser = require('body-parser');
 // parse application/x-www-form-urlencoded
@@ -45,12 +49,18 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+let env = dotenv.config({})
+if (env.error) throw env.error;
+env = dotenvParseVariables(env.parsed);
+
 
 // skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
-const testing = false;
+const pipeline_testing = env.PIPELINE_TESTING || false;
 // true activates local 3D-modelling pipeline using a node-child-process and running meshroom.exe inside
-// false will connect with local docker-container that runs meshroom and has far more implemented configs
-const local_pipeline = false;
+// false will connect with local docker-container that runs meshroom and has far more implemented configs and for fututre scaling
+const local_pipeline = env.LOCAL_PIPELINE || false;
+// specifies host-os, true: windows, false: linux
+const windows_host = env.WINDOWS_HOST || false;
 
 // contains current 3D-model-creation-tasks in progress running through meshroom.exe
 let current_modelling_processes = new Map();
@@ -135,7 +145,7 @@ app.post('/pipeline/start', async function (req, res) {
         const response = {
           request_id: request_id,
           response: 'All images reveived and 3D creation in Progress! This can take from a few minutes to several hours. \n You can either wait on the website,' +
-            ' or come back later and look up your models under add-Annotaion-page.'
+            ' or come back later and look up your models under services/manage-models page.'
         }
         // response is send to tell frontend of successfull upload of all images and initiation of the 3D-modelling-pipeline
         res.json(response);
@@ -190,7 +200,7 @@ function sendModelFile(userId, modelName, request_id) {
   form.append('modelName', modelName);
   form.append('model', fs.createReadStream(input));
 
-  fetch('https://localhost:3000/models/upload-model-file', { method: 'POST', body: form })
+  fetch(webserver_address + ':' + webserver_port + '/models/upload-model-file', { method: 'POST', body: form })
     .then(res => res.json())
     .then(json => console.log(json))
     .then(() => {
@@ -205,8 +215,8 @@ async function initiateMeshroomPipeline(userId, modelName, upload_folder_model) 
 
   const meshrom_exe_path = path.join(__dirname, 'Meshroom-AliceVision/Pipeline_2021/Meshroom-2021.1.0/meshroom_batch.exe');
   let input_path;
-  // if testing, meshroom will scip building 3D model from scratch, because image-signatures already known --> safes time
-  if (testing) {
+  // if pipeline_testing, meshroom will scip building 3D model from scratch, because image-signatures already known --> safes time
+  if (pipeline_testing) {
     // input already known to meshromm-cache --> skipping rendering-time
     input_path = path.join(__dirname, 'Meshroom-AliceVision/input/dataset_monstree-master/mini3');
   } else {
@@ -246,6 +256,10 @@ async function initiateDockerPipeline(userId, modelName, request_id, compressed,
   // having -p option and preview.mg at the same time, doesn't make sense, because the fully generated model will be the same as the firstly generated preview-model
   const command_withoutGPU = 'docker exec photogrammetry photogrammetry' + options + ' -u ' + userId + ' ' + modelName + ' preview.mg'; // use until nvidia gpu bug fixed (fehler wegen nvidia gpu on windows)
   const command_withGPU = 'docker exec photogrammetry photogrammetry' + options + ' -u ' + userId + ' ' + modelName;
+  // if docker is executed on local linux-host, GPU is enabled --> full 3D generation possible
+  // if executed on local windows-host, GPU is not accessable --> only preview-3D-model generation possible (for exceptions see README)
+  let command = command_withGPU;
+  if(windows_host) command = command_withoutGPU;
 
   // TODO: extra pipeline mit graphen am ende um z.b. background-noise zu entfernen kommt noch --> am ende des command einfügen dann
 
