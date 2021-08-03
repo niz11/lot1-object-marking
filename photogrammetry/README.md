@@ -16,7 +16,7 @@ Dockerized photogrammetry pipeline based on Meshroom (Version 2021.1.0): https:/
 - docker
 - docker-compose
 - official [NVIDIA drivers](https://www.nvidia.com/en-us/drivers/unix/) >= 361.93 (maybe older versions work as well)
-- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) <- almost sure it's really necessary
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
    nvidia-smi must be available
  
