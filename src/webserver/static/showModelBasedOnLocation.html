@@ -74,6 +74,53 @@
         top: 0%;
         padding: 1rem 1rem;
     }
+    input[type="checkbox"]{
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer;
+        position: absolute;
+        right: 1%;
+        top: 10%;
+        padding: 1rem 1rem;
+    }
+    input[type="checkbox"]:focus{
+        outline: 0;
+    }
+
+
+    .toggle{
+        height: 32px;
+        width: 52px;
+        border-radius: 16px;
+        display: inline-block;
+        position: relative;
+        margin: 0;
+        border: 2px solid #474755;
+        background: linear-gradient(180deg, #2D2F39 0%, #1F2027 100%);
+        transition: all .2s ease;
+    }
+
+    .toggle:after{
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 1px 2px rgba(44,44,44,.2);
+        transition: all .2s cubic-bezier(.5,.1,.75,1.35);
+    }
+
+    .toggle:checked{
+    border-color: #654FEC;
+    }
+    .toggle:checked:after{
+        transform: translatex(20px);
+    }
 </style>
 
 <body class="noModel" id="body">
@@ -88,6 +135,7 @@
     <i class="material-icons" id="fullScreenIcon" style="font-size:36px" onClick="toggleFullScreen()">
         fullscreen</i>
     <div id="distance"></div>
+    <input type="checkbox" class="toggle" id="toggleId" onclick="toggleHotspots()" checked>
     <script>
         const params = new URLSearchParams(document.location.search);
         let userId = params.get('userId')
@@ -130,7 +178,6 @@
                         // Take first result for now.
                         // Todo: add dropdown
                         model = models.length > 0 ? models[0] : models;
-                        console.log(model);
                         if (models.length > 0) {
                             removeAllHotspots();
                         } else {
@@ -172,6 +219,20 @@
                 cancelFullScreen.call(doc);
             }
         }
+        function toggleHotspots(){
+            if (model){
+                const checked = document.getElementById('toggleId').checked;
+                if (checked){
+                    model.hotspots.map(ano => {
+                        addHotspot(ano.position, ano.normal, ano.text)
+                    })
+                } else {
+                    removeAllHotspots()
+                }
+            } else {
+                console.log("Connection problems to server");
+            }
+        }
     </script>
     <script>
         function removeHotspot(hotspotId) {
@@ -185,7 +246,7 @@
 
         function removeAllHotspots() {
             var el = document.getElementsByClassName("hotspot");
-            if (el.length > 1) {
+            if (el.length > 0) {
                 Array.from(el).map(hotspot => hotspot.remove())
             }
         }
@@ -193,10 +254,11 @@
     <script>
         let id;
         function success(pos) {
+            console.log("success");
             if (!model){
 
             } else if (model.length === 0) {
-                // console.log
+                console.log("Model was not fetched");
             } else if (!model.location) {
                 document.getElementById("noModelTextBox").textContent = "Model is missing a location"
             } else if (!model.location.latitude && !model.location.longitude) {
@@ -211,7 +273,9 @@
                 const d = getDistance(objectLatitude, objectLongitude, usersLatitude, usersLongitude);
                 console.log("Distance from user to object: ", d);
                 const modelStatus = document.getElementById("body").className;
-                if (d < radius) {
+                // Remove radius check: LOT1 request to show models also when not in radius. 
+                // if (d < radius) {
+                if (true) {
                     navigator.geolocation.clearWatch(id);
                     if (modelStatus !== 'model') {
                         addModel();
