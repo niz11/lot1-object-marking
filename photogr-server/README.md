@@ -10,8 +10,19 @@ Photogrammetry pipeline based on Meshroom (Version 2021.1.0): https://github.com
 
 ## Prerequisites
 
+Hardware:
 - at least 8GB RAM, 32GB recommended
 - NVIDIA GPU with a CUDA compute capability >= 3.0
+OS:
+- Either Linux, Windows/Windows preview version, MacOS
+- Local Pipeline works on all OS
+- Dockerised pipeline fully works on Linux and Windows-preview-version, partially works on Windows
+- Dockerised Meshroom-Pipeline:
+   - On Linux: Install Nvidia CUDA Toolkit to enable access of GPUs inside docker-containers
+   - On Windows: Windows preview version necessary, in order to be able to use WSL2 and make GPU available inside docker-containers. Without windows-preview-version, only the      preview-pipeline-function (skips all steps during 3D-model creation that require GPU computations) are available. Full model creation not possible then. Use local Meshroom Pipeline (below) instead.
+- Local Meshroom-Pipeline:
+   - OS independent
+   - runs locally inside node.js child-processes --> directly accesses GPU, doesn't require any 
 
 ## Installation/config
 
