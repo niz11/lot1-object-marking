@@ -5,8 +5,6 @@ var urlBase = "https://localhost:3000";
 let chaiHttp = require("chai-http");
 chai.should();
 chai.use(chaiHttp)
-
-
 const https = require('https')
 
 
@@ -14,7 +12,7 @@ const https = require('https')
  * Test the POST route
  */
 describe("POST /users/register", () => {
-    it("It should REGISTER a new user", (done) => {
+    it("1. It should REGISTER a new user", (done) => {
         const data = new TextEncoder().encode(
             JSON.stringify({
                 name: "user1",
@@ -36,6 +34,39 @@ describe("POST /users/register", () => {
             console.log(`statusCode: ${res.statusCode}`)
             res.on('data', d => {
                 process.stdout.write("Response: " + d)
+            })
+        })
+        req.on('error', error => {
+            console.error("Error: " + error)
+        })
+
+        req.write(data)
+        req.end()
+        done()
+
+    });
+
+    it("2. It should Login a new user", (done) => {
+        const data = new TextEncoder().encode(
+            JSON.stringify({
+                email: "user1@email.com",
+                password: "1234"            })
+        )
+        const options = {
+            "rejectUnauthorized": false,
+            host: 'localhost',
+            port: 3000,
+            path: '/users/login',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': data.length
+            }
+        }
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            res.on('data', d => {
+                process.stdout.write("Response: " + d )
             })
         })
         req.on('error', error => {
