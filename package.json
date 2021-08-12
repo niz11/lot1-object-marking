@@ -4,7 +4,7 @@
   "description": "Object Detection in AR Preview Walks",
   "compilerOptions": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "nodemon src/webserver/server.js",
     "dev": "nodemon src/webserver/server.js",
     "ngstart": "node src/webserver/index.js",
@@ -22,6 +22,7 @@
   "homepage": "https://github.com/niz11/lot1-object-marking#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "chai-http": "^4.3.0",
     "connect-busboy": "0.0.2",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
@@ -33,6 +34,7 @@
     "request": "^2.88.2"
   },
   "devDependencies": {
+    "chai": "^4.3.4",
     "node": "^15.0.2",
     "nodemon": "^2.0.7"
   }
