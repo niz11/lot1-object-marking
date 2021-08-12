@@ -80,6 +80,36 @@ describe("POST /users/register", () => {
     });
 });
 
+/**
+ * Test the GET route
+ */
+describe("GET /models", () => {
+    it("1. It should REGISTER a new user", (done) => {
+        const options = {
+            "rejectUnauthorized": false,
+            host: 'localhost',
+            port: 3000,
+            path: '/models',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            res.on('data', d => {
+                process.stdout.write("Response: " + d)
+            })
+        })
+        req.on('error', error => {
+            console.error("Error: " + error)
+        })
+        req.end()
+        done()
+
+    });
+});
+
 
 // it('Main page content', function(done) {
 //
