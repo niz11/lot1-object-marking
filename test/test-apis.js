@@ -7,7 +7,6 @@ chai.should();
 chai.use(chaiHttp)
 const https = require('https')
 
-
 /**
  * Test the POST route
  */
@@ -78,13 +77,48 @@ describe("POST /users/register", () => {
         done()
 
     });
+
+    it("1. It should GEt user's models", (done) => {
+        const data = new TextEncoder().encode(
+            JSON.stringify(
+                {
+                    userId: "60d6d57bdbb0861ff7cca78b",
+                }
+            )
+        )
+        const options = {
+            "rejectUnauthorized": false,
+            host: 'localhost',
+            port: 3000,
+            path: '/models/user',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': data.length
+            }
+        }
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            res.on('data', d => {
+                process.stdout.write("Response: " + d)
+            })
+        })
+        req.on('error', error => {
+            console.error("Error: " + error)
+        })
+
+        req.write(data)
+        req.end()
+        done()
+
+    });
 });
 
 /**
  * Test the GET route
  */
 describe("GET /models", () => {
-    it("1. It should REGISTER a new user", (done) => {
+    it("1. It should GET all models", (done) => {
         const options = {
             "rejectUnauthorized": false,
             host: 'localhost',
