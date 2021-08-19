@@ -1,5 +1,8 @@
 # lot1-object-marking
 
+This project consists of 3 main components. The webserver, the 3D-model-creation-server, or pipeline (/photogr-server) and the docker-image of the 3D model rendering software meshroom (/photogrammetry).
+The installation/config of the webserver is done inside this README. For installation and config of the pipeline-server go to subdirectory /photogr-server and read the README and for the docker-image go to the README in /photogrammetry.
+
 # Build
 To build and start the express server just use:
 
