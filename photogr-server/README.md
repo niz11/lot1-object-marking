@@ -51,7 +51,7 @@ Local Meshroom-Pipeline:
     // false will connect with local docker-container that runs meshroom and has far more implemented configs and for fututre scaling
     LOCAL_PIPELINE=false
     
-    // specifies host-os, true: windows, false: linux, windows preview
+    // specifies host-os, true: windows (will skip GPU-steps if docker pipeline is enabled), false: linux, windows preview
     WINDOWS_HOST=false;
 ````    
  6. Install dependencies:
