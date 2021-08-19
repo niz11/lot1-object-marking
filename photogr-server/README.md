@@ -15,6 +15,7 @@ Photogrammetry pipeline based on Meshroom (Version 2021.1.0): https://github.com
 Hardware:
 - at least 8GB RAM, 32GB recommended
 - NVIDIA GPU with a CUDA compute capability >= 3.0
+
 OS:
 - Either Linux, Windows/Windows preview version, MacOS
 - Local Pipeline works on all OS
