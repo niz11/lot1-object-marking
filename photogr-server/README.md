@@ -4,9 +4,11 @@ Photogrammetry pipeline based on Meshroom (Version 2021.1.0): https://github.com
 
 ## Features
 
- - small webpage to generate a 3D model and display when finished
- - communicates with local node-express.js server on which 3D-model-rendering software runs
- - infer the geometry of a scene from a set of unordered photographs, output as 3D-model (available formats: .obj, .gltf, .glb, ...)
+ - application server to automatically generate a 3D model with the 3D-model-rendering software meshroom
+   - infer the geometry of a scene from a set of unordered photographs, output as 3D-model (available formats: .obj, .gltf, .glb, ...)
+ - the webserver will serve the static html page (src/webserver/static/createModel.html) for user interaction and start of the pipeline.
+ - the ceated models will be send to the webserver, where they get fetched by the user
+ 
 
 ## Prerequisites
 
