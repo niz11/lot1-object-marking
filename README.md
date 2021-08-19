@@ -1,9 +1,9 @@
 # lot1-object-marking
 
-This project consists of 3 main components: 
- - The webserver, 
- - the 3D-model-creation-server, or pipeline (/photogr-server) 
- - and the docker-image of the 3D model rendering software meshroom (/photogrammetry)
+The project consists of 3 main components: 
+ - webserver, 
+ - 3D-model-creation-server, or pipeline (/photogr-server) 
+ - docker-image of the 3D model rendering software meshroom (/photogrammetry)
  
 All components need to be properly set up, in order for everything to work. Only starting the webserver, will give you access to the AR part of the page, but you won't be able to use the 3D model pipeline. 
 The installation/config of the webserver is done inside this README. For installation and config of the pipeline-server, go to subdirectory /photogr-server and read the README and for the docker-image go to the README in /photogrammetry.
