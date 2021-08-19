@@ -1,7 +1,7 @@
 # lot1-object-marking
 
 The project consists of 3 main components: 
- - webserver, 
+ - webserver
  - 3D-model-creation-server, or pipeline (/photogr-server) 
  - docker-image of the 3D model rendering software meshroom (/photogrammetry)
  
