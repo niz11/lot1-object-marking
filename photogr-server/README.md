@@ -39,7 +39,22 @@ Local Meshroom-Pipeline:
  2. unzip folder and place Meshroom-2021.1.0 inside "Meshroom-AliceVision\Pipeline_2021" folder.
  3. if node.js is not installed yet, download node.js
  4. configure .env file for server-port, and pipeline-configs
- 5. Install dependencies:
+ ````
+    PORT=8080
+    WEBSERVER_ADDRESS=https://localhost
+    WEBSERVER_PORT=3000
+    
+    // skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
+    PIPELINE_TESTING=false
+    
+    // true activates local 3D-modelling pipeline using a node-child-process and running meshroom.exe inside
+    // false will connect with local docker-container that runs meshroom and has far more implemented configs and for fututre scaling
+    LOCAL_PIPELINE=false
+    
+    // specifies host-os, true: windows, false: linux, windows preview
+    WINDOWS_HOST=false;
+````    
+ 6. Install dependencies:
 ````
 npm i
 
@@ -50,7 +65,7 @@ npm i
  ````
 node server.js
 ````
- 8. You need to go to go to https://localhost:8080/ in your browser once in the beginning, in order to click on ignore that the page is not safe due to self-certifictes. Otherwise calls from the frontend to this server won't be allowed (browser will reject requests). So you must see the page of the server once inside your used browser.
+ 8. You need to go to go to https://localhost:8080/ in your browser once in the beginning, in order to click on ignore that the page is not safe due to self-certificates. Otherwise calls from the frontend to this server won't be allowed (browser will reject requests). So you must visit/see the page of the server once inside your used browser.
  9. DONE
 
 ## Create 3D model --> Start pipeline (local)
