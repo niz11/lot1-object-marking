@@ -16,7 +16,8 @@ describe("POST /users/register", () => {
             JSON.stringify({
                 name: "user1",
                 email: "user1@email.com",
-                password: "1234"            })
+                password: "1234"
+            })
         )
         const options = {
             "rejectUnauthorized": false,
