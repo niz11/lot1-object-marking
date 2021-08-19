@@ -42,6 +42,8 @@ Local Meshroom-Pipeline:
  ````
     PORT=8080
     WEBSERVER_ADDRESS=https://localhost
+    
+    // only important if webserver runs locally
     WEBSERVER_PORT=3000
     
     // skips meshroom-3D-model-generation, by using known images to meshromm-cache --> imidiate finish
